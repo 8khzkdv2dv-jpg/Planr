@@ -232,7 +232,8 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
     <div class="row"><input type="text" id="ev-title" placeholder="Titel..."></div>
     <div class="row">
       <input type="date" id="ev-date" style="flex:1">
-      <input type="time" id="ev-time" style="flex:1">
+      <input type="time" id="ev-time" placeholder="Start" style="flex:1">
+      <input type="time" id="ev-endtime" placeholder="Einde" style="flex:1">
     </div>
     <div class="row"><select id="ev-type" onchange="toggleCustomDays()">
       <option value="eenmalig">Eenmalig</option>
@@ -266,7 +267,8 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
 <!-- ADD TODO MODAL -->
 <div id="modal-todo" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-todo')">
   <div class="modal">
-    <div class="modal-t">To-do toevoegen<button class="modal-close" onclick="closeModal('modal-todo')">×</button></div>
+    <div class="modal-t" id="todo-modal-title">To-do toevoegen<button class="modal-close" onclick="closeModal('modal-todo')">×</button></div>
+    <input type="hidden" id="todo-edit-id">
     <div class="row"><input type="text" id="todo-txt" placeholder="Taak..."></div>
     <div class="row">
       <select id="todo-prio"><option value="normaal">Normaal</option><option value="hoog">Hoog prioriteit</option><option value="laag">Laag</option></select>
@@ -274,7 +276,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
     </div>
     <div class="row"><select id="todo-cat-sel"></select></div>
     <div class="row"><input type="text" id="todo-tags" placeholder="Tags (komma-gescheiden, bv: creatief, admin)"></div>
-    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="addTodo()">Toevoegen</button>
+    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="saveTodo()">Opslaan</button>
   </div>
 </div>
 
@@ -481,16 +483,27 @@ function parseIcal(text,fallbackColor){
       return m?m[1].trim():'';
     };
     const dtstart=get('DTSTART');
+    const dtend=get('DTEND');
     const summary=get('SUMMARY')||'(geen titel)';
     if(!dtstart)return;
-    // Handle both date-only (20260616) and datetime (20260616T...)
     const dateStr=dtstart.replace(/T.*/,'');
     const y=dateStr.substring(0,4),mo=dateStr.substring(4,6),d=dateStr.substring(6,8);
     if(!y||!mo||!d)return;
+    // Parse time if present
+    let time='',endTime='';
+    if(dtstart.includes('T')){
+      const t=dtstart.split('T')[1];
+      time=`${t.substring(0,2)}:${t.substring(2,4)}`;
+    }
+    if(dtend&&dtend.includes('T')){
+      const t=dtend.split('T')[1];
+      endTime=`${t.substring(0,2)}:${t.substring(2,4)}`;
+    }
     events.push({
       id:'g'+Math.random().toString(36).slice(2),
       title:summary,
       date:`${y}-${mo}-${d}`,
+      time,endTime,
       source:'gcal',
       color:fallbackColor
     });
@@ -617,34 +630,105 @@ function renderCalendar(){
     const mon=new Date(viewDate);mon.setDate(viewDate.getDate()-(dow===0?6:dow-1));
     const sun=new Date(mon);sun.setDate(mon.getDate()+6);
     document.getElementById('topbar-title').textContent=`${mon.getDate()} ${MONTHS_S[mon.getMonth()]} – ${sun.getDate()} ${MONTHS_S[sun.getMonth()]}`;
-    body+='<div class="week-grid" style="flex:1">';
+    // Header row
+    body+=`<div style="display:flex;flex-shrink:0;border-bottom:1px solid var(--border);margin-bottom:0">
+      <div style="width:44px;flex-shrink:0"></div>`;
+    for(let i=0;i<7;i++){
+      const d=new Date(mon);d.setDate(mon.getDate()+i);
+      const isT=d.toDateString()===today.toDateString();
+      body+=`<div style="flex:1;text-align:center;padding:4px 2px;${isT?'color:var(--accent);font-weight:700':''}">
+        <div style="font-size:9px;color:var(--text3);text-transform:uppercase">${DAYS_S[i]}</div>
+        <div style="font-size:15px;font-weight:700">${d.getDate()}</div>
+      </div>`;
+    }
+    body+='</div>';
+    // Scrollable hour grid
+    body+=`<div style="flex:1;overflow-y:auto;position:relative" id="week-scroll">
+      <div style="display:flex;position:relative" id="week-inner">
+        <div style="width:44px;flex-shrink:0">`;
+    for(let h=0;h<24;h++){
+      body+=`<div style="height:60px;border-bottom:1px solid var(--border);padding:2px 4px;font-size:9px;color:var(--text3);text-align:right;line-height:1">${String(h).padStart(2,'0')}:00</div>`;
+    }
+    body+='</div>';
+    // Day columns
     for(let i=0;i<7;i++){
       const d=new Date(mon);d.setDate(mon.getDate()+i);
       const isT=d.toDateString()===today.toDateString();
       const evs=getEventsForDate(d.getFullYear(),d.getMonth(),d.getDate());
-      body+=`<div class="week-col"><div class="week-head${isT?' today-h':''}">
-        <div class="week-dn">${DAYS_S[i]}</div>
-        <div class="week-num">${d.getDate()}</div>
-      </div><div class="week-body">`;
-      evs.forEach(ev=>{body+=`<div class="week-ev" style="background:${ev.color}25;color:${ev.color}">${ev.title}</div>`;});
-      body+='</div></div>';
+      body+=`<div style="flex:1;position:relative;border-left:1px solid var(--border);${isT?'background:'+('var(--accent2)')+'22':''}">`;
+      for(let h=0;h<24;h++){
+        body+=`<div style="height:60px;border-bottom:1px solid var(--border);box-sizing:border-box"></div>`;
+      }
+      evs.forEach(ev=>{
+        const mins=ev.time?parseInt(ev.time.split(':')[0])*60+parseInt(ev.time.split(':')[1]):0;
+        const durMins=ev.endTime?(parseInt(ev.endTime.split(':')[0])*60+parseInt(ev.endTime.split(':')[1]))-mins:60;
+        const top=(mins/60)*60;
+        const height=Math.max((durMins/60)*60,20);
+        body+=`<div style="position:absolute;top:${top}px;left:2px;right:2px;height:${height}px;background:${ev.color}dd;border-radius:4px;padding:2px 4px;overflow:hidden;cursor:pointer;z-index:2" onclick="openDay(${d.getFullYear()},${d.getMonth()},${d.getDate()})">
+          <div style="font-size:9px;font-weight:700;color:#fff;line-height:1.3;overflow:hidden">${ev.title}</div>
+          ${ev.time?`<div style="font-size:8px;color:rgba(255,255,255,.8)">${ev.time}</div>`:''}
+        </div>`;
+      });
+      body+='</div>';
     }
-    body+='</div>';
+    body+='</div></div>';
   } else if(curView==='dag'){
     document.getElementById('topbar-title').textContent=`${viewDate.getDate()} ${MONTHS[viewDate.getMonth()]}`;
     const evs=getEventsForDate(y,m,viewDate.getDate());
-    if(!evs.length)body+='<div class="empty">Geen afspraken vandaag</div>';
-    evs.forEach(ev=>{
-      body+=`<div class="day-ev-card" style="background:${ev.color}12;border-color:${ev.color}">
-        <div style="font-weight:700;font-size:15px">${ev.title}</div>
-        ${ev.time?`<div class="muted">${ev.time}</div>`:''}
-        <div style="margin-top:5px;display:flex;gap:5px;align-items:center;flex-wrap:wrap">
-          ${ev.source==='gcal'?'<span class="tag" style="background:#e8f0fe;color:#1a56db">Google</span>':''}
-          ${ev.type?`<span class="recur-tag">${RECUR_L[ev.type]||ev.type}</span>`:''}
-          ${!ev.source?`<button class="btn-d" onclick="delEvent('${ev.id}')">✕ verwijder</button>`:''}
-        </div>
+    // Header
+    body+=`<div style="flex-shrink:0;padding:6px 0 8px;border-bottom:1px solid var(--border);text-align:center">
+      <span style="font-size:13px;color:var(--text2)">${['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'][viewDate.getDay()]}</span>
+    </div>`;
+    // Scrollable hour grid
+    body+=`<div style="flex:1;overflow-y:auto" id="dag-scroll">
+      <div style="display:flex;position:relative">
+        <div style="width:52px;flex-shrink:0">`;
+    for(let h=0;h<24;h++){
+      body+=`<div style="height:60px;border-bottom:1px solid var(--border);padding:2px 6px 0 0;font-size:10px;color:var(--text3);text-align:right;line-height:1">${String(h).padStart(2,'0')}:00</div>`;
+    }
+    body+='</div>';
+    // Event column
+    body+=`<div style="flex:1;position:relative;border-left:1px solid var(--border)">`;
+    for(let h=0;h<24;h++){
+      body+=`<div style="height:60px;border-bottom:1px solid var(--border)"></div>`;
+    }
+    // Current time line
+    const now=new Date();
+    if(viewDate.toDateString()===now.toDateString()){
+      const nowMins=now.getHours()*60+now.getMinutes();
+      body+=`<div style="position:absolute;top:${(nowMins/60)*60}px;left:0;right:0;height:2px;background:var(--red);z-index:3">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);position:absolute;left:-4px;top:-3px"></div>
+      </div>`;
+    }
+    // All-day events (no time)
+    const allDay=evs.filter(ev=>!ev.time);
+    const timed=evs.filter(ev=>ev.time);
+    timed.forEach(ev=>{
+      const [hh,mm]=ev.time.split(':').map(Number);
+      const mins=hh*60+mm;
+      const endMins=ev.endTime?(()=>{const[eh,em]=ev.endTime.split(':').map(Number);return eh*60+em;})():mins+60;
+      const top=(mins/60)*60;
+      const height=Math.max(((endMins-mins)/60)*60,24);
+      body+=`<div style="position:absolute;top:${top}px;left:4px;right:4px;height:${height}px;background:${ev.color};border-radius:6px;padding:4px 8px;overflow:hidden;cursor:pointer;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.2)">
+        <div style="font-size:12px;font-weight:700;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${ev.title}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.85)">${ev.time}${ev.endTime?` – ${ev.endTime}`:''}</div>
+        ${!ev.source?`<button onclick="event.stopPropagation();delEvent('${ev.id}')" style="position:absolute;top:3px;right:4px;border:none;background:rgba(255,255,255,.3);color:#fff;border-radius:4px;font-size:10px;cursor:pointer;padding:1px 5px">✕</button>`:''}
       </div>`;
     });
+    body+='</div></div>';
+    // All-day section
+    if(allDay.length){
+      body+=`<div style="flex-shrink:0;border-top:1px solid var(--border);padding:6px 8px">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">HELE DAG</div>`;
+      allDay.forEach(ev=>{
+        body+=`<div style="background:${ev.color};color:#fff;border-radius:5px;padding:3px 8px;font-size:12px;font-weight:600;margin-bottom:3px;display:flex;justify-content:space-between">
+          ${ev.title}
+          ${!ev.source?`<button onclick="delEvent('${ev.id}')" style="border:none;background:transparent;color:#fff;cursor:pointer;font-size:12px">✕</button>`:''}
+        </div>`;
+      });
+      body+='</div>';
+    }
+    body+=`<button class="btn btn-p" style="flex-shrink:0;width:calc(100% - 16px);margin:8px 8px;display:block" onclick="openAddEvent()">＋ Afspraak toevoegen</button>`;
   } else if(curView==='jaar'){
     document.getElementById('topbar-title').textContent=String(y);
     body+='<div class="year-grid">';
@@ -664,9 +748,20 @@ function renderCalendar(){
     body+='</div>';
   }
 
-  // For dag/jaar views, add button at bottom
-  if(curView==='dag'||curView==='jaar'){
+  // For jaar view, add button at bottom
+  if(curView==='jaar'){
     body+=`<button class="btn btn-p" style="width:100%;margin-top:10px;flex-shrink:0" onclick="openAddEvent()">＋ Afspraak toevoegen</button>`;
+  }
+  el.innerHTML=nav+body;
+  // Auto-scroll to current time for dag/week views
+  if(curView==='dag'||curView==='week'){
+    const scrollId=curView==='dag'?'dag-scroll':'week-scroll';
+    const scrollEl=document.getElementById(scrollId);
+    if(scrollEl){
+      const now=new Date();
+      const scrollTo=Math.max(0,(now.getHours()-1)*60);
+      scrollEl.scrollTop=scrollTo;
+    }
   }
   el.innerHTML=nav+body;
   // Re-set title for month view
@@ -687,6 +782,7 @@ function openAddEvent(){
   document.getElementById('ev-date').value=viewDate.toISOString().split('T')[0];
   document.getElementById('ev-title').value='';
   document.getElementById('ev-time').value='';
+  document.getElementById('ev-endtime').value='';
   document.getElementById('ev-reminder').value='';
   document.getElementById('ev-type').value='eenmalig';
   document.getElementById('custom-days-picker').style.display='none';
@@ -705,12 +801,13 @@ function addEvent(){
   const title=document.getElementById('ev-title').value.trim();
   const date=document.getElementById('ev-date').value;
   const time=document.getElementById('ev-time').value;
+  const endTime=document.getElementById('ev-endtime').value;
   const type=document.getElementById('ev-type').value;
   const calId=document.getElementById('ev-cal-select').value;
   const taakCatId=document.getElementById('ev-taakcat-select').value;
   const reminder=document.getElementById('ev-reminder').value.trim();
   if(!title||!date){alert('Vul titel en datum in');return;}
-  const ev={id:Date.now()+'',title,date,time,type,calId,taakCatId,reminder};
+  const ev={id:Date.now()+'',title,date,time,endTime,type,calId,taakCatId,reminder};
   if(type==='custom-days'){
     ev.customDays=[...document.querySelectorAll('.dcb:checked')].map(c=>parseInt(c.value));
     ev.dayInterval=parseInt(document.getElementById('day-interval').value)||1;
@@ -753,20 +850,45 @@ function renderTaken(){
 
 /* ===== TODO ===== */
 function openAddTodo(){
+  document.getElementById('todo-modal-title').innerHTML='To-do toevoegen<button class="modal-close" onclick="closeModal(\'modal-todo\')">×</button>';
+  document.getElementById('todo-edit-id').value='';
   document.getElementById('todo-txt').value='';
   document.getElementById('todo-tags').value='';
+  document.getElementById('todo-prio').value='normaal';
+  document.getElementById('todo-urgent').value='niet-urgent';
   document.getElementById('todo-cat-sel').innerHTML=S.todoCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   openModal('modal-todo');
 }
-function addTodo(){
+
+function openEditTodo(id){
+  const t=S.todos.find(t=>t.id===id);if(!t)return;
+  document.getElementById('todo-modal-title').innerHTML='To-do bewerken<button class="modal-close" onclick="closeModal(\'modal-todo\')">×</button>';
+  document.getElementById('todo-edit-id').value=id;
+  document.getElementById('todo-txt').value=t.text;
+  document.getElementById('todo-prio').value=t.prio||'normaal';
+  document.getElementById('todo-urgent').value=t.urgent||'niet-urgent';
+  document.getElementById('todo-cat-sel').innerHTML=S.todoCats.map(c=>`<option value="${c.id}"${c.id===t.cat?' selected':''}>${c.name}</option>`).join('');
+  document.getElementById('todo-tags').value=(t.tags||[]).join(', ');
+  openModal('modal-todo');
+}
+
+function saveTodo(){
   const text=document.getElementById('todo-txt').value.trim();if(!text)return;
   const prio=document.getElementById('todo-prio').value;
   const urgent=document.getElementById('todo-urgent').value;
   const cat=document.getElementById('todo-cat-sel').value;
   const tags=document.getElementById('todo-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  S.todos.push({id:Date.now()+'',text,prio,urgent,cat,tags,done:false});
+  const editId=document.getElementById('todo-edit-id').value;
+  if(editId){
+    const t=S.todos.find(t=>t.id===editId);
+    if(t){t.text=text;t.prio=prio;t.urgent=urgent;t.cat=cat;t.tags=tags;}
+  } else {
+    S.todos.push({id:Date.now()+'',text,prio,urgent,cat,tags,done:false});
+  }
   save();closeModal('modal-todo');renderTodo();
 }
+
+function addTodo(){saveTodo();} // backwards compat
 function toggleTodo(id){const t=S.todos.find(t=>t.id===id);if(t){t.done=!t.done;save();renderTodo();}}
 function delTodo(id){S.todos=S.todos.filter(t=>t.id!==id);save();renderTodo();}
 
@@ -814,6 +936,7 @@ function renderTodo(){
           </div>
           <span style="flex:1;font-size:13px">${t.text}</span>
           ${pb}${ub}
+          <button style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:14px;padding:3px 5px" onclick="openEditTodo('${t.id}')" title="Bewerken">✏️</button>
           <button class="btn-d" onclick="delTodo('${t.id}')">✕</button>
         </div>`;
       });
@@ -829,6 +952,7 @@ function renderTodo(){
           <svg class="chksvg" viewBox="0 0 11 11"><polyline points="1.5 5.5 4.5 8.5 9.5 2.5"/></svg>
         </div>
         <span style="flex:1;font-size:13px;text-decoration:line-through">${t.text}</span>
+        <button style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:14px;padding:3px 5px" onclick="openEditTodo('${t.id}')">✏️</button>
         <button class="btn-d" onclick="delTodo('${t.id}')">✕</button>
       </div>`;
     });
@@ -846,7 +970,10 @@ function renderEisenhower(el,prefix){
   const q=(title,items,bg,bc,tc)=>{
     let h=`<div class="ei-q" style="background:${bg};border-color:${bc}"><div class="ei-qt" style="color:${tc}">${title}</div>`;
     if(!items.length)h+=`<div style="font-size:11px;color:${tc};opacity:.4">Leeg</div>`;
-    items.forEach(t=>{h+=`<div class="ei-it" onclick="toggleTodo('${t.id}')">${t.text}</div>`;});
+    items.forEach(t=>{h+=`<div class="ei-it" style="display:flex;align-items:center;gap:4px">
+      <span style="flex:1;cursor:pointer" onclick="toggleTodo('${t.id}')">${t.text}</span>
+      <button onclick="openEditTodo('${t.id}')" style="border:none;background:transparent;color:${tc};opacity:.6;cursor:pointer;font-size:12px;padding:1px 3px;flex-shrink:0">✏️</button>
+    </div>`});
     return h+'</div>';
   };
   el.innerHTML=prefix+`<div class="ei-grid">
