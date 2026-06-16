@@ -1,4 +1,4 @@
-const CACHE='planr-v18';
+const CACHE='planr-v19';
 const FILES=['/Planr/', '/Planr/index.html', '/Planr/manifest.json', '/Planr/icon-192.png', '/Planr/icon-512.png'];
 
 self.addEventListener('install', e=>{

@@ -1774,11 +1774,18 @@ window._fbLoadDefaults=function(){return load();};
 
 // Override save to also sync to Firebase
 const _origSave=save;
-function save(){
+window._planrSave=function(){
   _origSave();
   localStorage.setItem('planr_updated',Date.now());
   if(window._fbUser&&window._fbSave)window._fbSave(S);
-}
+};
+// Patch all save calls via a global flag
+const _realSave=save;
+save=function(){
+  try{_realSave();}catch(e){}
+  try{localStorage.setItem('planr_updated',Date.now());}catch(e){}
+  try{if(window._fbUser&&window._fbSave)window._fbSave(S);}catch(e){}
+};
 
 // Init
 try{
