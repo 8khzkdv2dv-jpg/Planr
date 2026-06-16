@@ -932,20 +932,22 @@ function openEditRoutine(id){
 }
 
 function saveRoutine(){
-  const name=document.getElementById('routine-name').value.trim();if(!name)return;
-  const freq=document.getElementById('routine-freq').value;
-  const cat=document.getElementById('routine-cat-sel').value;
-  const last=document.getElementById('routine-last').value;
-  const next=document.getElementById('routine-next').value;
-  const note=document.getElementById('routine-note').value.trim();
-  const editId=document.getElementById('routine-edit-id').value;
-  if(editId){
-    const r=S.routines.find(r=>r.id===editId);
-    if(r){r.name=name;r.freq=freq;r.cat=cat;r.last=last;r.next=next;r.note=note;}
-  } else {
-    S.routines.push({id:Date.now()+'',name,freq,cat,last,next,note});
-  }
-  save();closeModal('modal-routine');renderTaken();
+  try{
+    const name=document.getElementById('routine-name').value.trim();if(!name)return;
+    const freq=document.getElementById('routine-freq').value;
+    const cat=document.getElementById('routine-cat-sel').value;
+    const last=document.getElementById('routine-last').value;
+    const next=document.getElementById('routine-next').value;
+    const note=document.getElementById('routine-note').value.trim();
+    const editId=document.getElementById('routine-edit-id').value;
+    if(editId){
+      const r=S.routines.find(r=>r.id===editId);
+      if(r){r.name=name;r.freq=freq;r.cat=cat;r.last=last;r.next=next;r.note=note;}
+    } else {
+      S.routines.push({id:Date.now()+'',name,freq,cat,last,next,note});
+    }
+    save();closeModal('modal-routine');renderTaken();
+  }catch(e){console.error('saveRoutine error:',e);alert('Fout bij opslaan: '+e.message);}
 }
 
 function markRoutineDone(id){
@@ -1806,10 +1808,10 @@ window._planrSave=function(){
   localStorage.setItem('planr_updated',Date.now());
   if(window._fbUser&&window._fbSave)window._fbSave(S);
 };
-// Patch all save calls via a global flag
+// Patch save globally
 const _realSave=save;
 save=function(){
-  try{_realSave();}catch(e){}
+  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){console.error('Save error:',e);}
   try{localStorage.setItem('planr_updated',Date.now());}catch(e){}
   try{if(window._fbUser&&window._fbSave)window._fbSave(S);}catch(e){}
 };
