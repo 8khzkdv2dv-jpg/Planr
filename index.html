@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Planr">
+<meta name="theme-color" content="#ffffff">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Planr</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f5;--bg3:#ececec;
+  --text:#1a1a1a;--text2:#666;--text3:#999;
+  --border:#e0e0e0;--border2:#ccc;
+  --blue-bg:#e8f0fe;--blue:#1a56db;
+  --green-bg:#e3f9e5;--green:#0e6027;
+  --amber-bg:#fef3c7;--amber:#78350f;
+  --red-bg:#fee2e2;--red:#7f1d1d;
+  --accent:#1a1a1a;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1a1a1a;--bg2:#252525;--bg3:#303030;
+  --text:#f0f0f0;--text2:#aaa;--text3:#666;
+  --border:#333;--border2:#444;
+  --blue-bg:#1e3a5f;--blue:#93c5fd;
+  --green-bg:#14532d;--green:#86efac;
+  --amber-bg:#451a03;--amber:#fcd34d;
+  --red-bg:#450a0a;--red:#fca5a5;
+  --accent:#f0f0f0;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:16px;color:var(--text);background:var(--bg);min-height:100vh;padding-bottom:80px}
+.tabs-bar{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.tab-btn{flex:1;padding:10px 0 8px;border:none;background:transparent;color:var(--text2);font-size:11px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tab-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab-btn.active{color:var(--accent);font-weight:600}
+.panel{display:none;padding:16px}.panel.active{display:block}
+h1{font-size:22px;font-weight:700;margin-bottom:16px}
+.card{background:var(--bg2);border-radius:14px;padding:14px;margin-bottom:12px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:10px;background:var(--bg);color:var(--text);font-size:16px;font-family:inherit;appearance:none;-webkit-appearance:none}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+.btn{padding:10px 16px;border:1px solid var(--border2);border-radius:10px;background:var(--bg);color:var(--text);font-size:15px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn-primary{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.btn-sm{padding:6px 10px;font-size:13px}
+.btn-danger{color:var(--red);border-color:transparent;background:transparent}
+.row{display:flex;gap:8px;margin-bottom:10px;align-items:center}
+.row>*{flex:1}
+.row>.btn{flex:0 0 auto}
+.label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px}
+.item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.item:last-child{border-bottom:none}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.tag-blue{background:var(--blue-bg);color:var(--blue)}
+.tag-green{background:var(--green-bg);color:var(--green)}
+.tag-amber{background:var(--amber-bg);color:var(--amber)}
+.tag-red{background:var(--red-bg);color:var(--red)}
+.tag-gray{background:var(--bg3);color:var(--text2)}
+.muted{font-size:12px;color:var(--text3)}
+.circle-btn{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.circle-btn.done{background:var(--green);border-color:var(--green)}
+.sq-btn{width:22px;height:22px;border-radius:5px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sq-btn.got{background:var(--green);border-color:var(--green)}
+.check-icon{display:none}.circle-btn.done .check-icon,.sq-btn.got .check-icon{display:block}
+.empty{text-align:center;padding:40px 16px;color:var(--text3);font-size:15px}
+.cal-nav{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.cal-nav h2{flex:1;text-align:center;font-size:17px;font-weight:600}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:16px}
+.cal-dn{text-align:center;font-size:11px;color:var(--text2);font-weight:600;padding:4px 0}
+.cal-day{min-height:52px;border:1px solid var(--border);border-radius:8px;padding:4px;font-size:11px;background:var(--bg)}
+.cal-day.today{border-color:var(--accent);border-width:2px}
+.cal-day.other{opacity:.3}
+.cal-num{font-size:11px;color:var(--text2);margin-bottom:2px;font-weight:500}
+.cal-day.today .cal-num{color:var(--accent);font-weight:700}
+.ev-dot{font-size:10px;padding:1px 4px;border-radius:4px;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;line-height:1.3}
+.recur{font-size:11px;color:var(--text3);background:var(--bg3);padding:2px 6px;border-radius:20px}
+.shop-cat{font-size:13px;font-weight:600;color:var(--text2);padding:8px 0 4px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.strike{text-decoration:line-through;opacity:.45}
+</style>
+</head>
+<body>
+
+<div id="panel-agenda" class="panel active">
+  <h1>Agenda</h1>
+  <div class="cal-nav">
+    <button class="btn btn-sm" onclick="changeMonth(-1)">‹</button>
+    <h2 id="cal-title"></h2>
+    <button class="btn btn-sm" onclick="changeMonth(1)">›</button>
+  </div>
+  <div class="cal-grid" id="cal-grid"></div>
+
+  <div class="label">Taak toevoegen</div>
+  <div class="card">
+    <div class="row"><input type="text" id="ev-title" placeholder="Titel..."></div>
+    <div class="row">
+      <input type="date" id="ev-date" style="flex:1">
+      <select id="ev-type" style="flex:1">
+        <option value="eenmalig">Eenmalig</option>
+        <option value="dagelijks">Dagelijks</option>
+        <option value="wekelijks">Wekelijks</option>
+        <option value="2wekelijks">Elke 2 weken</option>
+        <option value="maandelijks">Maandelijks</option>
+      </select>
+    </div>
+    <div class="row">
+      <select id="ev-cat">
+        <option value="huishouden">🏠 Huishouden</option>
+        <option value="sport">🏐 Sport</option>
+        <option value="werk">💼 Werk</option>
+        <option value="gezondheid">💊 Gezondheid</option>
+        <option value="overig">📌 Overig</option>
+      </select>
+      <button class="btn btn-primary" onclick="addEvent()">Toevoegen</button>
+    </div>
+  </div>
+
+  <div class="label">Komende 14 dagen</div>
+  <div class="card" id="upcoming-list"></div>
+</div>
+
+<div id="panel-todo" class="panel">
+  <h1>To-do</h1>
+  <div class="card">
+    <div class="row">
+      <input type="text" id="todo-input" placeholder="Nieuwe taak..." onkeydown="if(event.key==='Enter')addTodo()">
+    </div>
+    <div class="row">
+      <select id="todo-prio">
+        <option value="normaal">Normaal</option>
+        <option value="hoog">Hoog</option>
+        <option value="laag">Laag</option>
+      </select>
+      <button class="btn btn-primary" onclick="addTodo()">Toevoegen</button>
+    </div>
+  </div>
+  <div id="todo-list"></div>
+</div>
+
+<div id="panel-winkel" class="panel">
+  <h1>Winkellijst</h1>
+  <div class="card">
+    <div class="row">
+      <input type="text" id="shop-new-store" placeholder="Nieuwe winkel...">
+      <button class="btn btn-primary" onclick="addStore()">+ Winkel</button>
+    </div>
+    <div class="row">
+      <select id="shop-store" onchange="renderShop()">
+        <option value="">Kies winkel...</option>
+      </select>
+    </div>
+  </div>
+  <div id="shop-add-section" style="display:none">
+    <div class="card">
+      <div class="row"><input type="text" id="shop-item" placeholder="Product..." onkeydown="if(event.key==='Enter')addShopItem()"></div>
+      <div class="row">
+        <input type="text" id="shop-qty" placeholder="Hoeveelheid" style="flex:1">
+        <select id="shop-cat" style="flex:2">
+          <option value="groenten">🥦 Groenten</option>
+          <option value="fruit">🍎 Fruit</option>
+          <option value="vlees">🥩 Vlees</option>
+          <option value="vis">🐟 Vis</option>
+          <option value="zuivel">🧀 Zuivel</option>
+          <option value="brood">🍞 Brood</option>
+          <option value="droog">🥫 Droog</option>
+          <option value="drank">🧃 Drank</option>
+          <option value="diepvries">❄️ Diepvries</option>
+          <option value="hygiëne">🧴 Hygiëne</option>
+          <option value="overig">🛒 Overig</option>
+        </select>
+        <button class="btn btn-primary" onclick="addShopItem()">+</button>
+      </div>
+    </div>
+  </div>
+  <div id="shop-list"></div>
+</div>
+
+<nav class="tabs-bar">
+  <button class="tab-btn active" onclick="showTab('agenda',this)" aria-label="Agenda">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    Agenda
+  </button>
+  <button class="tab-btn" onclick="showTab('todo',this)" aria-label="To-do">
+    <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    To-do
+  </button>
+  <button class="tab-btn" onclick="showTab('winkel',this)" aria-label="Winkellijst">
+    <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+    Winkellijst
+  </button>
+</nav>
+
+<script>
+const KEY='planr_v3';
+let S=load();
+
+function load(){
+  try{const d=localStorage.getItem(KEY);return d?JSON.parse(d):{events:[],todos:[],shops:{},stores:[]}}
+  catch(e){return{events:[],todos:[],shops:{},stores:[]}}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+const MONTHS=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+const DAYS=['ma','di','wo','do','vr','za','zo'];
+const CAT_ORDER=['groenten','fruit','vlees','vis','zuivel','brood','droog','drank','diepvries','hygiëne','overig'];
+const CAT_ICONS={groenten:'🥦',fruit:'🍎',vlees:'🥩',vis:'🐟',zuivel:'🧀',brood:'🍞',droog:'🥫',drank:'🧃',diepvries:'❄️','hygiëne':'🧴',overig:'🛒'};
+const CAT_COLOR={huishouden:'tag-blue',sport:'tag-green',werk:'tag-amber',gezondheid:'tag-red',overig:'tag-gray'};
+const CAT_LABEL={huishouden:'🏠 Huishouden',sport:'🏐 Sport',werk:'💼 Werk',gezondheid:'💊 Gezondheid',overig:'📌 Overig'};
+const RECUR={eenmalig:'Eenmalig',dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn',maandelijks:'Maandelijks'};
+const EV_COLORS={huishouden:'#c6d8f7',sport:'#c6f0d5',werk:'#faedc6',gezondheid:'#f7c6c6',overig:'#e0e0e0'};
+const EV_TC={huishouden:'#1a4a9a',sport:'#145e2e',werk:'#7a5200',gezondheid:'#7a1a1a',overig:'#555'};
+
+let viewY=new Date().getFullYear(), viewM=new Date().getMonth();
+
+function showTab(name, btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+  if(name==='agenda')renderCal();
+  if(name==='todo')renderTodos();
+  if(name==='winkel')renderShop();
+}
+
+function changeMonth(d){
+  viewM+=d;
+  if(viewM>11){viewM=0;viewY++;}
+  if(viewM<0){viewM=11;viewY--;}
+  renderCal();
+}
+
+function getEventsForDate(y,m,d){
+  const date=new Date(y,m,d);
+  const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  return S.events.filter(ev=>{
+    if(!ev.date)return false;
+    const ed=new Date(ev.date+'T00:00:00');
+    if(ev.type==='eenmalig')return ev.date===ds;
+    if(date<ed)return false;
+    if(ev.type==='dagelijks')return true;
+    const diff=Math.round((date-ed)/86400000);
+    if(ev.type==='wekelijks')return diff%7===0;
+    if(ev.type==='2wekelijks')return diff%14===0;
+    if(ev.type==='maandelijks')return ed.getDate()===d&&(y>ed.getFullYear()||(y===ed.getFullYear()&&m>=ed.getMonth()));
+    return false;
+  });
+}
+
+function renderCal(){
+  document.getElementById('cal-title').textContent=MONTHS[viewM]+' '+viewY;
+  const grid=document.getElementById('cal-grid');
+  grid.innerHTML='';
+  DAYS.forEach(d=>{const e=document.createElement('div');e.className='cal-dn';e.textContent=d;grid.appendChild(e);});
+  const first=new Date(viewY,viewM,1);
+  let start=first.getDay()-1;if(start<0)start=6;
+  const dim=new Date(viewY,viewM+1,0).getDate();
+  const prev=new Date(viewY,viewM,0).getDate();
+  const today=new Date();
+  for(let i=0;i<start;i++){
+    const e=document.createElement('div');e.className='cal-day other';
+    e.innerHTML=`<div class="cal-num">${prev-start+1+i}</div>`;grid.appendChild(e);
+  }
+  for(let d=1;d<=dim;d++){
+    const e=document.createElement('div');e.className='cal-day';
+    if(d===today.getDate()&&viewM===today.getMonth()&&viewY===today.getFullYear())e.classList.add('today');
+    const evs=getEventsForDate(viewY,viewM,d);
+    let h=`<div class="cal-num">${d}</div>`;
+    evs.slice(0,2).forEach(ev=>{h+=`<div class="ev-dot" style="background:${EV_COLORS[ev.cat]||'#e0e0e0'};color:${EV_TC[ev.cat]||'#333'}">${ev.title}</div>`;});
+    if(evs.length>2)h+=`<div style="font-size:9px;color:var(--text3)">+${evs.length-2}</div>`;
+    e.innerHTML=h;grid.appendChild(e);
+  }
+  renderUpcoming();
+}
+
+function renderUpcoming(){
+  const list=document.getElementById('upcoming-list');
+  const today=new Date();today.setHours(0,0,0,0);
+  const items=[];
+  for(let i=0;i<14;i++){
+    const d=new Date(today);d.setDate(d.getDate()+i);
+    getEventsForDate(d.getFullYear(),d.getMonth(),d.getDate()).forEach(ev=>items.push({ev,date:new Date(d)}));
+  }
+  if(!items.length){list.innerHTML='<p class="muted" style="text-align:center;padding:16px">Geen taken de komende 2 weken</p>';return;}
+  const wd=['zo','ma','di','wo','do','vr','za'];
+  list.innerHTML=items.map(({ev,date})=>{
+    const isT=date.toDateString()===today.toDateString();
+    const lbl=isT?'vandaag':`${wd[date.getDay()]} ${date.getDate()}/${date.getMonth()+1}`;
+    return `<div class="item">
+      <span class="tag ${CAT_COLOR[ev.cat]||'tag-gray'}" style="flex-shrink:0">${CAT_LABEL[ev.cat]||ev.cat}</span>
+      <span style="flex:1;font-size:14px">${ev.title}</span>
+      <span class="recur">${RECUR[ev.type]||ev.type}</span>
+      <span class="muted">${lbl}</span>
+      <button class="btn btn-danger btn-sm" onclick="deleteEvent('${ev.id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function addEvent(){
+  const title=document.getElementById('ev-title').value.trim();
+  const date=document.getElementById('ev-date').value;
+  const type=document.getElementById('ev-type').value;
+  const cat=document.getElementById('ev-cat').value;
+  if(!title||!date)return alert('Vul titel en datum in');
+  S.events.push({id:Date.now()+'',title,date,type,cat});
+  save();document.getElementById('ev-title').value='';renderCal();
+}
+function deleteEvent(id){S.events=S.events.filter(e=>e.id!==id);save();renderCal();}
+
+function renderTodos(){
+  const list=document.getElementById('todo-list');
+  if(!S.todos.length){list.innerHTML='<div class="empty">Nog geen taken</div>';return;}
+  const po={hoog:0,normaal:1,laag:2};
+  const pb={hoog:'tag-red',normaal:'tag-blue',laag:'tag-gray'};
+  const pl={hoog:'Hoog',normaal:'Normaal',laag:'Laag'};
+  const active=S.todos.filter(t=>!t.done).sort((a,b)=>po[a.prio]-po[b.prio]);
+  const done=S.todos.filter(t=>t.done);
+  let html='';
+  if(active.length){
+    html+='<div class="label">Te doen</div><div class="card">';
+    active.forEach(t=>{
+      html+=`<div class="item">
+        <div class="circle-btn${t.done?' done':''}" onclick="toggleTodo('${t.id}')">
+          <svg class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg>
+        </div>
+        <span style="flex:1;font-size:15px">${t.text}</span>
+        <span class="tag ${pb[t.prio]}">${pl[t.prio]}</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteTodo('${t.id}')">✕</button>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  if(done.length){
+    html+='<div class="label">Afgerond</div><div class="card" style="opacity:.6">';
+    done.forEach(t=>{
+      html+=`<div class="item">
+        <div class="circle-btn done" onclick="toggleTodo('${t.id}')">
+          <svg class="check-icon" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 6 5 9 10 3"/></svg>
+        </div>
+        <span style="flex:1;font-size:15px" class="strike">${t.text}</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteTodo('${t.id}')">✕</button>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  list.innerHTML=html;
+}
+
+function addTodo(){
+  const text=document.getElementById('todo-input').value.trim();
+  if(!text)return;
+  const prio=document.getElementById('todo-prio').value;
+  S.todos.push({id:Date.now()+'',text,prio,done:false});
+  save();document.getElementById('todo-input').value='';renderTodos();
+}
+function toggleTodo(id){const t=S.todos.find(t=>t.id===id);if(t)t.done=!t.done;save();renderTodos();}
+function deleteTodo(id){S.todos=S.todos.filter(t=>t.id!==id);save();renderTodos();}
+
+function addStore(){
+  const name=document.getElementById('shop-new-store').value.trim();
+  if(!name)return;
+  if(!S.stores.includes(name))S.stores.push(name);
+  if(!S.shops[name])S.shops[name]=[];
+  save();document.getElementById('shop-new-store').value='';renderShop();
+  document.getElementById('shop-store').value=name;renderShop();
+}
+
+function renderShop(){
+  const sel=document.getElementById('shop-store');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Kies winkel...</option>';
+  S.stores.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;sel.appendChild(o);});
+  if(S.stores.includes(cur))sel.value=cur;
+  const store=sel.value;
+  document.getElementById('shop-add-section').style.display=store?'block':'none';
+  const list=document.getElementById('shop-list');
+  if(!store){list.innerHTML='<div class="empty">Selecteer of maak een winkel aan</div>';return;}
+  const items=S.shops[store]||[];
+  if(!items.length){list.innerHTML='<div class="empty">Nog geen producten</div>';return;}
+  const bycat={};
+  items.forEach(it=>{if(!bycat[it.cat])bycat[it.cat]=[];bycat[it.cat].push(it);});
+  let html=`<div class="card" style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-sm" onclick="clearGot()">Afgevinkte wissen</button>
+    <button class="btn btn-danger btn-sm" onclick="deleteStore('${store}')">✕ Winkel verwijderen</button>
+  </div><div class="card">`;
+  CAT_ORDER.forEach(cat=>{
+    if(!bycat[cat])return;
+    html+=`<div class="shop-cat">${CAT_ICONS[cat]} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</div>`;
+    bycat[cat].forEach(it=>{
+      html+=`<div class="item">
+        <div class="sq-btn${it.got?' got':''}" onclick="toggleShop('${store}','${it.id}')">
+          <svg class="check-icon" width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1.5 5.5 4.5 8.5 9.5 2.5"/></svg>
+        </div>
+        <span style="flex:1;font-size:15px" class="${it.got?'strike':''}">${it.name}</span>
+        ${it.qty?`<span class="muted">${it.qty}</span>`:''}
+        <button class="btn btn-danger btn-sm" onclick="deleteShopItem('${store}','${it.id}')">✕</button>
+      </div>`;
+    });
+  });
+  html+='</div>';
+  list.innerHTML=html;
+}
+
+function addShopItem(){
+  const store=document.getElementById('shop-store').value;
+  if(!store)return;
+  const name=document.getElementById('shop-item').value.trim();
+  if(!name)return;
+  const qty=document.getElementById('shop-qty').value.trim();
+  const cat=document.getElementById('shop-cat').value;
+  if(!S.shops[store])S.shops[store]=[];
+  S.shops[store].push({id:Date.now()+'',name,qty,cat,got:false});
+  save();document.getElementById('shop-item').value='';document.getElementById('shop-qty').value='';renderShop();
+}
+function toggleShop(store,id){const it=S.shops[store]?.find(i=>i.id===id);if(it)it.got=!it.got;save();renderShop();}
+function deleteShopItem(store,id){if(S.shops[store])S.shops[store]=S.shops[store].filter(i=>i.id!==id);save();renderShop();}
+function clearGot(){const store=document.getElementById('shop-store').value;if(S.shops[store])S.shops[store]=S.shops[store].filter(i=>!i.got);save();renderShop();}
+function deleteStore(store){
+  if(!confirm('Winkel "'+store+'" verwijderen?'))return;
+  S.stores=S.stores.filter(s=>s!==store);delete S.shops[store];save();renderShop();
+}
+
+document.getElementById('ev-date').value=new Date().toISOString().split('T')[0];
+renderCal();
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>
