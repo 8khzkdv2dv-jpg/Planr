@@ -1669,38 +1669,64 @@ function initFirebase(){
         window._fbUser=user;
         window._fbUpdateUI(user);
         if(user){
-          // Force upload local data to Firebase on login
-          if(window._fbSave)window._fbSave(window.S);
-          // Start realtime sync
+          // First: check what's in Firebase
+          try{
+            const snap=await getDoc(doc(firestore,'planr',user.uid));
+            const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
+            if(snap.exists()&&snap.data()&&snap.data().data){
+              const remote=snap.data();
+              const remoteUpdated=remote.updated||0;
+              if(remoteUpdated>localUpdated){
+                // Firebase is newer — pull it down
+                const parsed=JSON.parse(remote.data);
+                const def=window._fbLoadDefaults();
+                window.S={...def,...parsed,
+                  calendars:parsed.calendars||def.calendars,
+                  taakCats:parsed.taakCats||def.taakCats,
+                  todoCats:parsed.todoCats||def.todoCats,
+                  routines:(parsed.routines&&parsed.routines.length)?parsed.routines:def.routines,
+                  routineCats:parsed.routineCats||def.routineCats,
+                  storeLogos:parsed.storeLogos||{},
+                  stores:parsed.stores||[],
+                  shops:parsed.shops||{}
+                };
+                localStorage.setItem(window._planrKey,JSON.stringify(window.S));
+                localStorage.setItem('planr_updated',remoteUpdated);
+                window._fbRefreshUI();
+              } else {
+                // Local is newer or equal — push to Firebase
+                window._fbSave(window.S);
+              }
+            } else {
+              // Nothing in Firebase yet — push local data
+              window._fbSave(window.S);
+            }
+          }catch(e){console.error('Initial sync error:',e);}
+
+          // Then start realtime listener
           if(unsubscribe)unsubscribe();
           unsubscribe=onSnapshot(doc(firestore,'planr',user.uid),snap=>{
-            if(snap.exists()){
+            if(snap.exists()&&snap.data()&&snap.data().data){
               const remote=snap.data();
-              if(remote&&remote.data){
+              const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
+              const remoteUpdated=remote.updated||0;
+              if(remoteUpdated>localUpdated){
                 try{
                   const parsed=JSON.parse(remote.data);
-                  const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
-                  const remoteUpdated=remote.updated||0;
-                  if(remoteUpdated>localUpdated){
-                    // Remote is newer — load it
-                    const def=window._fbLoadDefaults();
-                    window.S={...def,...parsed,
-                      calendars:parsed.calendars||def.calendars,
-                      taakCats:parsed.taakCats||def.taakCats,
-                      todoCats:parsed.todoCats||def.todoCats,
-                      routines:(parsed.routines&&parsed.routines.length)?parsed.routines:def.routines,
-                      routineCats:parsed.routineCats||def.routineCats,
-                      storeLogos:parsed.storeLogos||{},
-                      stores:parsed.stores||[],
-                      shops:parsed.shops||{}
-                    };
-                    localStorage.setItem(window._planrKey,JSON.stringify(window.S));
-                    localStorage.setItem('planr_updated',remoteUpdated);
-                    window._fbRefreshUI();
-                  } else if(localUpdated>0){
-                    // Local is newer — push to Firebase
-                    if(window._fbSave)window._fbSave(window.S);
-                  }
+                  const def=window._fbLoadDefaults();
+                  window.S={...def,...parsed,
+                    calendars:parsed.calendars||def.calendars,
+                    taakCats:parsed.taakCats||def.taakCats,
+                    todoCats:parsed.todoCats||def.todoCats,
+                    routines:(parsed.routines&&parsed.routines.length)?parsed.routines:def.routines,
+                    routineCats:parsed.routineCats||def.routineCats,
+                    storeLogos:parsed.storeLogos||{},
+                    stores:parsed.stores||[],
+                    shops:parsed.shops||{}
+                  };
+                  localStorage.setItem(window._planrKey,JSON.stringify(window.S));
+                  localStorage.setItem('planr_updated',remoteUpdated);
+                  window._fbRefreshUI();
                 }catch(e){console.error('Sync parse error:',e);}
               }
             }
