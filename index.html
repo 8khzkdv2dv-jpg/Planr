@@ -287,18 +287,35 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
     <input type="hidden" id="routine-edit-id">
     <div class="row"><input type="text" id="routine-name" placeholder="Naam (bv: Handdoeken verversen)"></div>
     <div class="row">
-      <select id="routine-freq">
+      <select id="routine-freq" onchange="updateNextDateFromFreq()">
         <option value="dagelijks">Dagelijks</option>
         <option value="wekelijks">Wekelijks</option>
         <option value="2wekelijks">Elke 2 weken</option>
         <option value="3wekelijks">Elke 3 weken</option>
         <option value="maandelijks">Maandelijks</option>
         <option value="kwartaal">Per kwartaal</option>
+        <option value="jaarlijks">Jaarlijks</option>
+        <option value="aangepast">Aangepaste datum</option>
       </select>
       <select id="routine-cat-sel"></select>
     </div>
-    <div class="row"><input type="date" id="routine-last" placeholder="Laatste keer gedaan"></div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Vul in wanneer je dit voor het laatst hebt gedaan, dan berekent de app wanneer het weer tijd is.</div>
+
+    <!-- Laatste keer gedaan -->
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">Laatste keer gedaan:</div>
+    <div class="row" style="margin-bottom:4px">
+      <input type="date" id="routine-last" onchange="updateNextDateFromFreq()">
+      <button class="btn btn-sm" onclick="setLastToday()" style="white-space:nowrap">Vandaag</button>
+    </div>
+
+    <!-- Volgende datum (aangepast of berekend) -->
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">Volgende keer gepland:</div>
+    <div class="row" style="margin-bottom:2px">
+      <input type="date" id="routine-next" placeholder="Kies datum...">
+      <button class="btn btn-sm" onclick="openMiniCal()" style="white-space:nowrap">📅 Kies</button>
+    </div>
+    <div id="mini-cal-container" style="display:none;margin-bottom:10px"></div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Bij "Aangepaste datum" kies je zelf wanneer het de volgende keer moet.</div>
+
     <div class="row"><input type="text" id="routine-note" placeholder="Notitie (optioneel)"></div>
     <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="saveRoutine()">Opslaan</button>
   </div>
@@ -880,8 +897,8 @@ function addEvent(){
 function delEvent(id){S.events=S.events.filter(e=>e.id!==id);save();renderCalendar();}
 
 /* ===== ROUTINES ===== */
-const FREQ_DAYS={dagelijks:1,wekelijks:7,'2wekelijks':14,'3wekelijks':21,maandelijks:30,kwartaal:90};
-const FREQ_L={dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal'};
+const FREQ_DAYS={dagelijks:1,wekelijks:7,'2wekelijks':14,'3wekelijks':21,maandelijks:30,kwartaal:90,jaarlijks:365,aangepast:null};
+const FREQ_L={dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal',jaarlijks:'Jaarlijks',aangepast:'Aangepast'};
 
 function openAddRoutine(){
   document.getElementById('routine-modal-title').innerHTML='Routine toevoegen<button class="modal-close" onclick="closeModal(\'modal-routine\')">×</button>';
@@ -889,8 +906,11 @@ function openAddRoutine(){
   document.getElementById('routine-name').value='';
   document.getElementById('routine-note').value='';
   document.getElementById('routine-last').value=new Date().toISOString().split('T')[0];
+  document.getElementById('routine-next').value='';
   document.getElementById('routine-freq').value='wekelijks';
+  document.getElementById('mini-cal-container').style.display='none';
   document.getElementById('routine-cat-sel').innerHTML=S.routineCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  updateNextDateFromFreq();
   openModal('modal-routine');
 }
 
@@ -901,7 +921,9 @@ function openEditRoutine(id){
   document.getElementById('routine-name').value=r.name;
   document.getElementById('routine-note').value=r.note||'';
   document.getElementById('routine-last').value=r.last||'';
+  document.getElementById('routine-next').value=r.next||'';
   document.getElementById('routine-freq').value=r.freq||'wekelijks';
+  document.getElementById('mini-cal-container').style.display='none';
   document.getElementById('routine-cat-sel').innerHTML=S.routineCats.map(c=>`<option value="${c.id}"${c.id===r.cat?' selected':''}>${c.name}</option>`).join('');
   openModal('modal-routine');
 }
@@ -911,36 +933,134 @@ function saveRoutine(){
   const freq=document.getElementById('routine-freq').value;
   const cat=document.getElementById('routine-cat-sel').value;
   const last=document.getElementById('routine-last').value;
+  const next=document.getElementById('routine-next').value;
   const note=document.getElementById('routine-note').value.trim();
   const editId=document.getElementById('routine-edit-id').value;
   if(editId){
     const r=S.routines.find(r=>r.id===editId);
-    if(r){r.name=name;r.freq=freq;r.cat=cat;r.last=last;r.note=note;}
+    if(r){r.name=name;r.freq=freq;r.cat=cat;r.last=last;r.next=next;r.note=note;}
   } else {
-    S.routines.push({id:Date.now()+'',name,freq,cat,last,note,done:false});
+    S.routines.push({id:Date.now()+'',name,freq,cat,last,next,note});
   }
   save();closeModal('modal-routine');renderTaken();
 }
 
 function markRoutineDone(id){
   const r=S.routines.find(r=>r.id===id);
-  if(r){r.last=new Date().toISOString().split('T')[0];r.done=false;}
+  if(r){
+    r.last=new Date().toISOString().split('T')[0];
+    // Recalculate next date based on freq
+    const interval=FREQ_DAYS[r.freq];
+    if(interval){
+      const next=new Date();next.setDate(next.getDate()+interval);
+      r.next=next.toISOString().split('T')[0];
+    } else {
+      r.next=''; // aangepast: user must set manually
+    }
+  }
   save();renderTaken();
 }
 
 function delRoutine(id){S.routines=S.routines.filter(r=>r.id!==id);save();renderTaken();}
 
 function getRoutineStatus(r){
+  const today=new Date();today.setHours(0,0,0,0);
+  // Use explicit next date if set (for aangepast or override)
+  if(r.next){
+    const next=new Date(r.next+'T00:00:00');
+    const daysLeft=Math.round((next-today)/86400000);
+    if(daysLeft<0)return{label:`${Math.abs(daysLeft)} dag${Math.abs(daysLeft)!==1?'en':''} te laat`,urgency:'overdue',daysLeft};
+    if(daysLeft===0)return{label:'Vandaag!',urgency:'today',daysLeft};
+    if(daysLeft<=3)return{label:`Over ${daysLeft} dag${daysLeft!==1?'en':''}`,urgency:'soon',daysLeft};
+    return{label:`Over ${daysLeft} dagen`,urgency:'ok',daysLeft};
+  }
   if(!r.last)return{label:'Nog nooit gedaan',urgency:'overdue',daysLeft:-999};
   const last=new Date(r.last+'T00:00:00');
-  const today=new Date();today.setHours(0,0,0,0);
-  const interval=FREQ_DAYS[r.freq]||7;
+  const interval=FREQ_DAYS[r.freq];
+  if(!interval)return{label:'Datum niet ingesteld',urgency:'overdue',daysLeft:-999};
   const next=new Date(last);next.setDate(last.getDate()+interval);
   const daysLeft=Math.round((next-today)/86400000);
   if(daysLeft<0)return{label:`${Math.abs(daysLeft)} dag${Math.abs(daysLeft)!==1?'en':''} te laat`,urgency:'overdue',daysLeft};
   if(daysLeft===0)return{label:'Vandaag!',urgency:'today',daysLeft};
   if(daysLeft<=3)return{label:`Over ${daysLeft} dag${daysLeft!==1?'en':''}`,urgency:'soon',daysLeft};
   return{label:`Over ${daysLeft} dagen`,urgency:'ok',daysLeft};
+}
+
+function setLastToday(){
+  document.getElementById('routine-last').value=new Date().toISOString().split('T')[0];
+  updateNextDateFromFreq();
+}
+
+function updateNextDateFromFreq(){
+  const freq=document.getElementById('routine-freq').value;
+  const last=document.getElementById('routine-last').value;
+  if(freq==='aangepast')return; // user picks manually
+  if(!last)return;
+  const interval=FREQ_DAYS[freq];
+  if(!interval)return;
+  const next=new Date(last+'T00:00:00');
+  next.setDate(next.getDate()+interval);
+  document.getElementById('routine-next').value=next.toISOString().split('T')[0];
+}
+
+let miniCalDate=new Date();
+function openMiniCal(){
+  const container=document.getElementById('mini-cal-container');
+  if(container.style.display==='block'){container.style.display='none';return;}
+  // Try to init from current next value
+  const cur=document.getElementById('routine-next').value;
+  if(cur)miniCalDate=new Date(cur+'T00:00:00');
+  else miniCalDate=new Date();
+  renderMiniCal();
+  container.style.display='block';
+}
+
+function renderMiniCal(){
+  const container=document.getElementById('mini-cal-container');
+  const y=miniCalDate.getFullYear(),m=miniCalDate.getMonth();
+  const today=new Date();today.setHours(0,0,0,0);
+  const selVal=document.getElementById('routine-next').value;
+  const sel=selVal?new Date(selVal+'T00:00:00'):null;
+  const monthNames=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+  let html=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <button onclick="miniCalNav(-1)" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:var(--text)">‹</button>
+      <span style="font-weight:700;font-size:14px">${monthNames[m]} ${y}</span>
+      <button onclick="miniCalNav(1)" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:var(--text)">›</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">`;
+  ['M','D','W','D','V','Z','Z'].forEach(d=>{html+=`<div style="font-size:10px;color:var(--text3);font-weight:700;padding:2px">${d}</div>`;});
+  const first=new Date(y,m,1);
+  let start=first.getDay()-1;if(start<0)start=6;
+  const dim=new Date(y,m+1,0).getDate();
+  for(let i=0;i<start;i++)html+=`<div></div>`;
+  for(let d=1;d<=dim;d++){
+    const date=new Date(y,m,d);
+    const isToday=date.toDateString()===today.toDateString();
+    const isSel=sel&&date.toDateString()===sel.toDateString();
+    const isPast=date<today;
+    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    html+=`<div onclick="pickMiniCalDate('${ds}')" style="height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;font-size:12px;font-weight:${isToday||isSel?'700':'400'};
+      background:${isSel?'var(--accent)':isToday?'var(--accent2)':'transparent'};
+      color:${isSel?'#fff':isPast?'var(--text3)':'var(--text)'}">${d}</div>`;
+  }
+  html+=`</div></div>`;
+  container.innerHTML=html;
+}
+
+function miniCalNav(d){
+  miniCalDate.setMonth(miniCalDate.getMonth()+d);
+  renderMiniCal();
+}
+
+function pickMiniCalDate(ds){
+  document.getElementById('routine-next').value=ds;
+  document.getElementById('mini-cal-container').style.display='none';
+  // Set freq to aangepast if manually picked
+  const freq=document.getElementById('routine-freq').value;
+  if(freq!=='aangepast'){
+    // keep freq but update the next date field
+  }
 }
 
 function renderTaken(){
@@ -994,6 +1114,7 @@ function renderTaken(){
               <span class="recur-tag">${FREQ_L[r.freq]||r.freq}</span>
               <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${bg};color:${col}">${st.label}</span>
               ${r.last?`<span class="muted">Laatste keer: ${new Date(r.last+'T00:00:00').toLocaleDateString('nl-BE')}</span>`:''}
+              ${r.next?`<span class="muted">Volgende: ${new Date(r.next+'T00:00:00').toLocaleDateString('nl-BE')}</span>`:''}
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
@@ -1325,8 +1446,14 @@ function renderSettings(){
   <div class="st-sec">
     <div class="st-title">Gegevens</div>
     <div class="card">
-      <button class="btn btn-sm" style="width:100%;margin-bottom:8px" onclick="exportData()">📤 Exporteer (JSON)</button>
-      <button class="btn-d btn-sm" style="width:100%;padding:8px" onclick="clearAll()">🗑 Alle gegevens wissen</button>
+      <button class="btn btn-sm" style="width:100%;margin-bottom:8px" onclick="exportData()">📤 Exporteer backup (JSON)</button>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Sla regelmatig een backup op om je data te beschermen.</div>
+      <div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:8px">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">📥 Importeer backup</div>
+        <input type="file" id="import-file" accept=".json" style="font-size:13px;padding:4px;margin-bottom:6px" onchange="importData()">
+        <div style="font-size:11px;color:var(--text2)">Kies een eerder geëxporteerd JSON-bestand. Je huidige data wordt overschreven.</div>
+      </div>
+      <button class="btn-d btn-sm" style="width:100%;padding:8px;border-top:1px solid var(--border);padding-top:10px" onclick="clearAll()">🗑 Alle gegevens wissen</button>
     </div>
   </div>`;
   el.innerHTML=html;
@@ -1427,7 +1554,45 @@ function delTodoCat(id){S.todoCats=S.todoCats.filter(c=>c.id!==id);save();render
 function updateTCColor(id,color){const c=S.todoCats.find(c=>c.id===id);if(c){c.color=color;save();}}
 function exportData(){
   const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='planr-backup.json';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download=`planr-backup-${new Date().toISOString().split('T')[0]}.json`;a.click();
+}
+function importData(){
+  const file=document.getElementById('import-file').files[0];
+  if(!file)return;
+  if(!confirm('Je huidige data wordt overschreven met de backup. Doorgaan?')){
+    document.getElementById('import-file').value='';return;
+  }
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const imported=JSON.parse(e.target.result);
+      // Validate it looks like planr data
+      if(typeof imported!=='object'||Array.isArray(imported)){
+        alert('Ongeldig bestand. Kies een Planr backup JSON.');return;
+      }
+      // Merge with defaults to ensure all keys exist
+      const def=load();
+      S={...def,...imported,
+        calendars:imported.calendars||def.calendars,
+        taakCats:imported.taakCats||def.taakCats,
+        todoCats:imported.todoCats||def.todoCats,
+        routines:imported.routines||def.routines,
+        routineCats:imported.routineCats||def.routineCats,
+        storeLogos:imported.storeLogos||{},
+        stores:imported.stores||[],
+        shops:imported.shops||{},
+        events:imported.events||[],
+        todos:imported.todos||[]
+      };
+      save();
+      alert('✓ Backup succesvol geladen!');
+      location.reload();
+    }catch(err){
+      alert('Fout bij inladen: '+err.message);
+    }
+  };
+  reader.readAsText(file);
 }
 function clearAll(){if(confirm('Alles wissen?')){localStorage.removeItem(KEY);location.reload();}}
 
