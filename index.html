@@ -2,6 +2,9 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1604,7 +1607,11 @@ try{
 // Auto-refresh Google Agenda every 30 min
 setInterval(()=>{try{refreshAllIcal();}catch(e){}}, 30*60*1000);
 try{refreshAllIcal();}catch(e){}
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    reg.update(); // Check for updates on every load
+  }).catch(()=>{});
+}
 </script>
 </body>
 </html>

@@ -1,11 +1,12 @@
 {
   "name": "Planr",
   "short_name": "Planr",
-  "description": "Agenda, to-do en winkellijsten",
-  "start_url": "/",
+  "description": "Agenda, routines, to-do en winkellijsten",
+  "start_url": "/Planr/",
+  "scope": "/Planr/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#0e0a1a",
+  "theme_color": "#f5f0ff",
   "lang": "nl",
   "icons": [
     {

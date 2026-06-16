@@ -1,5 +1,5 @@
-const CACHE='planr-v12';
-const FILES=['./',  './index.html', './manifest.json'];
+const CACHE='planr-v14';
+const FILES=['/Planr/', '/Planr/index.html', '/Planr/manifest.json', '/Planr/icon-192.png', '/Planr/icon-512.png'];
 
 self.addEventListener('install', e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));
