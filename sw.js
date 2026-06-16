@@ -1,4 +1,4 @@
-const CACHE='planr-v11';
+const CACHE='planr-v12';
 const FILES=['./',  './index.html', './manifest.json'];
 
 self.addEventListener('install', e=>{
