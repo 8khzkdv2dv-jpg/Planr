@@ -383,14 +383,18 @@ function handleTopbarAdd(){
 /* ===== CALENDAR SIDEBAR ===== */
 function renderCalSidebar(){
   const el=document.getElementById('cal-list');
-  el.innerHTML=S.calendars.map(cal=>`
-    <div class="cal-item" onclick="toggleCal('${cal.id}')">
+  el.innerHTML=S.calendars.map(cal=>{
+    const status=S._status&&S._status[cal.id]?`<div style="font-size:9px;color:var(--text3);margin-top:1px">${S._status[cal.id]}</div>`:'';
+    const gcalLabel=cal.ical?`<div style="font-size:9px;color:var(--text3)">Google${status?'':''}</div>`:'';
+    return `<div class="cal-item" onclick="toggleCal('${cal.id}')">
       <div class="cal-dot${cal.active?'':' inactive'}" style="background:${cal.active?cal.color:'transparent'};border-color:${cal.color}"></div>
-      <div>
+      <div style="flex:1;min-width:0">
         <div class="cal-name">${cal.name}</div>
-        ${cal.ical?`<div style="font-size:9px;color:var(--text3)">Google</div>`:''}
+        ${cal.ical?`<div id="cal-status-${cal.id}" style="font-size:9px;color:var(--text3)">${(S._status&&S._status[cal.id])||'Google'}</div>`:''}
       </div>
-    </div>`).join('');
+      ${cal.ical?`<button onclick="event.stopPropagation();fetchIcal('${cal.id}')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;padding:2px">↻</button>`:''}
+    </div>`;
+  }).join('');
 }
 
 function toggleCal(id){
@@ -425,27 +429,71 @@ function deleteCalendar(id){
 }
 
 /* ===== ICAL FETCH ===== */
-function fetchIcal(calId){
+const PROXIES=[
+  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url=>`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+  url=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+];
+
+async function fetchIcal(calId){
   const cal=S.calendars.find(c=>c.id===calId);
   if(!cal||!cal.ical)return;
-  const proxy='https://api.allorigins.win/get?url='+encodeURIComponent(cal.ical);
-  fetch(proxy).then(r=>r.json()).then(data=>{
-    cal.gcalEvents=parseIcal(data.contents,cal.color);
-    save();renderCalendar();
-  }).catch(()=>{});
+  updateCalStatus(calId,'⏳ Laden...');
+  for(let i=0;i<PROXIES.length;i++){
+    try{
+      const proxyUrl=PROXIES[i](cal.ical);
+      const r=await fetch(proxyUrl,{signal:AbortSignal.timeout(8000)});
+      if(!r.ok)continue;
+      let text='';
+      if(i===1){// allorigins returns JSON
+        const j=await r.json();text=j.contents||'';
+      } else {
+        text=await r.text();
+      }
+      if(!text||!text.includes('BEGIN:VCALENDAR')){continue;}
+      cal.gcalEvents=parseIcal(text,cal.color);
+      save();renderCalendar();renderCalSidebar();
+      updateCalStatus(calId,`✓ ${cal.gcalEvents.length} afspraken`);
+      return;
+    }catch(e){continue;}
+  }
+  updateCalStatus(calId,'⚠️ Sync mislukt');
+}
+
+function updateCalStatus(calId,msg){
+  // Store status message per calendar
+  if(!S._status)S._status={};
+  S._status[calId]=msg;
+  // Show in settings if open
+  const el=document.getElementById('cal-status-'+calId);
+  if(el)el.textContent=msg;
 }
 
 function parseIcal(text,fallbackColor){
   const events=[];
   if(!text)return events;
+  // Unfold lines (RFC 5545: lines ending with CRLF + whitespace are continuations)
+  text=text.replace(/\r?\n[ \t]/g,'');
   const blocks=text.split('BEGIN:VEVENT');
   blocks.slice(1).forEach(block=>{
-    const get=k=>{const m=block.match(new RegExp(k+'(?:;[^:]*)?:([^\\r\\n]+)'));return m?m[1].trim():''};
+    const get=k=>{
+      const m=block.match(new RegExp(k+'(?:;[^:]*)?:([^\\r\\n]+)'));
+      return m?m[1].trim():'';
+    };
     const dtstart=get('DTSTART');
     const summary=get('SUMMARY')||'(geen titel)';
     if(!dtstart)return;
-    const y=dtstart.substring(0,4),mo=dtstart.substring(4,6),d=dtstart.substring(6,8);
-    events.push({id:'g'+Math.random().toString(36).slice(2),title:summary,date:`${y}-${mo}-${d}`,source:'gcal',color:fallbackColor});
+    // Handle both date-only (20260616) and datetime (20260616T...)
+    const dateStr=dtstart.replace(/T.*/,'');
+    const y=dateStr.substring(0,4),mo=dateStr.substring(4,6),d=dateStr.substring(6,8);
+    if(!y||!mo||!d)return;
+    events.push({
+      id:'g'+Math.random().toString(36).slice(2),
+      title:summary,
+      date:`${y}-${mo}-${d}`,
+      source:'gcal',
+      color:fallbackColor
+    });
   });
   return events;
 }
@@ -962,15 +1010,15 @@ function renderCalsManage(){
   const el=document.getElementById('cals-manage');if(!el)return;
   el.innerHTML=S.calendars.map(c=>`
     <div class="st-row">
-      <div style="display:flex;align-items:center;gap:8px;flex:1">
-        <div style="width:12px;height:12px;border-radius:50%;background:${c.color}"></div>
-        <div>
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+        <div style="width:12px;height:12px;border-radius:50%;background:${c.color};flex-shrink:0"></div>
+        <div style="min-width:0">
           <div class="st-lbl">${c.name}</div>
-          ${c.ical?`<div class="st-sub">Google Agenda gekoppeld</div>`:'<div class="st-sub">Eigen agenda</div>'}
+          <div id="cal-status-${c.id}" class="st-sub">${c.ical?(S._status&&S._status[c.id]||'Google Agenda gekoppeld'):'Eigen agenda'}</div>
         </div>
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input type="color" value="${c.color}" onchange="updateCalColor('${c.id}',this.value)" style="width:30px;height:26px;border:none;border-radius:6px;cursor:pointer;background:none">
+      <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
+        <input type="color" value="${c.color}" onchange="updateCalColor('${c.id}',this.value)" style="width:28px;height:24px;border:none;border-radius:5px;cursor:pointer;background:none">
         ${c.ical?`<button class="btn btn-sm" onclick="fetchIcal('${c.id}')">↻</button>`:''}
         ${c.id!=='eigen'?`<button class="btn-d" onclick="deleteCalendar('${c.id}')">✕</button>`:''}
       </div>
