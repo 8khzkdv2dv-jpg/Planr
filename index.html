@@ -257,6 +257,7 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
       <select id="day-interval"><option value="1">Elke week</option><option value="2">Elke 2 weken</option><option value="3">Elke 3 weken</option></select>
     </div>
     <div class="row"><select id="ev-cal-select"></select></div>
+    <div class="row"><select id="ev-taakcat-select"></select></div>
     <div class="row"><input type="text" id="ev-reminder" placeholder="Herinnering (bv: 30 min voor)"></div>
     <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="addEvent()">Toevoegen</button>
   </div>
@@ -322,6 +323,13 @@ function load(){
       calendars:[
         {id:'eigen',name:'Mijn agenda',color:'#7c3aed',active:true,ical:'',gcalEvents:[]}
       ],
+      taakCats:[
+        {id:'huishouden',name:'Huishouden',color:'#7c3aed'},
+        {id:'sport',name:'Sport',color:'#059669'},
+        {id:'werk',name:'Werk',color:'#d97706'},
+        {id:'gezondheid',name:'Gezondheid',color:'#dc2626'},
+        {id:'overig',name:'Overig',color:'#6b7280'}
+      ],
       todoCats:[
         {id:'persoonlijk',name:'Persoonlijk',color:'#7c3aed'},
         {id:'werk',name:'Werk',color:'#2563eb'},
@@ -332,6 +340,7 @@ function load(){
     const p=JSON.parse(d);
     return {...def,...p,
       calendars:p.calendars||def.calendars,
+      taakCats:p.taakCats||def.taakCats,
       todoCats:p.todoCats||def.todoCats,
       storeLogos:p.storeLogos||{}
     };
@@ -498,7 +507,9 @@ function getEventsForDate(y,m,d){
     }
     if(match){
       const cal=S.calendars.find(c=>c.id===ev.calId)||{color:'#888'};
-      result.push({...ev,color:cal.color});
+      const taakCat=S.taakCats.find(c=>c.id===ev.taakCatId);
+      const color=taakCat?taakCat.color:cal.color;
+      result.push({...ev,color});
     }
   });
 
@@ -617,6 +628,7 @@ function openDay(y,m,d){viewDate=new Date(y,m,d);setView('dag');}
 
 function openAddEvent(){
   populateCalSelect();
+  document.getElementById('ev-taakcat-select').innerHTML=S.taakCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   document.getElementById('ev-date').value=viewDate.toISOString().split('T')[0];
   document.getElementById('ev-title').value='';
   document.getElementById('ev-time').value='';
@@ -640,9 +652,10 @@ function addEvent(){
   const time=document.getElementById('ev-time').value;
   const type=document.getElementById('ev-type').value;
   const calId=document.getElementById('ev-cal-select').value;
+  const taakCatId=document.getElementById('ev-taakcat-select').value;
   const reminder=document.getElementById('ev-reminder').value.trim();
   if(!title||!date){alert('Vul titel en datum in');return;}
-  const ev={id:Date.now()+'',title,date,time,type,calId,reminder};
+  const ev={id:Date.now()+'',title,date,time,type,calId,taakCatId,reminder};
   if(type==='custom-days'){
     ev.customDays=[...document.querySelectorAll('.dcb:checked')].map(c=>parseInt(c.value));
     ev.dayInterval=parseInt(document.getElementById('day-interval').value)||1;
@@ -901,15 +914,36 @@ function renderSettings(){
   <div class="st-sec">
     <div class="st-title">Agenda's beheren</div>
     <div class="card" id="cals-manage"></div>
+    <button class="btn btn-p btn-sm" style="width:100%;margin-top:-4px" onclick="openAddCalModal()">＋ Agenda toevoegen</button>
   </div>
   <div class="st-sec">
-    <div class="st-title">To-do categorieën</div>
+    <div class="st-title">Categorieën — Taken</div>
+    <div class="card" id="taak-cats-manage"></div>
+    <div class="card" style="margin-top:-4px">
+      <div class="row">
+        <input type="text" id="new-taakcat-name" placeholder="Nieuwe categorie...">
+        <input type="color" id="new-taakcat-color" value="#7c3aed" style="width:40px;flex:0 0 40px;height:34px;padding:2px;border-radius:7px;border:1px solid var(--border2)">
+        <button class="btn btn-p btn-sm" onclick="addTaakCat()">＋</button>
+      </div>
+    </div>
+  </div>
+  <div class="st-sec">
+    <div class="st-title">Categorieën — To-do</div>
     <div class="card" id="todo-cats-manage"></div>
     <div class="card" style="margin-top:-4px">
       <div class="row">
         <input type="text" id="new-tc-name" placeholder="Nieuwe categorie...">
         <input type="color" id="new-tc-color" value="#7c3aed" style="width:40px;flex:0 0 40px;height:34px;padding:2px;border-radius:7px;border:1px solid var(--border2)">
         <button class="btn btn-p btn-sm" onclick="addTodoCat()">＋</button>
+      </div>
+    </div>
+  </div>
+  <div class="st-sec">
+    <div class="st-title">Uiterlijk</div>
+    <div class="card">
+      <div class="st-row">
+        <div><div class="st-lbl">Accentkleur</div><div class="st-sub">Hoofdkleur van de app</div></div>
+        <input type="color" value="#7c3aed" id="accent-color-pick" onchange="setAccent(this.value)" style="width:36px;height:32px;border:none;border-radius:7px;cursor:pointer;background:none">
       </div>
     </div>
   </div>
@@ -921,7 +955,7 @@ function renderSettings(){
     </div>
   </div>`;
   el.innerHTML=html;
-  renderCalsManage();renderTodoCatsManage();
+  renderCalsManage();renderTaakCatsManage();renderTodoCatsManage();
 }
 
 function renderCalsManage(){
@@ -943,6 +977,31 @@ function renderCalsManage(){
     </div>`).join('');
 }
 function updateCalColor(id,color){const c=S.calendars.find(c=>c.id===id);if(c){c.color=color;save();renderCalSidebar();}}
+
+function renderTaakCatsManage(){
+  const el=document.getElementById('taak-cats-manage');if(!el)return;
+  el.innerHTML=S.taakCats.map(c=>`
+    <div class="st-row">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:12px;height:12px;border-radius:50%;background:${c.color}"></div>
+        <span>${c.name}</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="color" value="${c.color}" onchange="updateTaakCatColor('${c.id}',this.value)" style="width:30px;height:26px;border:none;border-radius:6px;cursor:pointer;background:none">
+        <button class="btn-d" onclick="delTaakCat('${c.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+function addTaakCat(){
+  const name=document.getElementById('new-taakcat-name').value.trim();
+  const color=document.getElementById('new-taakcat-color').value;
+  if(!name)return;
+  S.taakCats.push({id:Date.now()+'',name,color});save();
+  renderTaakCatsManage();document.getElementById('new-taakcat-name').value='';
+}
+function delTaakCat(id){S.taakCats=S.taakCats.filter(c=>c.id!==id);save();renderTaakCatsManage();}
+function updateTaakCatColor(id,color){const c=S.taakCats.find(c=>c.id===id);if(c){c.color=color;save();}}
+function setAccent(color){document.documentElement.style.setProperty('--accent',color);}
 
 function renderTodoCatsManage(){
   const el=document.getElementById('todo-cats-manage');if(!el)return;
