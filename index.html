@@ -1400,6 +1400,14 @@ function renderSettings(){
   const el=document.getElementById('panel-instellingen');
   let html=`
   <div class="st-sec">
+    <div class="st-title">☁️ Synchronisatie</div>
+    <div class="card">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Log in met Google om je data automatisch te synchroniseren tussen al je apparaten.</div>
+      <div id="fb-status" style="font-size:12px;margin-bottom:10px;color:var(--text3)">Laden...</div>
+      <button id="fb-login-btn" class="btn btn-p" style="width:100%">Inloggen met Google</button>
+    </div>
+  </div>
+  <div class="st-sec">
     <div class="st-title">Agenda's beheren</div>
     <div class="card" id="cals-manage"></div>
     <button class="btn btn-p btn-sm" style="width:100%;margin-top:-4px" onclick="openAddCalModal()">＋ Agenda toevoegen</button>
@@ -1461,6 +1469,8 @@ function renderSettings(){
   </div>`;
   el.innerHTML=html;
   renderCalsManage();renderRoutineCatsManage();renderTaakCatsManage();renderTodoCatsManage();
+  // Update Firebase UI state
+  setTimeout(()=>{if(window._fbUpdateUI)window._fbUpdateUI(window._fbUser);},50);
 }
 
 function renderCalsManage(){
@@ -1599,6 +1609,134 @@ function importData(){
 }
 function clearAll(){if(confirm('Alles wissen?')){localStorage.removeItem(KEY);location.reload();}}
 
+/* ===== FIREBASE SYNC ===== */
+const FB_CONFIG={
+  apiKey:"AIzaSyC3srCJohuA5HKvt2K6_bNIlvgnjBpXn9I",
+  authDomain:"planr-45155.firebaseapp.com",
+  projectId:"planr-45155",
+  storageBucket:"planr-45155.firebasestorage.app",
+  messagingSenderId:"706335599227",
+  appId:"1:706335599227:web:760d845bb34d26a92150de"
+};
+
+let db=null, fbUser=null, syncIndicator=null;
+
+function initFirebase(){
+  try{
+    const script1=document.createElement('script');
+    script1.type='module';
+    script1.textContent=`
+      import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+      import {getFirestore,doc,setDoc,getDoc,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+      import {getAuth,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+      const app=initializeApp(${JSON.stringify(FB_CONFIG)});
+      const firestore=getFirestore(app);
+      const auth=getAuth(app);
+      let unsubscribe=null;
+
+      window._fbSignIn=async()=>{
+        try{
+          const provider=new GoogleAuthProvider();
+          await signInWithPopup(auth,provider);
+        }catch(e){console.error('Sign in error:',e);alert('Inloggen mislukt: '+e.message);}
+      };
+      window._fbSignOut=async()=>{
+        if(unsubscribe)unsubscribe();
+        await signOut(auth);
+        window._fbUser=null;
+        window._fbUpdateUI(null);
+      };
+      window._fbSave=async(data)=>{
+        if(!window._fbUser)return;
+        try{
+          await setDoc(doc(firestore,'planr',window._fbUser.uid),{data:JSON.stringify(data),updated:Date.now()});
+        }catch(e){console.error('Firebase save error:',e);}
+      };
+
+      onAuthStateChanged(auth,async user=>{
+        window._fbUser=user;
+        window._fbUpdateUI(user);
+        if(user){
+          // Start realtime sync
+          if(unsubscribe)unsubscribe();
+          unsubscribe=onSnapshot(doc(firestore,'planr',user.uid),snap=>{
+            if(snap.exists()){
+              const remote=snap.data();
+              if(remote&&remote.data){
+                try{
+                  const parsed=JSON.parse(remote.data);
+                  // Only update if remote is newer
+                  const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
+                  if((remote.updated||0)>localUpdated){
+                    const def=window._fbLoadDefaults();
+                    window.S={...def,...parsed,
+                      calendars:parsed.calendars||def.calendars,
+                      taakCats:parsed.taakCats||def.taakCats,
+                      todoCats:parsed.todoCats||def.todoCats,
+                      routines:(parsed.routines&&parsed.routines.length)?parsed.routines:def.routines,
+                      routineCats:parsed.routineCats||def.routineCats,
+                      storeLogos:parsed.storeLogos||{},
+                      stores:parsed.stores||[],
+                      shops:parsed.shops||{}
+                    };
+                    localStorage.setItem(window._planrKey,JSON.stringify(window.S));
+                    localStorage.setItem('planr_updated',remote.updated);
+                    window._fbRefreshUI();
+                  }
+                }catch(e){console.error('Sync parse error:',e);}
+              }
+            }
+          });
+        }
+      });
+    `;
+    document.head.appendChild(script1);
+  }catch(e){console.error('Firebase init error:',e);}
+}
+
+window._planrKey=KEY;
+window._fbUser=null;
+window._fbUpdateUI=function(user){
+  const btn=document.getElementById('fb-login-btn');
+  const status=document.getElementById('fb-status');
+  if(!btn||!status)return;
+  if(user){
+    btn.textContent='Uitloggen';
+    btn.onclick=window._fbSignOut;
+    status.textContent='✓ Ingelogd als '+user.email;
+    status.style.color='var(--green)';
+  }else{
+    btn.textContent='Inloggen met Google';
+    btn.onclick=window._fbSignIn;
+    status.textContent='Niet ingelogd — geen sync';
+    status.style.color='var(--text3)';
+  }
+};
+window._fbRefreshUI=function(){
+  try{renderCalSidebar();renderCalendar();}catch(e){}
+  // Refresh current tab
+  const panels=['agenda','taken','todo','winkel','instellingen'];
+  panels.forEach(p=>{
+    const el=document.getElementById('panel-'+p);
+    if(el&&el.classList.contains('active')){
+      if(p==='taken')try{renderTaken();}catch(e){}
+      if(p==='todo')try{renderTodo();}catch(e){}
+      if(p==='winkel')try{renderWinkel();}catch(e){}
+      if(p==='instellingen')try{renderSettings();}catch(e){}
+    }
+  });
+};
+window._fbLoadDefaults=function(){return load();};
+
+// Override save to also sync to Firebase
+const _origSave=save;
+function save(){
+  _origSave();
+  localStorage.setItem('planr_updated',Date.now());
+  if(window._fbUser&&window._fbSave)window._fbSave(S);
+}
+
 // Init
 try{
   renderCalSidebar();
@@ -1607,9 +1745,11 @@ try{
 // Auto-refresh Google Agenda every 30 min
 setInterval(()=>{try{refreshAllIcal();}catch(e){}}, 30*60*1000);
 try{refreshAllIcal();}catch(e){}
+// Init Firebase sync
+try{initFirebase();}catch(e){console.error('Firebase init error:',e);}
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').then(reg=>{
-    reg.update(); // Check for updates on every load
+    reg.update();
   }).catch(()=>{});
 }
 </script>
