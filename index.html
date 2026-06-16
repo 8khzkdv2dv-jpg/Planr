@@ -1404,7 +1404,8 @@ function renderSettings(){
     <div class="card">
       <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Log in met Google om je data automatisch te synchroniseren tussen al je apparaten.</div>
       <div id="fb-status" style="font-size:12px;margin-bottom:10px;color:var(--text3)">Laden...</div>
-      <button id="fb-login-btn" class="btn btn-p" style="width:100%">Inloggen met Google</button>
+      <button id="fb-login-btn" class="btn btn-p" style="width:100%;margin-bottom:8px">Inloggen met Google</button>
+      <button class="btn btn-sm" style="width:100%" onclick="if(window._fbSave&&window._fbUser){window._fbSave(window.S);alert('✓ Data gesynchroniseerd!');}else{alert('Eerst inloggen.');}">☁️ Nu synchroniseren</button>
     </div>
   </div>
   <div class="st-sec">
@@ -1668,6 +1669,8 @@ function initFirebase(){
         window._fbUser=user;
         window._fbUpdateUI(user);
         if(user){
+          // Force upload local data to Firebase on login
+          if(window._fbSave)window._fbSave(window.S);
           // Start realtime sync
           if(unsubscribe)unsubscribe();
           unsubscribe=onSnapshot(doc(firestore,'planr',user.uid),snap=>{
@@ -1676,9 +1679,10 @@ function initFirebase(){
               if(remote&&remote.data){
                 try{
                   const parsed=JSON.parse(remote.data);
-                  // Only update if remote is newer
                   const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
-                  if((remote.updated||0)>localUpdated){
+                  const remoteUpdated=remote.updated||0;
+                  if(remoteUpdated>localUpdated){
+                    // Remote is newer — load it
                     const def=window._fbLoadDefaults();
                     window.S={...def,...parsed,
                       calendars:parsed.calendars||def.calendars,
@@ -1691,8 +1695,11 @@ function initFirebase(){
                       shops:parsed.shops||{}
                     };
                     localStorage.setItem(window._planrKey,JSON.stringify(window.S));
-                    localStorage.setItem('planr_updated',remote.updated);
+                    localStorage.setItem('planr_updated',remoteUpdated);
                     window._fbRefreshUI();
+                  } else if(localUpdated>0){
+                    // Local is newer — push to Firebase
+                    if(window._fbSave)window._fbSave(window.S);
                   }
                 }catch(e){console.error('Sync parse error:',e);}
               }
