@@ -1787,17 +1787,10 @@ window._fbUpdateUI=function(user){
 };
 window._fbRefreshUI=function(){
   try{renderCalSidebar();renderCalendar();}catch(e){}
-  // Refresh current tab
-  const panels=['agenda','taken','todo','winkel','instellingen'];
-  panels.forEach(p=>{
-    const el=document.getElementById('panel-'+p);
-    if(el&&el.classList.contains('active')){
-      if(p==='taken')try{renderTaken();}catch(e){}
-      if(p==='todo')try{renderTodo();}catch(e){}
-      if(p==='winkel')try{renderWinkel();}catch(e){}
-      if(p==='instellingen')try{renderSettings();}catch(e){}
-    }
-  });
+  try{if(document.getElementById('panel-taken').classList.contains('active'))renderTaken();}catch(e){}
+  try{if(document.getElementById('panel-todo').classList.contains('active'))renderTodo();}catch(e){}
+  try{if(document.getElementById('panel-winkel').classList.contains('active'))renderWinkel();}catch(e){}
+  try{if(document.getElementById('panel-instellingen').classList.contains('active'))renderSettings();}catch(e){}
 };
 window._fbLoadDefaults=function(){return load();};
 
@@ -1826,12 +1819,20 @@ setInterval(()=>{try{refreshAllIcal();}catch(e){}}, 30*60*1000);
 try{refreshAllIcal();}catch(e){}
 // Init Firebase sync
 try{initFirebase();}catch(e){console.error('Firebase init error:',e);}
-// Check Firebase for updates every 60 seconds
+// Check Firebase every 30 seconds
 setInterval(()=>{
-  try{
-    if(window._fbUser&&window._fbCheckUpdates)window._fbCheckUpdates();
-  }catch(e){}
-},60*1000);
+  try{if(window._fbUser&&window._fbCheckUpdates)window._fbCheckUpdates();}catch(e){}
+},30*1000);
+// Check Firebase when app comes back into focus (crucial for iPhone)
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'){
+    try{if(window._fbUser&&window._fbCheckUpdates)window._fbCheckUpdates();}catch(e){}
+  }
+});
+// Also check when window gets focus
+window.addEventListener('focus',()=>{
+  try{if(window._fbUser&&window._fbCheckUpdates)window._fbCheckUpdates();}catch(e){}
+});
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').then(reg=>{
     reg.update();
