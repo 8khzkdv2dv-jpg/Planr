@@ -1703,34 +1703,61 @@ function initFirebase(){
             }
           }catch(e){console.error('Initial sync error:',e);}
 
-          // Then start realtime listener
-          if(unsubscribe)unsubscribe();
-          unsubscribe=onSnapshot(doc(firestore,'planr',user.uid),snap=>{
-            if(snap.exists()&&snap.data()&&snap.data().data){
-              const remote=snap.data();
-              const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
-              const remoteUpdated=remote.updated||0;
-              if(remoteUpdated>localUpdated){
-                try{
-                  const parsed=JSON.parse(remote.data);
-                  const def=window._fbLoadDefaults();
-                  window.S={...def,...parsed,
-                    calendars:parsed.calendars||def.calendars,
-                    taakCats:parsed.taakCats||def.taakCats,
-                    todoCats:parsed.todoCats||def.todoCats,
-                    routines:(parsed.routines&&parsed.routines.length)?parsed.routines:def.routines,
-                    routineCats:parsed.routineCats||def.routineCats,
-                    storeLogos:parsed.storeLogos||{},
-                    stores:parsed.stores||[],
-                    shops:parsed.shops||{}
-                  };
-                  localStorage.setItem(window._planrKey,JSON.stringify(window.S));
-                  localStorage.setItem('planr_updated',remoteUpdated);
-                  window._fbRefreshUI();
-                }catch(e){console.error('Sync parse error:',e);}
-              }
+      window._fbCheckUpdates=async()=>{
+        if(!window._fbUser)return;
+        try{
+          const snap=await getDoc(doc(firestore,'planr',window._fbUser.uid));
+          if(snap.exists()&&snap.data()&&snap.data().data){
+            const remote=snap.data();
+            const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
+            if((remote.updated||0)>localUpdated){
+              const parsed=JSON.parse(remote.data);
+              const def=window._fbLoadDefaults();
+              window.S={...def,...parsed,
+                calendars:parsed.calendars||def.calendars,
+                taakCats:parsed.taakCats||def.taakCats,
+                todoCats:parsed.todoCats||def.todoCats,
+                routines:parsed.routines||[],
+                routineCats:parsed.routineCats||def.routineCats,
+                storeLogos:parsed.storeLogos||{},
+                stores:parsed.stores||[],
+                shops:parsed.shops||{}
+              };
+              localStorage.setItem(window._planrKey,JSON.stringify(window.S));
+              localStorage.setItem('planr_updated',remote.updated);
+              window._fbRefreshUI();
             }
-          });
+          }
+        }catch(e){console.error('Check updates error:',e);}
+      };
+
+      // Realtime listener — always apply remote if newer
+      if(unsubscribe)unsubscribe();
+      unsubscribe=onSnapshot(doc(firestore,'planr',user.uid),snap=>{
+        if(snap.exists()&&snap.data()&&snap.data().data){
+          const remote=snap.data();
+          const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
+          if((remote.updated||0)>localUpdated){
+            try{
+              const parsed=JSON.parse(remote.data);
+              const def=window._fbLoadDefaults();
+              window.S={...def,...parsed,
+                calendars:parsed.calendars||def.calendars,
+                taakCats:parsed.taakCats||def.taakCats,
+                todoCats:parsed.todoCats||def.todoCats,
+                routines:parsed.routines||[],
+                routineCats:parsed.routineCats||def.routineCats,
+                storeLogos:parsed.storeLogos||{},
+                stores:parsed.stores||[],
+                shops:parsed.shops||{}
+              };
+              localStorage.setItem(window._planrKey,JSON.stringify(window.S));
+              localStorage.setItem('planr_updated',remote.updated);
+              window._fbRefreshUI();
+            }catch(e){console.error('Snapshot sync error:',e);}
+          }
+        }
+      });
         }
       });
     `;
@@ -1797,6 +1824,12 @@ setInterval(()=>{try{refreshAllIcal();}catch(e){}}, 30*60*1000);
 try{refreshAllIcal();}catch(e){}
 // Init Firebase sync
 try{initFirebase();}catch(e){console.error('Firebase init error:',e);}
+// Check Firebase for updates every 60 seconds
+setInterval(()=>{
+  try{
+    if(window._fbUser&&window._fbCheckUpdates)window._fbCheckUpdates();
+  }catch(e){}
+},60*1000);
 if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').then(reg=>{
     reg.update();
