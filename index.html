@@ -191,8 +191,8 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
     Agenda
   </button>
   <button class="tab-btn" onclick="showTab('taken',this)">
-    <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    Taken
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><polyline points="12 6 12 12 16 14"/></svg>
+    Routines
   </button>
   <button class="tab-btn" onclick="showTab('todo',this)">
     <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
@@ -280,6 +280,30 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
   </div>
 </div>
 
+<!-- ADD/EDIT ROUTINE MODAL -->
+<div id="modal-routine" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-routine')">
+  <div class="modal">
+    <div class="modal-t" id="routine-modal-title">Routine toevoegen<button class="modal-close" onclick="closeModal('modal-routine')">×</button></div>
+    <input type="hidden" id="routine-edit-id">
+    <div class="row"><input type="text" id="routine-name" placeholder="Naam (bv: Handdoeken verversen)"></div>
+    <div class="row">
+      <select id="routine-freq">
+        <option value="dagelijks">Dagelijks</option>
+        <option value="wekelijks">Wekelijks</option>
+        <option value="2wekelijks">Elke 2 weken</option>
+        <option value="3wekelijks">Elke 3 weken</option>
+        <option value="maandelijks">Maandelijks</option>
+        <option value="kwartaal">Per kwartaal</option>
+      </select>
+      <select id="routine-cat-sel"></select>
+    </div>
+    <div class="row"><input type="date" id="routine-last" placeholder="Laatste keer gedaan"></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Vul in wanneer je dit voor het laatst hebt gedaan, dan berekent de app wanneer het weer tijd is.</div>
+    <div class="row"><input type="text" id="routine-note" placeholder="Notitie (optioneel)"></div>
+    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="saveRoutine()">Opslaan</button>
+  </div>
+</div>
+
 <!-- ADD SHOP ITEM MODAL -->
 <div id="modal-shop" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-shop')">
   <div class="modal">
@@ -336,6 +360,32 @@ function load(){
         {id:'persoonlijk',name:'Persoonlijk',color:'#7c3aed'},
         {id:'werk',name:'Werk',color:'#2563eb'},
         {id:'thuis',name:'Thuis',color:'#059669'}
+      ],
+      routines:[
+        {id:'r1',name:'Stofzuigen',freq:'wekelijks',cat:'huishouden',last:'',note:''},
+        {id:'r2',name:'Dweilen',freq:'wekelijks',cat:'huishouden',last:'',note:''},
+        {id:'r3',name:'Badkamer poetsen',freq:'wekelijks',cat:'huishouden',last:'',note:'Toilet, lavabo, douche'},
+        {id:'r4',name:'Keuken poetsen',freq:'wekelijks',cat:'huishouden',last:'',note:'Aanrecht, kookplaat, spoelbak'},
+        {id:'r5',name:'Stof afnemen',freq:'wekelijks',cat:'huishouden',last:'',note:''},
+        {id:'r6',name:'Wasgoed doen',freq:'wekelijks',cat:'huishouden',last:'',note:''},
+        {id:'r7',name:'Handdoeken verversen',freq:'2wekelijks',cat:'huishouden',last:'',note:''},
+        {id:'r8',name:'Lakens verversen',freq:'2wekelijks',cat:'huishouden',last:'',note:''},
+        {id:'r9',name:'Koelkast opruimen',freq:'2wekelijks',cat:'huishouden',last:'',note:'Verlopen producten weggooien'},
+        {id:'r10',name:'Vaatwasser reinigen',freq:'2wekelijks',cat:'huishouden',last:'',note:'Filter schoonmaken'},
+        {id:'r11',name:'Ramen poetsen',freq:'2wekelijks',cat:'huishouden',last:'',note:'Binnenkant'},
+        {id:'r12',name:'Oven reinigen',freq:'maandelijks',cat:'huishouden',last:'',note:''},
+        {id:'r13',name:'Wasmachine reinigen',freq:'maandelijks',cat:'huishouden',last:'',note:'Kuisbeurt draaien'},
+        {id:'r14',name:'Kalk verwijderen',freq:'maandelijks',cat:'huishouden',last:'',note:'Kranen en douchekoppen'},
+        {id:'r15',name:'Gordijnen wassen',freq:'maandelijks',cat:'huishouden',last:'',note:''},
+        {id:'r16',name:'Kasten opruimen',freq:'maandelijks',cat:'huishouden',last:'',note:''},
+        {id:'r17',name:'Terras vegen',freq:'maandelijks',cat:'tuin',last:'',note:''},
+        {id:'r18',name:'Rookmelders testen',freq:'maandelijks',cat:'huishouden',last:'',note:''}
+      ],
+      routineCats:[
+        {id:'huishouden',name:'Huishouden',color:'#7c3aed'},
+        {id:'persoonlijk',name:'Persoonlijk',color:'#059669'},
+        {id:'tuin',name:'Tuin',color:'#d97706'},
+        {id:'overig',name:'Overig',color:'#6b7280'}
       ]
     };
     if(!d)return def;
@@ -344,9 +394,21 @@ function load(){
       calendars:p.calendars||def.calendars,
       taakCats:p.taakCats||def.taakCats,
       todoCats:p.todoCats||def.todoCats,
+      routines:(p.routines&&p.routines.length)?p.routines:def.routines,
+      routineCats:p.routineCats||def.routineCats,
       storeLogos:p.storeLogos||{}
     };
-  }catch(e){return load();}
+  }catch(e){
+    console.error('Load error:',e);
+    const fb={events:[],todos:[],shops:{},stores:[]};
+    fb.storeLogos={};
+    fb.calendars=[{id:'eigen',name:'Mijn agenda',color:'#7c3aed',active:true,ical:'',gcalEvents:[]}];
+    fb.taakCats=[{id:'huishouden',name:'Huishouden',color:'#7c3aed'},{id:'overig',name:'Overig',color:'#6b7280'}];
+    fb.todoCats=[{id:'persoonlijk',name:'Persoonlijk',color:'#7c3aed'},{id:'werk',name:'Werk',color:'#2563eb'},{id:'thuis',name:'Thuis',color:'#059669'}];
+    fb.routines=[];
+    fb.routineCats=[{id:'huishouden',name:'Huishouden',color:'#7c3aed'},{id:'persoonlijk',name:'Persoonlijk',color:'#059669'},{id:'tuin',name:'Tuin',color:'#d97706'},{id:'overig',name:'Overig',color:'#6b7280'}];
+    return fb;
+  }
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
@@ -364,20 +426,20 @@ function showTab(name,btn){
   document.getElementById('panel-'+name).classList.add('active');
   btn.classList.add('active');
   curTab=name;
-  const titles={agenda:'Agenda',taken:'Taken',todo:'To-do',winkel:'Winkellijst',instellingen:'Instellingen'};
+  const titles={agenda:'Agenda',taken:'Routines',todo:'To-do',winkel:'Winkellijst',instellingen:'Instellingen'};
   document.getElementById('topbar-title').textContent=titles[name]||name;
   // Show sidebar only for agenda
   document.getElementById('sidebar').style.display=name==='agenda'?'flex':'none';
-  if(name==='agenda'){renderCalSidebar();renderCalendar();}
-  if(name==='taken')renderTaken();
-  if(name==='todo')renderTodo();
-  if(name==='winkel')renderWinkel();
-  if(name==='instellingen')renderSettings();
+  if(name==='agenda'){try{renderCalSidebar();renderCalendar();}catch(e){console.error(e);}}
+  if(name==='taken'){try{renderTaken();}catch(e){console.error(e);document.getElementById('panel-taken').innerHTML='<div class="empty">Fout bij laden. Probeer opnieuw.</div>';}}
+  if(name==='todo'){try{renderTodo();}catch(e){console.error(e);}}
+  if(name==='winkel'){try{renderWinkel();}catch(e){console.error(e);}}
+  if(name==='instellingen'){try{renderSettings();}catch(e){console.error(e);}}
 }
 
 function handleTopbarAdd(){
   if(curTab==='agenda')openAddEvent();
-  else if(curTab==='taken')openAddEvent();
+  else if(curTab==='taken')openAddRoutine();
   else if(curTab==='todo')openAddTodo();
   else if(curTab==='winkel')openAddStore();
 }
@@ -817,34 +879,154 @@ function addEvent(){
 }
 function delEvent(id){S.events=S.events.filter(e=>e.id!==id);save();renderCalendar();}
 
-/* ===== TAKEN ===== */
+/* ===== ROUTINES ===== */
+const FREQ_DAYS={dagelijks:1,wekelijks:7,'2wekelijks':14,'3wekelijks':21,maandelijks:30,kwartaal:90};
+const FREQ_L={dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal'};
+
+function openAddRoutine(){
+  document.getElementById('routine-modal-title').innerHTML='Routine toevoegen<button class="modal-close" onclick="closeModal(\'modal-routine\')">×</button>';
+  document.getElementById('routine-edit-id').value='';
+  document.getElementById('routine-name').value='';
+  document.getElementById('routine-note').value='';
+  document.getElementById('routine-last').value=new Date().toISOString().split('T')[0];
+  document.getElementById('routine-freq').value='wekelijks';
+  document.getElementById('routine-cat-sel').innerHTML=S.routineCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  openModal('modal-routine');
+}
+
+function openEditRoutine(id){
+  const r=S.routines.find(r=>r.id===id);if(!r)return;
+  document.getElementById('routine-modal-title').innerHTML='Routine bewerken<button class="modal-close" onclick="closeModal(\'modal-routine\')">×</button>';
+  document.getElementById('routine-edit-id').value=id;
+  document.getElementById('routine-name').value=r.name;
+  document.getElementById('routine-note').value=r.note||'';
+  document.getElementById('routine-last').value=r.last||'';
+  document.getElementById('routine-freq').value=r.freq||'wekelijks';
+  document.getElementById('routine-cat-sel').innerHTML=S.routineCats.map(c=>`<option value="${c.id}"${c.id===r.cat?' selected':''}>${c.name}</option>`).join('');
+  openModal('modal-routine');
+}
+
+function saveRoutine(){
+  const name=document.getElementById('routine-name').value.trim();if(!name)return;
+  const freq=document.getElementById('routine-freq').value;
+  const cat=document.getElementById('routine-cat-sel').value;
+  const last=document.getElementById('routine-last').value;
+  const note=document.getElementById('routine-note').value.trim();
+  const editId=document.getElementById('routine-edit-id').value;
+  if(editId){
+    const r=S.routines.find(r=>r.id===editId);
+    if(r){r.name=name;r.freq=freq;r.cat=cat;r.last=last;r.note=note;}
+  } else {
+    S.routines.push({id:Date.now()+'',name,freq,cat,last,note,done:false});
+  }
+  save();closeModal('modal-routine');renderTaken();
+}
+
+function markRoutineDone(id){
+  const r=S.routines.find(r=>r.id===id);
+  if(r){r.last=new Date().toISOString().split('T')[0];r.done=false;}
+  save();renderTaken();
+}
+
+function delRoutine(id){S.routines=S.routines.filter(r=>r.id!==id);save();renderTaken();}
+
+function getRoutineStatus(r){
+  if(!r.last)return{label:'Nog nooit gedaan',urgency:'overdue',daysLeft:-999};
+  const last=new Date(r.last+'T00:00:00');
+  const today=new Date();today.setHours(0,0,0,0);
+  const interval=FREQ_DAYS[r.freq]||7;
+  const next=new Date(last);next.setDate(last.getDate()+interval);
+  const daysLeft=Math.round((next-today)/86400000);
+  if(daysLeft<0)return{label:`${Math.abs(daysLeft)} dag${Math.abs(daysLeft)!==1?'en':''} te laat`,urgency:'overdue',daysLeft};
+  if(daysLeft===0)return{label:'Vandaag!',urgency:'today',daysLeft};
+  if(daysLeft<=3)return{label:`Over ${daysLeft} dag${daysLeft!==1?'en':''}`,urgency:'soon',daysLeft};
+  return{label:`Over ${daysLeft} dagen`,urgency:'ok',daysLeft};
+}
+
 function renderTaken(){
   const el=document.getElementById('panel-taken');
-  const today=new Date();today.setHours(0,0,0,0);
-  const items=[];
-  for(let i=0;i<30;i++){
-    const d=new Date(today);d.setDate(d.getDate()+i);
-    getEventsForDate(d.getFullYear(),d.getMonth(),d.getDate()).forEach(ev=>items.push({ev,date:new Date(d)}));
-  }
-  const wd=['zo','ma','di','wo','do','vr','za'];
-  let html=`<button class="btn btn-p" style="width:100%;margin-bottom:12px" onclick="openAddEvent()">＋ Taak toevoegen</button>`;
-  if(!items.length){html+='<div class="empty">Geen taken komende 30 dagen</div>';el.innerHTML=html;return;}
-  let lastDay='';
-  items.forEach(({ev,date})=>{
-    const dk=date.toDateString();
-    const isT=date.toDateString()===today.toDateString();
-    const lbl=isT?'Vandaag':`${wd[date.getDay()]} ${date.getDate()}/${date.getMonth()+1}`;
-    if(dk!==lastDay){html+=`<div class="lbl">${lbl}</div>`;lastDay=dk;}
-    html+=`<div class="card-w" style="border-left:4px solid ${ev.color||'#888'};padding:9px 11px">
-      <div style="font-weight:600;font-size:14px">${ev.title}</div>
-      <div style="display:flex;gap:5px;align-items:center;margin-top:3px;flex-wrap:wrap">
-        ${ev.time?`<span class="muted">${ev.time}</span>`:''}
-        ${ev.source==='gcal'?'<span class="tag" style="background:#e8f0fe;color:#1a56db;font-size:10px">Google</span>':''}
-        <span class="recur-tag">${RECUR_L[ev.type]||ev.type||''}</span>
-        ${!ev.source?`<button class="btn-d" style="margin-left:auto" onclick="delEvent('${ev.id}')">✕</button>`:''}
-      </div>
-    </div>`;
+  const urgencyColor={overdue:'var(--red)',today:'var(--amber)',soon:'var(--amber)',ok:'var(--green)'};
+  const urgencyBg={overdue:'#fee2e2',today:'#fef3c7',soon:'#fef9c3',ok:'#d1fae5'};
+
+  // Sort: overdue first, then by days left
+  const sorted=[...S.routines].sort((a,b)=>{
+    const sa=getRoutineStatus(a), sb=getRoutineStatus(b);
+    return sa.daysLeft-sb.daysLeft;
   });
+
+  // Group by category
+  const byCat={};
+  sorted.forEach(r=>{
+    if(!byCat[r.cat])byCat[r.cat]=[];
+    byCat[r.cat].push(r);
+  });
+
+  let html=`<button class="btn btn-p" style="width:100%;margin-bottom:12px;flex-shrink:0" onclick="openAddRoutine()">＋ Routine toevoegen</button>`;
+
+  if(!S.routines.length){
+    html+=`<div class="empty">
+      <div style="font-size:32px;margin-bottom:8px">🔄</div>
+      <div>Nog geen routines.</div>
+      <div style="font-size:12px;margin-top:4px">Voeg bv. "Planten water geven" of "Lakens verversen" toe.</div>
+    </div>`;
+    el.innerHTML=html;return;
+  }
+
+  S.routineCats.forEach(cat=>{
+    const routines=byCat[cat.id];
+    if(!routines||!routines.length)return;
+    html+=`<div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-shrink:0">
+        <div style="width:10px;height:10px;border-radius:50%;background:${cat.color}"></div>
+        <span style="font-weight:700;font-size:14px;color:${cat.color}">${cat.name}</span>
+        <span class="badge" style="background:${cat.color}">${routines.length}</span>
+      </div>`;
+    routines.forEach(r=>{
+      const st=getRoutineStatus(r);
+      const col=urgencyColor[st.urgency];
+      const bg=urgencyBg[st.urgency];
+      html+=`<div class="card-w" style="border-left:4px solid ${cat.color};padding:10px 12px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:14px">${r.name}</div>
+            ${r.note?`<div class="muted" style="margin-top:2px">${r.note}</div>`:''}
+            <div style="display:flex;gap:6px;align-items:center;margin-top:5px;flex-wrap:wrap">
+              <span class="recur-tag">${FREQ_L[r.freq]||r.freq}</span>
+              <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${bg};color:${col}">${st.label}</span>
+              ${r.last?`<span class="muted">Laatste keer: ${new Date(r.last+'T00:00:00').toLocaleDateString('nl-BE')}</span>`:''}
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
+            <button onclick="markRoutineDone('${r.id}')" style="border:none;background:var(--green);color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">✓ Gedaan</button>
+            <div style="display:flex;gap:4px">
+              <button onclick="openEditRoutine('${r.id}')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:14px;padding:3px">✏️</button>
+              <button onclick="delRoutine('${r.id}')" style="border:none;background:transparent;color:var(--red);cursor:pointer;font-size:13px;padding:3px">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    });
+    html+='</div>';
+  });
+
+  // Uncategorized
+  const uncatRoutines=sorted.filter(r=>!S.routineCats.find(c=>c.id===r.cat));
+  if(uncatRoutines.length){
+    html+=`<div class="lbl">Overig</div>`;
+    uncatRoutines.forEach(r=>{
+      const st=getRoutineStatus(r);
+      const col=urgencyColor[st.urgency];
+      const bg=urgencyBg[st.urgency];
+      html+=`<div class="card-w" style="padding:10px 12px;margin-bottom:6px">
+        <div style="font-weight:600">${r.name}</div>
+        <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${bg};color:${col}">${st.label}</span>
+        <button onclick="markRoutineDone('${r.id}')" style="border:none;background:var(--green);color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;margin-left:8px">✓ Gedaan</button>
+        <button onclick="openEditRoutine('${r.id}')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;margin-left:4px">✏️</button>
+        <button onclick="delRoutine('${r.id}')" style="border:none;background:transparent;color:var(--red);cursor:pointer;font-size:13px">✕</button>
+      </div>`;
+    });
+  }
+
   el.innerHTML=html;
 }
 
@@ -1099,7 +1281,18 @@ function renderSettings(){
     <button class="btn btn-p btn-sm" style="width:100%;margin-top:-4px" onclick="openAddCalModal()">＋ Agenda toevoegen</button>
   </div>
   <div class="st-sec">
-    <div class="st-title">Categorieën — Taken</div>
+    <div class="st-title">Categorieën — Routines</div>
+    <div class="card" id="routine-cats-manage"></div>
+    <div class="card" style="margin-top:-4px">
+      <div class="row">
+        <input type="text" id="new-rc-name" placeholder="Nieuwe categorie...">
+        <input type="color" id="new-rc-color" value="#059669" style="width:40px;flex:0 0 40px;height:34px;padding:2px;border-radius:7px;border:1px solid var(--border2)">
+        <button class="btn btn-p btn-sm" onclick="addRoutineCat()">＋</button>
+      </div>
+    </div>
+  </div>
+  <div class="st-sec">
+    <div class="st-title">Categorieën — Agenda</div>
     <div class="card" id="taak-cats-manage"></div>
     <div class="card" style="margin-top:-4px">
       <div class="row">
@@ -1137,7 +1330,7 @@ function renderSettings(){
     </div>
   </div>`;
   el.innerHTML=html;
-  renderCalsManage();renderTaakCatsManage();renderTodoCatsManage();
+  renderCalsManage();renderRoutineCatsManage();renderTaakCatsManage();renderTodoCatsManage();
 }
 
 function renderCalsManage(){
@@ -1159,6 +1352,30 @@ function renderCalsManage(){
     </div>`).join('');
 }
 function updateCalColor(id,color){const c=S.calendars.find(c=>c.id===id);if(c){c.color=color;save();renderCalSidebar();}}
+
+function renderRoutineCatsManage(){
+  const el=document.getElementById('routine-cats-manage');if(!el)return;
+  el.innerHTML=S.routineCats.map(c=>`
+    <div class="st-row">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:12px;height:12px;border-radius:50%;background:${c.color}"></div>
+        <span>${c.name}</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="color" value="${c.color}" onchange="updateRCColor('${c.id}',this.value)" style="width:30px;height:26px;border:none;border-radius:6px;cursor:pointer;background:none">
+        <button class="btn-d" onclick="delRoutineCat('${c.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+function addRoutineCat(){
+  const name=document.getElementById('new-rc-name').value.trim();
+  const color=document.getElementById('new-rc-color').value;
+  if(!name)return;
+  S.routineCats.push({id:Date.now()+'',name,color});save();
+  renderRoutineCatsManage();document.getElementById('new-rc-name').value='';
+}
+function delRoutineCat(id){S.routineCats=S.routineCats.filter(c=>c.id!==id);save();renderRoutineCatsManage();}
+function updateRCColor(id,color){const c=S.routineCats.find(c=>c.id===id);if(c){c.color=color;save();}}
 
 function renderTaakCatsManage(){
   const el=document.getElementById('taak-cats-manage');if(!el)return;
@@ -1215,11 +1432,13 @@ function exportData(){
 function clearAll(){if(confirm('Alles wissen?')){localStorage.removeItem(KEY);location.reload();}}
 
 // Init
-renderCalSidebar();
-renderCalendar();
+try{
+  renderCalSidebar();
+  renderCalendar();
+} catch(e){console.error('Init error:',e);}
 // Auto-refresh Google Agenda every 30 min
-setInterval(refreshAllIcal, 30*60*1000);
-refreshAllIcal();
+setInterval(()=>{try{refreshAllIcal();}catch(e){}}, 30*60*1000);
+try{refreshAllIcal();}catch(e){}
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
