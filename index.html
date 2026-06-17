@@ -2,297 +2,184 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Planr">
-<meta name="theme-color" content="#f5f0ff">
+<meta name="theme-color" content="#4a7c3f">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Planr</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#fff;--bg2:#f7f3ff;--bg3:#ede8fa;
-  --text:#1a1030;--text2:#6b5f8a;--text3:#a89fbe;
-  --border:#e4ddf5;--border2:#c9bfe8;
-  --accent:#7c3aed;--accent2:#ede9fe;
-  --green:#059669;--red:#dc2626;--amber:#d97706;--blue:#2563eb;
-}
-@media(prefers-color-scheme:dark){:root{
-  --bg:#0e0a1a;--bg2:#180f2e;--bg3:#221840;
-  --text:#ede8ff;--text2:#9080b8;--text3:#5a4878;
-  --border:#2a1f45;--border2:#3d2f60;
-  --accent:#a78bfa;--accent2:#2d1f5e;
-  --green:#10b981;--red:#f87171;--amber:#fbbf24;--blue:#60a5fa;
-}}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;color:var(--text);background:var(--bg);height:100dvh;overflow:hidden;display:flex;flex-direction:column}
-
-/* TOP BAR */
-.topbar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;min-height:52px}
-.topbar-title{font-size:17px;font-weight:700;flex:1}
-.topbar-btn{width:36px;height:36px;border:1px solid var(--border2);border-radius:10px;background:transparent;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-
-/* MAIN LAYOUT */
-.main{display:flex;flex:1;overflow:hidden}
-
-/* SIDEBAR */
-.sidebar{width:130px;flex-shrink:0;border-right:1px solid var(--border);background:var(--bg2);overflow-y:auto;display:flex;flex-direction:column;transition:width .2s}
-.sidebar.collapsed{width:0;overflow:hidden}
-.sidebar-section{padding:10px 8px 4px;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
-.cal-item{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:8px;margin:1px 4px;cursor:pointer;user-select:none}
-.cal-item:active{background:var(--bg3)}
-.cal-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:2px solid transparent}
-.cal-dot.inactive{background:transparent!important}
-.cal-name{font-size:12px;font-weight:500;line-height:1.2;color:var(--text);word-break:break-word}
-.add-cal-btn{display:flex;align-items:center;gap:6px;padding:7px 8px;border-radius:8px;margin:2px 4px;cursor:pointer;color:var(--accent);font-size:12px;font-weight:600;border:none;background:transparent;width:calc(100% - 8px);text-align:left}
-.add-cal-btn:active{background:var(--accent2)}
-
-/* CONTENT */
-.content{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch}
-
-/* BOTTOM NAV */
-.tabs-bar{display:flex;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;padding-bottom:max(env(safe-area-inset-bottom), 12px)}
-.tab-btn{flex:1;padding:10px 0 6px;border:none;background:transparent;color:var(--text3);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit}
-.tab-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.tab-btn.active{color:var(--accent);font-weight:700}
-
-/* PANELS */
-.panel{display:none;flex-direction:column;flex:1}.panel.active{display:flex}
-
-/* CALENDAR */
-.view-tabs{display:flex;gap:3px;margin-bottom:10px;background:var(--bg3);border-radius:10px;padding:3px}
-.view-tab{flex:1;padding:5px 2px;border:none;background:transparent;border-radius:8px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;font-family:inherit}
-.view-tab.active{background:var(--bg);color:var(--accent)}
-.cal-nav{display:flex;align-items:center;gap:6px;margin-bottom:10px}
-.cal-nav h2{flex:1;text-align:center;font-size:15px;font-weight:700}
-.nav-btn{width:30px;height:30px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
-.today-btn{padding:5px 10px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--accent);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr;gap:1px;margin-bottom:10px;flex:1}
-.cal-dn{text-align:center;font-size:9px;color:var(--text3);font-weight:700;padding:3px 0;text-transform:uppercase}
-.cal-day{border:1px solid var(--border);border-radius:6px;padding:2px;background:var(--bg);cursor:pointer;overflow:hidden;min-height:0}
-.cal-day:active{background:var(--bg2)}
-.cal-day.today{border-color:var(--accent);border-width:2px}
-.cal-day.other{opacity:.2}
-.cal-num{font-size:10px;color:var(--text2);font-weight:600;line-height:1.4}
-.cal-day.today .cal-num{color:var(--accent);font-weight:800}
-.ev-pill{font-size:8px;padding:1px 3px;border-radius:3px;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-weight:700;line-height:1.4}
-.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;flex:1}
-.week-col{border:1px solid var(--border);border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
-.week-head{text-align:center;padding:5px 2px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
-.week-head.today-h{background:var(--accent2)}
-.week-dn{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase}
-.week-num{font-size:14px;font-weight:700}
-.week-head.today-h .week-num{color:var(--accent)}
-.week-body{padding:3px;flex:1;overflow-y:auto}
-.week-ev{font-size:9px;padding:2px 3px;border-radius:3px;margin-bottom:2px;font-weight:700;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-.day-ev-card{border-radius:10px;padding:10px 12px;border-left:4px solid;margin-bottom:8px}
-.year-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.mini-month{background:var(--bg2);border-radius:8px;padding:6px;border:1px solid var(--border)}
-.mini-title{font-size:9px;font-weight:700;text-align:center;margin-bottom:3px;color:var(--text2)}
-.mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
-.mini-cell{height:11px;border-radius:2px;font-size:6px;text-align:center;line-height:11px;color:var(--text3)}
-.mini-cell.m-ev{background:var(--accent2);color:var(--accent);font-weight:700}
-.mini-cell.m-today{background:var(--accent);color:#fff;font-weight:700}
-.recur-tag{font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 6px;border-radius:10px;white-space:nowrap}
-
-/* TODO / TAKEN */
-.card{background:var(--bg2);border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid var(--border)}
-.card-w{background:var(--bg);border-radius:12px;padding:12px;margin-bottom:10px;border:1px solid var(--border)}
-.item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
-.item:last-child{border-bottom:none}
-.lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin:12px 0 6px}
-.tag{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
-.muted{font-size:11px;color:var(--text3)}
-.circle{width:24px;height:24px;border-radius:50%;border:2px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.circle.done{background:var(--green);border-color:var(--green)}
-.sq{width:20px;height:20px;border-radius:4px;border:2px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sq.got{background:var(--green);border-color:var(--green)}
-.chksvg{display:none;width:11px;height:11px;stroke:white;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-.circle.done .chksvg,.sq.got .chksvg{display:block}
-.empty{text-align:center;padding:28px 12px;color:var(--text3);font-size:13px}
-.badge{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 4px;border-radius:9px;font-size:10px;font-weight:700;background:var(--accent);color:#fff}
-
-/* EISENHOWER */
-.ei-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
-.ei-q{border-radius:10px;padding:8px;min-height:90px;border:1px solid}
-.ei-qt{font-size:10px;font-weight:700;margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
-.ei-it{font-size:11px;padding:3px 5px;border-radius:5px;margin-bottom:2px;background:rgba(255,255,255,.25);cursor:pointer}
-
-/* SHOP */
-.shop-card{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px}
-.shop-head{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;background:var(--bg2)}
-.shop-head:active{opacity:.7}
-.shop-logo{width:32px;height:32px;border-radius:7px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;overflow:hidden}
-.shop-logo img{width:100%;height:100%;object-fit:cover}
-.shop-nm{font-weight:700;font-size:14px;flex:1}
-.shop-body{padding:10px 12px;background:var(--bg);display:none}
-.shop-body.open{display:block}
-.shop-cat-h{font-size:11px;font-weight:700;color:var(--text2);padding:5px 0 2px;border-bottom:1px solid var(--border);margin-top:6px}
-.shop-row{display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid var(--border)}
-.shop-row:last-child{border-bottom:none}
-
-/* SETTINGS */
-.st-sec{margin-bottom:18px}
-.st-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px}
-.st-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
-.st-row:last-child{border-bottom:none}
-.st-lbl{font-size:14px;font-weight:500}
-.st-sub{font-size:11px;color:var(--text2);margin-top:1px}
-
-/* BUTTONS */
-.btn{padding:9px 14px;border:1px solid var(--border2);border-radius:9px;background:var(--bg);color:var(--text);font-size:14px;cursor:pointer;font-family:inherit;white-space:nowrap}
-.btn:active{opacity:.7}
-.btn-p{background:var(--accent);color:#fff;border-color:var(--accent)}
-.btn-sm{padding:5px 10px;font-size:12px;border-radius:7px}
-.btn-d{color:var(--red);border:none;background:transparent;padding:5px 7px;cursor:pointer;font-size:13px}
-.row{display:flex;gap:7px;margin-bottom:8px;align-items:center}
-.row>*{flex:1}.row>.btn{flex:0 0 auto}
-input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--border2);border-radius:9px;background:var(--bg);color:var(--text);font-size:14px;font-family:inherit;appearance:none;-webkit-appearance:none}
-input:focus,select:focus{outline:none;border-color:var(--accent)}
-
-/* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end;justify-content:center}
-.modal{background:var(--bg);border-radius:18px 18px 0 0;padding:18px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto}
-.modal-t{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
-.modal-close{font-size:22px;border:none;background:none;color:var(--text2);cursor:pointer;line-height:1;padding:0 4px}
+  :root {
+    --bg:#f4f8f1;--bg2:#e8f0e2;--bg3:#d4e6c8;--text:#2d4a1e;--text2:#5a7a45;
+    --text3:#8aaa75;--accent:#4a7c3f;--accent2:#c8e6b8;--red:#9b4a4a;
+    --orange:#8b6914;--border:#c8dab8;--card:#ffffff;--shadow:rgba(74,124,63,0.10);--nav-h:64px;
+  }
+  [data-theme="dark"] {
+    --bg:#1a2416;--bg2:#212f1a;--bg3:#2a3d20;--text:#d4e6c8;--text2:#8aaa75;
+    --text3:#5a7a45;--accent:#6ab05f;--accent2:#2a3d20;--border:#2a3d20;--card:#212f1a;--shadow:rgba(0,0,0,0.3);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;overscroll-behavior:none}
+  #app{display:flex;flex-direction:column;height:100%;height:100dvh}
+  #main{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
+  #nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;z-index:100;box-shadow:0 -2px 12px var(--shadow)}
+  .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:none;cursor:pointer;color:var(--text3);padding:8px 4px;transition:color .15s;font-size:10px;font-weight:500;letter-spacing:.3px}
+  .nav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .nav-btn.active{color:var(--accent)}
+  .nav-btn.active svg{stroke-width:2.2}
+  .page-header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 16px 12px;display:flex;align-items:center;gap:10px}
+  .page-title{font-size:22px;font-weight:700;color:var(--text);flex:1}
+  .header-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--accent);transition:background .15s}
+  .header-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .section{margin:12px 0}
+  .section-header{padding:6px 16px 4px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .card-list{margin:0 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)}
+  .row{display:flex;align-items:flex-start;padding:12px 14px;gap:10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
+  .row:last-child{border-bottom:none}
+  .row:active{background:var(--bg2)}
+  .row-accent{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0}
+  .row-content{flex:1;min-width:0}
+  .row-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+  .row-sub{font-size:12px;color:var(--text3);margin-bottom:4px}
+  .chip{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin-right:4px;margin-top:2px;font-weight:500}
+  .chip-green{background:var(--bg3);color:var(--text2)}
+  .chip-red{background:rgba(155,74,74,.12);color:var(--red)}
+  .chip-orange{background:rgba(139,105,20,.12);color:var(--orange)}
+  .check-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0}
+  .check-btn svg{width:26px;height:26px;stroke:var(--accent);fill:none;stroke-width:1.7}
+  .empty{padding:40px 20px;text-align:center}
+  .empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
+  .empty-title{font-size:17px;font-weight:600;color:var(--text);margin-bottom:4px}
+  .empty-sub{font-size:14px;color:var(--text3)}
+  .seg{display:flex;background:var(--bg2);border-radius:10px;padding:2px;margin:10px 16px}
+  .seg-btn{flex:1;padding:6px;border:none;background:none;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s}
+  .seg-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px var(--shadow);font-weight:600}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s}
+  .overlay.open{opacity:1;pointer-events:all}
+  .sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom);transform:translateY(100%);transition:transform .25s cubic-bezier(.25,.46,.45,.94)}
+  .overlay.open .sheet{transform:translateY(0)}
+  .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 4px}
+  .sheet-title{font-size:18px;font-weight:700;color:var(--text);padding:8px 16px 14px}
+  .form-group{padding:0 16px;margin-bottom:12px}
+  .form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
+  .form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:15px;outline:none;transition:border-color .15s;font-family:inherit}
+  .form-input:focus{border-color:var(--accent)}
+  .form-select{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:15px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238aaa75' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer;font-family:inherit}
+  .form-toggle{display:flex;align-items:center;justify-content:space-between;padding:11px 13px}
+  .toggle-switch{width:44px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
+  .toggle-switch.on{background:var(--accent)}
+  .toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:white;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .toggle-switch.on::after{transform:translateX(18px)}
+  .sheet-actions{display:flex;gap:8px;padding:12px 16px 8px}
+  .btn{padding:13px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;flex:1;transition:opacity .15s}
+  .btn-primary{background:var(--accent);color:white}
+  .btn-secondary{background:var(--bg2);color:var(--text2)}
+  .btn:active{opacity:.8}
+  .btn:disabled{opacity:.45;cursor:default}
+  .matrix{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+  .quad{background:var(--card);border-radius:12px;padding:10px;border:1.5px solid var(--border);min-height:110px}
+  .quad-title{font-size:12px;font-weight:700;margin-bottom:2px}
+  .quad-sub{font-size:10px;color:var(--text3);margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .quad-item{font-size:11px;color:var(--text);padding:4px 6px;border-radius:6px;margin-bottom:3px;cursor:pointer}
+  .store-header{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--card);user-select:none}
+  .store-name{font-size:15px;font-weight:700;color:var(--text);flex:1}
+  .store-badge{background:var(--accent);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
+  .store-body{background:var(--card)}
+  .shop-cat-label{padding:6px 14px 3px;font-size:11px;color:var(--text3);font-weight:600}
+  .shop-item-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--bg2)}
+  .shop-item-name{flex:1;font-size:14px;color:var(--text)}
+  .shop-item-name.got{text-decoration:line-through;color:var(--text3)}
+  .shop-qty{font-size:12px;color:var(--text3)}
+  .check-sq{width:22px;height:22px;border:2px solid var(--border);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+  .check-sq.checked{background:var(--accent);border-color:var(--accent)}
+  .check-sq.checked::after{content:'✓';color:white;font-size:13px;font-weight:700}
+  .store-add-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--accent);font-size:14px;cursor:pointer;border-bottom:1px solid var(--bg2)}
+  .store-clear-btn{padding:8px 14px;color:var(--red);font-size:13px;cursor:pointer;text-align:center}
+  .settings-section{margin:16px 12px 0;background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px var(--shadow)}
+  .settings-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border)}
+  .settings-row:last-child{border-bottom:none}
+  .settings-label{flex:1;font-size:14px;color:var(--text)}
+  .cat-color-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0}
+  .settings-del{background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:2px 6px}
+  .add-cat-row{display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--accent);cursor:pointer;font-size:14px;font-weight:500}
+  #auth-screen{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+  .auth-logo{font-size:56px;margin-bottom:8px}
+  .auth-title{font-size:32px;font-weight:800;color:var(--text);margin-bottom:6px}
+  .auth-sub{font-size:15px;color:var(--text2);margin-bottom:36px;text-align:center}
+  .google-btn{display:flex;align-items:center;gap:12px;padding:14px 24px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:16px;font-weight:600;color:var(--text);cursor:pointer;box-shadow:0 2px 8px var(--shadow)}
+  #loading{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+  .spinner{width:32px;height:32px;border:3px solid var(--bg3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .user-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
+  .hidden{display:none!important}
+  input[type=color]{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;background:none;padding:0}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <button class="topbar-btn" onclick="toggleSidebar()" id="sidebar-toggle" aria-label="Agenda's">☰</button>
-  <div class="topbar-title" id="topbar-title">Agenda</div>
-  <button class="topbar-btn" onclick="handleTopbarAdd()" aria-label="Toevoegen">＋</button>
+<div id="loading">
+  <div style="font-size:40px">🌿</div>
+  <div class="spinner"></div>
 </div>
 
-<div class="main">
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-section">Mijn agenda's</div>
-    <div id="cal-list"></div>
-    <button class="add-cal-btn" onclick="openAddCalModal()">＋ Agenda</button>
-    <div style="flex:1"></div>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content" id="content">
-    <div id="panel-agenda" class="panel active"></div>
-    <div id="panel-taken" class="panel"></div>
-    <div id="panel-todo" class="panel"></div>
-    <div id="panel-winkel" class="panel"></div>
-    <div id="panel-instellingen" class="panel"></div>
-  </div>
+<div id="auth-screen" class="hidden">
+  <div class="auth-logo">🌿</div>
+  <div class="auth-title">Planr</div>
+  <div class="auth-sub">Jouw persoonlijke planner.<br>Log in om te starten.</div>
+  <button class="google-btn" onclick="signInGoogle()">
+    <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20H24v8h11.3C33.6 34 29.3 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l5.7-5.7C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.1-2.7-.4-4z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.1 19 12 24 12c3.1 0 5.9 1.1 8.1 2.9l5.7-5.7C34.5 5.1 29.5 3 24 3 16.3 3 9.7 7.9 6.3 14.7z"/><path fill="#4CAF50" d="M24 45c5.2 0 10-2 13.6-5.2l-6.3-5.2C29.3 36.2 26.8 37 24 37c-5.2 0-9.6-3.4-11.2-8H6.3C9.6 38.5 16.3 45 24 45z"/><path fill="#1976D2" d="M43.6 20H24v8h11.3c-.7 2.1-2.1 3.9-3.9 5.2l6.3 5.2C41.5 35.2 44 30 44 24c0-1.3-.1-2.7-.4-4z"/></svg>
+    Inloggen met Google
+  </button>
 </div>
 
-<nav class="tabs-bar">
-  <button class="tab-btn active" onclick="showTab('agenda',this)">
-    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    Agenda
-  </button>
-  <button class="tab-btn" onclick="showTab('taken',this)">
-    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><polyline points="12 6 12 12 16 14"/></svg>
-    Routines
-  </button>
-  <button class="tab-btn" onclick="showTab('todo',this)">
-    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
-    To-do
-  </button>
-  <button class="tab-btn" onclick="showTab('winkel',this)">
-    <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-    Winkel
-  </button>
-  <button class="tab-btn" onclick="showTab('instellingen',this)">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-    Instellingen
-  </button>
-</nav>
+<div id="app" class="hidden">
+  <div id="main">
+    <div id="page-routines" class="hidden"></div>
+    <div id="page-todos" class="hidden"></div>
+    <div id="page-winkellijst" class="hidden"></div>
+    <div id="page-instellingen" class="hidden"></div>
+  </div>
+  <nav id="nav">
+    <button class="nav-btn active" onclick="showPage('routines')" id="nav-routines">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><polyline points="12 6 12 12 16 14"/></svg>
+      Routines
+    </button>
+    <button class="nav-btn" onclick="showPage('todos')" id="nav-todos">
+      <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      To-do
+    </button>
+    <button class="nav-btn" onclick="showPage('winkellijst')" id="nav-winkellijst">
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+      Winkel
+    </button>
+    <button class="nav-btn" onclick="showPage('instellingen')" id="nav-instellingen">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Instellingen
+    </button>
+  </nav>
+</div>
 
-<!-- ADD CALENDAR MODAL -->
-<div id="modal-cal" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-cal')">
-  <div class="modal">
-    <div class="modal-t">Agenda toevoegen<button class="modal-close" onclick="closeModal('modal-cal')">×</button></div>
-    <div class="row"><input type="text" id="cal-name-input" placeholder="Naam (bv: Werk, Privé...)"></div>
-    <div class="row" style="align-items:center">
-      <label style="font-size:13px;color:var(--text2);flex:0 0 auto">Kleur:</label>
-      <input type="color" id="cal-color-input" value="#7c3aed" style="width:44px;height:36px;flex:0 0 44px;padding:2px;border-radius:8px;border:1px solid var(--border2)">
-      <div style="flex:1"></div>
+<!-- Routine modal -->
+<div class="overlay" id="modal-routine">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="routine-modal-title">Routine toevoegen</div>
+    <div class="form-group">
+      <label class="form-label">Naam</label>
+      <input class="form-input" id="r-name" placeholder="Bijv. Stofzuigen" type="text">
     </div>
-    <div class="lbl" style="margin-top:8px">Google Agenda (optioneel)</div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Plak hier de iCal-link van Google Agenda om afspraken te synchroniseren.</div>
-    <div class="row"><input type="url" id="cal-ical-input" placeholder="https://calendar.google.com/calendar/ical/..."></div>
-    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="addCalendar()">Toevoegen</button>
-  </div>
-</div>
-
-<!-- ADD EVENT MODAL -->
-<div id="modal-event" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-event')">
-  <div class="modal">
-    <div class="modal-t">Taak toevoegen<button class="modal-close" onclick="closeModal('modal-event')">×</button></div>
-    <div class="row"><input type="text" id="ev-title" placeholder="Titel..."></div>
-    <div class="row">
-      <input type="date" id="ev-date" style="flex:1">
-      <input type="time" id="ev-time" placeholder="Start" style="flex:1">
-      <input type="time" id="ev-endtime" placeholder="Einde" style="flex:1">
+    <div class="form-group">
+      <label class="form-label">Notitie</label>
+      <input class="form-input" id="r-note" placeholder="Optioneel" type="text">
     </div>
-    <div class="row"><select id="ev-type" onchange="toggleCustomDays()">
-      <option value="eenmalig">Eenmalig</option>
-      <option value="dagelijks">Dagelijks</option>
-      <option value="wekelijks">Wekelijks</option>
-      <option value="2wekelijks">Elke 2 weken</option>
-      <option value="3wekelijks">Elke 3 weken</option>
-      <option value="maandelijks">Maandelijks</option>
-      <option value="eerste-zondag">Eerste zondag v/d maand</option>
-      <option value="custom-days">Specifieke dagen</option>
-    </select></div>
-    <div id="custom-days-picker" style="display:none;margin-bottom:8px">
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">
-        <label style="display:flex;align-items:center;gap:3px;font-size:13px"><input type="checkbox" value="1" class="dcb"> Ma</label>
-        <label style="display:flex;align-items:center;gap:3px;font-size:13px"><input type="checkbox" value="2" class="dcb"> Di</label>
-        <label style="display:flex;align-items:center;gap:3px;font-size:13px"><input type="checkbox" value="3" class="dcb"> Wo</label>
-        <label style="display:flex;align-items:center;gap:3px;font-size:13px"><input type="checkbox" value="4" class="dcb"> Do</label>
-        <label style="display:flex;align-items:center;gap:3px;font-size:13px"><input type="checkbox" value="5" class="dcb"> Vr</label>
-        <label style="display:flex;align-items:center;gap:3px;font-size:13px"><input type="checkbox" value="6" class="dcb"> Za</label>
-        <label style="display:flex;align-items:center;gap:3px;font-size:13px"><input type="checkbox" value="0" class="dcb"> Zo</label>
-      </div>
-      <select id="day-interval"><option value="1">Elke week</option><option value="2">Elke 2 weken</option><option value="3">Elke 3 weken</option></select>
-    </div>
-    <div class="row"><select id="ev-cal-select"></select></div>
-    <div class="row"><select id="ev-taakcat-select"></select></div>
-    <div class="row"><input type="text" id="ev-reminder" placeholder="Herinnering (bv: 30 min voor)"></div>
-    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="addEvent()">Toevoegen</button>
-  </div>
-</div>
-
-<!-- ADD TODO MODAL -->
-<div id="modal-todo" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-todo')">
-  <div class="modal">
-    <div class="modal-t" id="todo-modal-title">To-do toevoegen<button class="modal-close" onclick="closeModal('modal-todo')">×</button></div>
-    <input type="hidden" id="todo-edit-id">
-    <div class="row"><input type="text" id="todo-txt" placeholder="Taak..."></div>
-    <div class="row">
-      <select id="todo-prio"><option value="normaal">Normaal</option><option value="hoog">Hoog prioriteit</option><option value="laag">Laag</option></select>
-      <select id="todo-urgent"><option value="niet-urgent">Niet urgent</option><option value="urgent">Urgent</option></select>
-    </div>
-    <div class="row"><select id="todo-cat-sel"></select></div>
-    <div class="row"><input type="text" id="todo-tags" placeholder="Tags (komma-gescheiden, bv: creatief, admin)"></div>
-    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="saveTodo()">Opslaan</button>
-  </div>
-</div>
-
-<!-- ADD/EDIT ROUTINE MODAL -->
-<div id="modal-routine" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-routine')">
-  <div class="modal">
-    <div class="modal-t" id="routine-modal-title">Routine toevoegen<button class="modal-close" onclick="closeModal('modal-routine')">×</button></div>
-    <input type="hidden" id="routine-edit-id">
-    <div class="row"><input type="text" id="routine-name" placeholder="Naam (bv: Handdoeken verversen)"></div>
-    <div class="row">
-      <select id="routine-freq" onchange="updateNextDateFromFreq()">
+    <div class="form-group">
+      <label class="form-label">Frequentie</label>
+      <select class="form-select" id="r-freq">
         <option value="dagelijks">Dagelijks</option>
-        <option value="wekelijks">Wekelijks</option>
+        <option value="wekelijks" selected>Wekelijks</option>
         <option value="2wekelijks">Elke 2 weken</option>
         <option value="3wekelijks">Elke 3 weken</option>
         <option value="maandelijks">Maandelijks</option>
@@ -300,1544 +187,394 @@ input:focus,select:focus{outline:none;border-color:var(--accent)}
         <option value="jaarlijks">Jaarlijks</option>
         <option value="aangepast">Aangepaste datum</option>
       </select>
-      <select id="routine-cat-sel"></select>
     </div>
-
-    <!-- Laatste keer gedaan -->
-    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">Laatste keer gedaan:</div>
-    <div class="row" style="margin-bottom:4px">
-      <input type="date" id="routine-last" onchange="updateNextDateFromFreq()">
-      <button class="btn btn-sm" onclick="setLastToday()" style="white-space:nowrap">Vandaag</button>
+    <div class="form-group hidden" id="r-custom-date-group">
+      <label class="form-label">Volgende keer</label>
+      <input class="form-input" id="r-next-date" type="date">
     </div>
-
-    <!-- Volgende datum (aangepast of berekend) -->
-    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:4px">Volgende keer gepland:</div>
-    <div class="row" style="margin-bottom:2px">
-      <input type="date" id="routine-next" placeholder="Kies datum...">
-      <button class="btn btn-sm" onclick="openMiniCal()" style="white-space:nowrap">📅 Kies</button>
+    <div class="form-group">
+      <label class="form-label">Categorie</label>
+      <select class="form-select" id="r-cat"></select>
     </div>
-    <div id="mini-cal-container" style="display:none;margin-bottom:10px"></div>
-    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Bij "Aangepaste datum" kies je zelf wanneer het de volgende keer moet.</div>
-
-    <div class="row"><input type="text" id="routine-note" placeholder="Notitie (optioneel)"></div>
-    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="saveRoutine()">Opslaan</button>
+    <div class="form-group">
+      <label class="form-label">Laatste keer gedaan</label>
+      <input class="form-input" id="r-last-done" type="date">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-routine')">Annuleer</button>
+      <button class="btn btn-primary" onclick="saveRoutine()">Opslaan</button>
+    </div>
+    <div style="height:8px"></div>
   </div>
 </div>
 
-<!-- ADD SHOP ITEM MODAL -->
-<div id="modal-shop" class="overlay" style="display:none" onclick="if(event.target===this)closeModal('modal-shop')">
-  <div class="modal">
-    <div class="modal-t" id="shop-modal-t">Product toevoegen<button class="modal-close" onclick="closeModal('modal-shop')">×</button></div>
-    <div class="row"><input type="text" id="shop-item-nm" placeholder="Product..."></div>
-    <div class="row">
-      <input type="text" id="shop-qty" placeholder="Hoeveelheid" style="flex:1">
-      <select id="shop-cat-sel" style="flex:2">
-        <option value="groenten">🥦 Groenten</option><option value="fruit">🍎 Fruit</option>
-        <option value="vlees">🥩 Vlees</option><option value="vis">🐟 Vis</option>
-        <option value="zuivel">🧀 Zuivel</option><option value="brood">🍞 Brood</option>
-        <option value="droog">🥫 Droog</option><option value="drank">🧃 Drank</option>
-        <option value="diepvries">❄️ Diepvries</option><option value="hygiëne">🧴 Hygiëne</option>
+<!-- Todo modal -->
+<div class="overlay" id="modal-todo">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="todo-modal-title">To-do toevoegen</div>
+    <div class="form-group">
+      <label class="form-label">Omschrijving</label>
+      <input class="form-input" id="t-text" placeholder="Wat moet er gedaan worden?" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notities</label>
+      <textarea class="form-input" id="t-notes" placeholder="Optioneel" rows="2" style="resize:none"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Prioriteit</label>
+      <div class="seg" style="margin:0">
+        <button class="seg-btn" id="prio-laag" onclick="setPrio('laag')">Laag</button>
+        <button class="seg-btn active" id="prio-normaal" onclick="setPrio('normaal')">Normaal</button>
+        <button class="seg-btn" id="prio-hoog" onclick="setPrio('hoog')">Hoog</button>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:10px">
+      <div style="background:var(--card);border:1.5px solid var(--border);border-radius:10px">
+        <div class="form-toggle">
+          <span style="font-size:14px;color:var(--text)">Urgent</span>
+          <button class="toggle-switch" id="t-urgent-toggle" onclick="toggleUrgent()"></button>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categorie</label>
+      <select class="form-select" id="t-cat"></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tags <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)">(komma-gescheiden)</span></label>
+      <input class="form-input" id="t-tags" placeholder="bv: creatief, admin" type="text">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-todo')">Annuleer</button>
+      <button class="btn btn-primary" onclick="saveTodo()">Opslaan</button>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- Store modal -->
+<div class="overlay" id="modal-store">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Winkel toevoegen</div>
+    <div class="form-group">
+      <label class="form-label">Naam</label>
+      <input class="form-input" id="s-name" placeholder="Bijv. Delhaize, Lidl..." type="text">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-store')">Annuleer</button>
+      <button class="btn btn-primary" onclick="saveStore()">Toevoegen</button>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- ShopItem modal -->
+<div class="overlay" id="modal-shopitem">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Product toevoegen</div>
+    <div class="form-group">
+      <label class="form-label">Naam</label>
+      <input class="form-input" id="si-name" placeholder="Naam van product" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Hoeveelheid</label>
+      <input class="form-input" id="si-qty" placeholder="bv: 2x, 500g..." type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categorie</label>
+      <select class="form-select" id="si-cat">
+        <option value="groenten">🥦 Groenten</option>
+        <option value="fruit">🍎 Fruit</option>
+        <option value="vlees">🥩 Vlees</option>
+        <option value="vis">🐟 Vis</option>
+        <option value="zuivel">🧀 Zuivel</option>
+        <option value="brood">🍞 Brood</option>
+        <option value="droog">🥫 Droog</option>
+        <option value="drank">🧃 Drank</option>
+        <option value="diepvries">❄️ Diepvries</option>
+        <option value="hygiene">🧴 Hygiëne</option>
         <option value="overig">🛒 Overig</option>
       </select>
     </div>
-    <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="addShopItem()">Toevoegen</button>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-shopitem')">Annuleer</button>
+      <button class="btn btn-primary" onclick="saveShopItem()">Toevoegen</button>
+    </div>
+    <div style="height:8px"></div>
   </div>
 </div>
 
-<script>
-const KEY='planr_v5';
-let S=load();
-let curView='maand', curTakenView='lijst', curTodoView='lijst';
-let viewDate=new Date();
-let curTab='agenda';
-let sidebarOpen=true;
-let activeStore=null;
-let gcalTimers={};
-
-const MONTHS=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
-const MONTHS_S=['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-const DAYS_S=['ma','di','wo','do','vr','za','zo'];
-const CAT_ORDER=['groenten','fruit','vlees','vis','zuivel','brood','droog','drank','diepvries','hygiëne','overig'];
-const CAT_ICONS={groenten:'🥦',fruit:'🍎',vlees:'🥩',vis:'🐟',zuivel:'🧀',brood:'🍞',droog:'🥫',drank:'🧃',diepvries:'❄️','hygiëne':'🧴',overig:'🛒'};
-const RECUR_L={eenmalig:'Eenmalig',dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'2-wekelijks','3wekelijks':'3-wekelijks',maandelijks:'Maandelijks','eerste-zondag':'1e zo/mnd','custom-days':'Aangepast'};
-
-function load(){
-  try{
-    const d=localStorage.getItem(KEY);
-    const def={
-      events:[],todos:[],shops:{},stores:[],storeLogos:{},
-      calendars:[
-        {id:'eigen',name:'Mijn agenda',color:'#7c3aed',active:true,ical:'',gcalEvents:[]}
-      ],
-      taakCats:[
-        {id:'huishouden',name:'Huishouden',color:'#7c3aed'},
-        {id:'sport',name:'Sport',color:'#059669'},
-        {id:'werk',name:'Werk',color:'#d97706'},
-        {id:'gezondheid',name:'Gezondheid',color:'#dc2626'},
-        {id:'overig',name:'Overig',color:'#6b7280'}
-      ],
-      todoCats:[
-        {id:'persoonlijk',name:'Persoonlijk',color:'#7c3aed'},
-        {id:'werk',name:'Werk',color:'#2563eb'},
-        {id:'thuis',name:'Thuis',color:'#059669'}
-      ],
-      routines:[
-        {id:'r1',name:'Stofzuigen',freq:'wekelijks',cat:'huishouden',last:'',note:''},
-        {id:'r2',name:'Dweilen',freq:'wekelijks',cat:'huishouden',last:'',note:''},
-        {id:'r3',name:'Badkamer poetsen',freq:'wekelijks',cat:'huishouden',last:'',note:'Toilet, lavabo, douche'},
-        {id:'r4',name:'Keuken poetsen',freq:'wekelijks',cat:'huishouden',last:'',note:'Aanrecht, kookplaat, spoelbak'},
-        {id:'r5',name:'Stof afnemen',freq:'wekelijks',cat:'huishouden',last:'',note:''},
-        {id:'r6',name:'Wasgoed doen',freq:'wekelijks',cat:'huishouden',last:'',note:''},
-        {id:'r7',name:'Handdoeken verversen',freq:'2wekelijks',cat:'huishouden',last:'',note:''},
-        {id:'r8',name:'Lakens verversen',freq:'2wekelijks',cat:'huishouden',last:'',note:''},
-        {id:'r9',name:'Koelkast opruimen',freq:'2wekelijks',cat:'huishouden',last:'',note:'Verlopen producten weggooien'},
-        {id:'r10',name:'Vaatwasser reinigen',freq:'2wekelijks',cat:'huishouden',last:'',note:'Filter schoonmaken'},
-        {id:'r11',name:'Ramen poetsen',freq:'2wekelijks',cat:'huishouden',last:'',note:'Binnenkant'},
-        {id:'r12',name:'Oven reinigen',freq:'maandelijks',cat:'huishouden',last:'',note:''},
-        {id:'r13',name:'Wasmachine reinigen',freq:'maandelijks',cat:'huishouden',last:'',note:'Kuisbeurt draaien'},
-        {id:'r14',name:'Kalk verwijderen',freq:'maandelijks',cat:'huishouden',last:'',note:'Kranen en douchekoppen'},
-        {id:'r15',name:'Gordijnen wassen',freq:'maandelijks',cat:'huishouden',last:'',note:''},
-        {id:'r16',name:'Kasten opruimen',freq:'maandelijks',cat:'huishouden',last:'',note:''},
-        {id:'r17',name:'Terras vegen',freq:'maandelijks',cat:'tuin',last:'',note:''},
-        {id:'r18',name:'Rookmelders testen',freq:'maandelijks',cat:'huishouden',last:'',note:''}
-      ],
-      routineCats:[
-        {id:'huishouden',name:'Huishouden',color:'#7c3aed'},
-        {id:'persoonlijk',name:'Persoonlijk',color:'#059669'},
-        {id:'tuin',name:'Tuin',color:'#d97706'},
-        {id:'overig',name:'Overig',color:'#6b7280'}
-      ]
-    };
-    if(!d)return def;
-    const p=JSON.parse(d);
-    return {...def,...p,
-      calendars:p.calendars||def.calendars,
-      taakCats:p.taakCats||def.taakCats,
-      todoCats:p.todoCats||def.todoCats,
-      routines:(p.routines&&p.routines.length)?p.routines:def.routines,
-      routineCats:p.routineCats||def.routineCats,
-      storeLogos:p.storeLogos||{}
-    };
-  }catch(e){
-    console.error('Load error:',e);
-    const fb={events:[],todos:[],shops:{},stores:[]};
-    fb.storeLogos={};
-    fb.calendars=[{id:'eigen',name:'Mijn agenda',color:'#7c3aed',active:true,ical:'',gcalEvents:[]}];
-    fb.taakCats=[{id:'huishouden',name:'Huishouden',color:'#7c3aed'},{id:'overig',name:'Overig',color:'#6b7280'}];
-    fb.todoCats=[{id:'persoonlijk',name:'Persoonlijk',color:'#7c3aed'},{id:'werk',name:'Werk',color:'#2563eb'},{id:'thuis',name:'Thuis',color:'#059669'}];
-    fb.routines=[];
-    fb.routineCats=[{id:'huishouden',name:'Huishouden',color:'#7c3aed'},{id:'persoonlijk',name:'Persoonlijk',color:'#059669'},{id:'tuin',name:'Tuin',color:'#d97706'},{id:'overig',name:'Overig',color:'#6b7280'}];
-    return fb;
-  }
-}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-
-function openModal(id){document.getElementById(id).style.display='flex'}
-function closeModal(id){document.getElementById(id).style.display='none'}
-
-function toggleSidebar(){
-  sidebarOpen=!sidebarOpen;
-  document.getElementById('sidebar').classList.toggle('collapsed',!sidebarOpen);
-}
-
-function showTab(name,btn){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
-  btn.classList.add('active');
-  curTab=name;
-  const titles={agenda:'Agenda',taken:'Routines',todo:'To-do',winkel:'Winkellijst',instellingen:'Instellingen'};
-  document.getElementById('topbar-title').textContent=titles[name]||name;
-  // Show sidebar only for agenda
-  document.getElementById('sidebar').style.display=name==='agenda'?'flex':'none';
-  if(name==='agenda'){try{renderCalSidebar();renderCalendar();}catch(e){console.error(e);}}
-  if(name==='taken'){try{renderTaken();}catch(e){console.error(e);document.getElementById('panel-taken').innerHTML='<div class="empty">Fout bij laden. Probeer opnieuw.</div>';}}
-  if(name==='todo'){try{renderTodo();}catch(e){console.error(e);}}
-  if(name==='winkel'){try{renderWinkel();}catch(e){console.error(e);}}
-  if(name==='instellingen'){try{renderSettings();}catch(e){console.error(e);}}
-}
-
-function handleTopbarAdd(){
-  if(curTab==='agenda')openAddEvent();
-  else if(curTab==='taken')openAddRoutine();
-  else if(curTab==='todo')openAddTodo();
-  else if(curTab==='winkel')openAddStore();
-}
-
-/* ===== CALENDAR SIDEBAR ===== */
-function renderCalSidebar(){
-  const el=document.getElementById('cal-list');
-  el.innerHTML=S.calendars.map(cal=>{
-    const status=S._status&&S._status[cal.id]?`<div style="font-size:9px;color:var(--text3);margin-top:1px">${S._status[cal.id]}</div>`:'';
-    const gcalLabel=cal.ical?`<div style="font-size:9px;color:var(--text3)">Google${status?'':''}</div>`:'';
-    return `<div class="cal-item" onclick="toggleCal('${cal.id}')">
-      <div class="cal-dot${cal.active?'':' inactive'}" style="background:${cal.active?cal.color:'transparent'};border-color:${cal.color}"></div>
-      <div style="flex:1;min-width:0">
-        <div class="cal-name">${cal.name}</div>
-        ${cal.ical?`<div id="cal-status-${cal.id}" style="font-size:9px;color:var(--text3)">${(S._status&&S._status[cal.id])||'Google'}</div>`:''}
-      </div>
-      ${cal.ical?`<button onclick="event.stopPropagation();fetchIcal('${cal.id}')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;padding:2px">↻</button>`:''}
-    </div>`;
-  }).join('');
-}
-
-function toggleCal(id){
-  const cal=S.calendars.find(c=>c.id===id);
-  if(cal)cal.active=!cal.active;
-  save();renderCalSidebar();renderCalendar();
-}
-
-function openAddCalModal(){
-  document.getElementById('cal-name-input').value='';
-  document.getElementById('cal-color-input').value='#2563eb';
-  document.getElementById('cal-ical-input').value='';
-  openModal('modal-cal');
-}
-
-function addCalendar(){
-  const name=document.getElementById('cal-name-input').value.trim();
-  const color=document.getElementById('cal-color-input').value;
-  const ical=document.getElementById('cal-ical-input').value.trim();
-  if(!name)return;
-  const id='cal-'+Date.now();
-  S.calendars.push({id,name,color,active:true,ical,gcalEvents:[]});
-  save();closeModal('modal-cal');renderCalSidebar();
-  if(ical)fetchIcal(id);
-}
-
-function deleteCalendar(id){
-  if(!confirm('Agenda verwijderen?'))return;
-  S.calendars=S.calendars.filter(c=>c.id!==id);
-  S.events=S.events.filter(e=>e.calId!==id);
-  save();renderCalSidebar();renderCalendar();
-}
-
-/* ===== ICAL FETCH ===== */
-const PROXIES=[
-  url=>`https://corsproxy.io/?${encodeURIComponent(url)}`,
-  url=>`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-  url=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
-];
-
-async function fetchIcal(calId){
-  const cal=S.calendars.find(c=>c.id===calId);
-  if(!cal||!cal.ical)return;
-  updateCalStatus(calId,'⏳ Laden...');
-  for(let i=0;i<PROXIES.length;i++){
-    try{
-      const proxyUrl=PROXIES[i](cal.ical);
-      const r=await fetch(proxyUrl,{signal:AbortSignal.timeout(8000)});
-      if(!r.ok)continue;
-      let text='';
-      if(i===1){// allorigins returns JSON
-        const j=await r.json();text=j.contents||'';
-      } else {
-        text=await r.text();
-      }
-      if(!text||!text.includes('BEGIN:VCALENDAR')){continue;}
-      cal.gcalEvents=parseIcal(text,cal.color);
-      save();renderCalendar();renderCalSidebar();
-      updateCalStatus(calId,`✓ ${cal.gcalEvents.length} afspraken`);
-      return;
-    }catch(e){continue;}
-  }
-  updateCalStatus(calId,'⚠️ Sync mislukt');
-}
-
-function updateCalStatus(calId,msg){
-  // Store status message per calendar
-  if(!S._status)S._status={};
-  S._status[calId]=msg;
-  // Show in settings if open
-  const el=document.getElementById('cal-status-'+calId);
-  if(el)el.textContent=msg;
-}
-
-function parseIcal(text,fallbackColor){
-  const events=[];
-  if(!text)return events;
-  // Unfold lines (RFC 5545: lines ending with CRLF + whitespace are continuations)
-  text=text.replace(/\r?\n[ \t]/g,'');
-  const blocks=text.split('BEGIN:VEVENT');
-  blocks.slice(1).forEach(block=>{
-    const get=k=>{
-      const m=block.match(new RegExp(k+'(?:;[^:]*)?:([^\\r\\n]+)'));
-      return m?m[1].trim():'';
-    };
-    const dtstart=get('DTSTART');
-    const dtend=get('DTEND');
-    const summary=get('SUMMARY')||'(geen titel)';
-    if(!dtstart)return;
-    const dateStr=dtstart.replace(/T.*/,'');
-    const y=dateStr.substring(0,4),mo=dateStr.substring(4,6),d=dateStr.substring(6,8);
-    if(!y||!mo||!d)return;
-    // Parse time if present
-    let time='',endTime='';
-    if(dtstart.includes('T')){
-      const t=dtstart.split('T')[1];
-      time=`${t.substring(0,2)}:${t.substring(2,4)}`;
-    }
-    if(dtend&&dtend.includes('T')){
-      const t=dtend.split('T')[1];
-      endTime=`${t.substring(0,2)}:${t.substring(2,4)}`;
-    }
-    events.push({
-      id:'g'+Math.random().toString(36).slice(2),
-      title:summary,
-      date:`${y}-${mo}-${d}`,
-      time,endTime,
-      source:'gcal',
-      color:fallbackColor
-    });
-  });
-  return events;
-}
-
-function refreshAllIcal(){
-  S.calendars.forEach(cal=>{if(cal.ical)fetchIcal(cal.id);});
-}
-
-/* ===== CALENDAR RENDER ===== */
-function setView(v){
-  curView=v;
-  document.querySelectorAll('#panel-agenda .view-tab').forEach(b=>{
-    b.classList.toggle('active',b.dataset.v===v);
-  });
-  renderCalendar();
-}
-
-function navDate(d){
-  if(curView==='dag')viewDate.setDate(viewDate.getDate()+d);
-  else if(curView==='week')viewDate.setDate(viewDate.getDate()+d*7);
-  else if(curView==='maand')viewDate.setMonth(viewDate.getMonth()+d);
-  else if(curView==='jaar')viewDate.setFullYear(viewDate.getFullYear()+d);
-  renderCalendar();
-}
-function goToday(){viewDate=new Date();renderCalendar();}
-function toggleCustomDays(){
-  document.getElementById('custom-days-picker').style.display=
-    document.getElementById('ev-type').value==='custom-days'?'block':'none';
-}
-
-function getActiveCals(){return S.calendars.filter(c=>c.active);}
-
-function getEventsForDate(y,m,d){
-  const date=new Date(y,m,d);
-  const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  const activeCals=getActiveCals().map(c=>c.id);
-  const result=[];
-
-  // Own events
-  S.events.filter(ev=>activeCals.includes(ev.calId)).forEach(ev=>{
-    if(!ev.date)return;
-    const ed=new Date(ev.date+'T00:00:00');
-    let match=false;
-    if(ev.type==='eenmalig')match=ev.date===ds;
-    else if(date>=ed){
-      const diff=Math.round((date-ed)/86400000);
-      if(ev.type==='dagelijks')match=true;
-      else if(ev.type==='wekelijks')match=diff%7===0;
-      else if(ev.type==='2wekelijks')match=diff%14===0;
-      else if(ev.type==='3wekelijks')match=diff%21===0;
-      else if(ev.type==='maandelijks')match=ed.getDate()===d&&(y>ed.getFullYear()||(y===ed.getFullYear()&&m>=ed.getMonth()));
-      else if(ev.type==='eerste-zondag'){
-        if(date.getDay()===0){const fs=new Date(y,m,1);while(fs.getDay()!==0)fs.setDate(fs.getDate()+1);match=d===fs.getDate();}
-      }
-      else if(ev.type==='custom-days'&&ev.customDays){
-        const dow=date.getDay();
-        if(ev.customDays.includes(dow)){const interval=ev.dayInterval||1;match=diff%(interval*7)<7;}
-      }
-    }
-    if(match){
-      const cal=S.calendars.find(c=>c.id===ev.calId)||{color:'#888'};
-      const taakCat=S.taakCats.find(c=>c.id===ev.taakCatId);
-      const color=taakCat?taakCat.color:cal.color;
-      result.push({...ev,color});
-    }
-  });
-
-  // Google Calendar events
-  S.calendars.filter(c=>c.active&&c.gcalEvents).forEach(cal=>{
-    cal.gcalEvents.filter(ev=>ev.date===ds).forEach(ev=>{
-      result.push({...ev,color:cal.color});
-    });
-  });
-
-  return result;
-}
-
-function renderCalendar(){
-  const el=document.getElementById('panel-agenda');
-  const today=new Date();
-  const y=viewDate.getFullYear(), m=viewDate.getMonth();
-
-  let nav=`<div class="view-tabs">
-    <button class="view-tab${curView==='dag'?' active':''}" data-v="dag" onclick="setView('dag')">Dag</button>
-    <button class="view-tab${curView==='week'?' active':''}" data-v="week" onclick="setView('week')">Week</button>
-    <button class="view-tab${curView==='maand'?' active':''}" data-v="maand" onclick="setView('maand')">Maand</button>
-    <button class="view-tab${curView==='jaar'?' active':''}" data-v="jaar" onclick="setView('jaar')">Jaar</button>
+<!-- Category modal -->
+<div class="overlay" id="modal-cat">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="cat-modal-title">Categorie toevoegen</div>
+    <div class="form-group">
+      <label class="form-label">Naam</label>
+      <input class="form-input" id="cat-name" placeholder="Naam" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Kleur</label>
+      <input type="color" id="cat-color" value="#5a8a5a">
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-cat')">Annuleer</button>
+      <button class="btn btn-primary" onclick="saveCat()">Toevoegen</button>
+    </div>
+    <div style="height:8px"></div>
   </div>
-  <div class="cal-nav">
-    <button class="nav-btn" onclick="navDate(-1)">‹</button>
-    <h2 id="cal-title"></h2>
-    <button class="nav-btn" onclick="navDate(1)">›</button>
-    <button class="today-btn" onclick="goToday()">Vandaag</button>
-  </div>`;
+</div>
 
-  let body='';
-  if(curView==='maand'){
-    document.getElementById('topbar-title').textContent=MONTHS[m]+' '+y;
-    // Day name headers (not part of the growing grid)
-    body+='<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:2px">';
-    DAYS_S.forEach(d=>{body+=`<div class="cal-dn">${d}</div>`;});
-    body+='</div>';
-    // The actual grid fills remaining space
-    body+='<div class="cal-grid" style="flex:1">';
-    const first=new Date(y,m,1);
-    let start=first.getDay()-1;if(start<0)start=6;
-    const dim=new Date(y,m+1,0).getDate();
-    const prev=new Date(y,m,0).getDate();
-    for(let i=0;i<start;i++)body+=`<div class="cal-day other"><div class="cal-num">${prev-start+1+i}</div></div>`;
-    for(let d=1;d<=dim;d++){
-      const isT=d===today.getDate()&&m===today.getMonth()&&y===today.getFullYear();
-      const evs=getEventsForDate(y,m,d);
-      let inner=`<div class="cal-num">${d}</div>`;
-      evs.slice(0,2).forEach(ev=>{inner+=`<div class="ev-pill" style="background:${ev.color}25;color:${ev.color}">${ev.title}</div>`;});
-      if(evs.length>2)inner+=`<div style="font-size:8px;color:var(--text3)">+${evs.length-2}</div>`;
-      body+=`<div class="cal-day${isT?' today':''}" onclick="openDay(${y},${m},${d})">${inner}</div>`;
-    }
-    body+='</div>';
-  } else if(curView==='week'){
-    const dow=viewDate.getDay();
-    const mon=new Date(viewDate);mon.setDate(viewDate.getDate()-(dow===0?6:dow-1));
-    const sun=new Date(mon);sun.setDate(mon.getDate()+6);
-    document.getElementById('topbar-title').textContent=`${mon.getDate()} ${MONTHS_S[mon.getMonth()]} – ${sun.getDate()} ${MONTHS_S[sun.getMonth()]}`;
-    // Header row
-    body+=`<div style="display:flex;flex-shrink:0;border-bottom:1px solid var(--border);margin-bottom:0">
-      <div style="width:44px;flex-shrink:0"></div>`;
-    for(let i=0;i<7;i++){
-      const d=new Date(mon);d.setDate(mon.getDate()+i);
-      const isT=d.toDateString()===today.toDateString();
-      body+=`<div style="flex:1;text-align:center;padding:4px 2px;${isT?'color:var(--accent);font-weight:700':''}">
-        <div style="font-size:9px;color:var(--text3);text-transform:uppercase">${DAYS_S[i]}</div>
-        <div style="font-size:15px;font-weight:700">${d.getDate()}</div>
-      </div>`;
-    }
-    body+='</div>';
-    // Scrollable hour grid
-    body+=`<div style="flex:1;overflow-y:auto;position:relative" id="week-scroll">
-      <div style="display:flex;position:relative" id="week-inner">
-        <div style="width:44px;flex-shrink:0">`;
-    for(let h=0;h<24;h++){
-      body+=`<div style="height:60px;border-bottom:1px solid var(--border);padding:2px 4px;font-size:9px;color:var(--text3);text-align:right;line-height:1">${String(h).padStart(2,'0')}:00</div>`;
-    }
-    body+='</div>';
-    // Day columns
-    for(let i=0;i<7;i++){
-      const d=new Date(mon);d.setDate(mon.getDate()+i);
-      const isT=d.toDateString()===today.toDateString();
-      const evs=getEventsForDate(d.getFullYear(),d.getMonth(),d.getDate());
-      body+=`<div style="flex:1;position:relative;border-left:1px solid var(--border);${isT?'background:'+('var(--accent2)')+'22':''}">`;
-      for(let h=0;h<24;h++){
-        body+=`<div style="height:60px;border-bottom:1px solid var(--border);box-sizing:border-box"></div>`;
-      }
-      evs.forEach(ev=>{
-        const mins=ev.time?parseInt(ev.time.split(':')[0])*60+parseInt(ev.time.split(':')[1]):0;
-        const durMins=ev.endTime?(parseInt(ev.endTime.split(':')[0])*60+parseInt(ev.endTime.split(':')[1]))-mins:60;
-        const top=(mins/60)*60;
-        const height=Math.max((durMins/60)*60,20);
-        body+=`<div style="position:absolute;top:${top}px;left:2px;right:2px;height:${height}px;background:${ev.color}dd;border-radius:4px;padding:2px 4px;overflow:hidden;cursor:pointer;z-index:2" onclick="openDay(${d.getFullYear()},${d.getMonth()},${d.getDate()})">
-          <div style="font-size:9px;font-weight:700;color:#fff;line-height:1.3;overflow:hidden">${ev.title}</div>
-          ${ev.time?`<div style="font-size:8px;color:rgba(255,255,255,.8)">${ev.time}</div>`:''}
-        </div>`;
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import{getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,query,orderBy,updateDoc}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const app=initializeApp({apiKey:"AIzaSyC3srCJohuA5HKvt2K6_bNIlvgnjBpXn9I",authDomain:"planr-45155.firebaseapp.com",projectId:"planr-45155",storageBucket:"planr-45155.firebasestorage.app",messagingSenderId:"706335599227",appId:"1:706335599227:web:760d845bb34d26a92150de"});
+const auth=getAuth(app);
+const db=getFirestore(app);
+
+let uid=null,currentPage='routines',todoMode='lijst',currentPrio='normaal';
+let editingRoutineId=null,editingTodoId=null,addingShopItemForStore=null,addingCatFor=null,expandedStoreId=null;
+let routines=[],routineCats=[],todos=[],todoCats=[],stores=[],shopItems=[],unsubs=[];
+
+const defaultRoutineCats=[{id:'huishouden',name:'Huishouden',colorHex:'#5a8a5a'},{id:'persoonlijk',name:'Persoonlijk',colorHex:'#4a7a9b'},{id:'tuin',name:'Tuin',colorHex:'#6b8c3a'},{id:'overig',name:'Overig',colorHex:'#7a8a6a'}];
+const defaultTodoCats=[{id:'persoonlijk',name:'Persoonlijk',colorHex:'#5a8a5a'},{id:'werk',name:'Werk',colorHex:'#4a7a9b'},{id:'thuis',name:'Thuis',colorHex:'#6b8c3a'}];
+const defaultRoutines=[{name:'Stofzuigen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Dweilen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Badkamer poetsen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Keuken poetsen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Wasgoed doen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Handdoeken verversen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Lakens verversen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Koelkast opruimen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Oven reinigen',frequency:'maandelijks',categoryId:'huishouden'},{name:'Wasmachine reinigen',frequency:'maandelijks',categoryId:'huishouden'},{name:'Terras vegen',frequency:'maandelijks',categoryId:'tuin'}];
+const shopCatLabels={groenten:'🥦 Groenten',fruit:'🍎 Fruit',vlees:'🥩 Vlees',vis:'🐟 Vis',zuivel:'🧀 Zuivel',brood:'🍞 Brood',droog:'🥫 Droog',drank:'🧃 Drank',diepvries:'❄️ Diepvries',hygiene:'🧴 Hygiëne',overig:'🛒 Overig'};
+
+window.signInGoogle=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){alert('Inloggen mislukt: '+e.message)}};
+window.doSignOut=async()=>{unsubs.forEach(u=>u());unsubs=[];await signOut(auth)};
+
+onAuthStateChanged(auth,user=>{
+  document.getElementById('loading').classList.add('hidden');
+  if(user){uid=user.uid;document.getElementById('auth-screen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');startListeners()}
+  else{uid=null;document.getElementById('app').classList.add('hidden');document.getElementById('auth-screen').classList.remove('hidden')}
+});
+
+const col=p=>collection(db,`users/${uid}/${p}`);
+const docRef=(p,id)=>doc(db,`users/${uid}/${p}/${id}`);
+
+function startListeners(){
+  unsubs.forEach(u=>u());unsubs=[];
+  unsubs.push(onSnapshot(col('routineCats'),s=>{routineCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!routineCats.length)defaultRoutineCats.forEach(c=>setDoc(docRef('routineCats',c.id),c));else renderCurrent()}));
+  unsubs.push(onSnapshot(col('todoCats'),s=>{todoCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!todoCats.length)defaultTodoCats.forEach(c=>setDoc(docRef('todoCats',c.id),c));else renderCurrent()}));
+  unsubs.push(onSnapshot(query(col('routines'),orderBy('createdAt','asc')),s=>{routines=s.docs.map(d=>({id:d.id,...d.data()}));if(!routines.length)defaultRoutines.forEach(r=>setDoc(docRef('routines',uuid()),{...r,note:'',lastDone:null,nextDate:null,createdAt:Date.now()}));else renderCurrent()}));
+  unsubs.push(onSnapshot(query(col('todos'),orderBy('createdAt','asc')),s=>{todos=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
+  unsubs.push(onSnapshot(query(col('stores'),orderBy('order','asc')),s=>{stores=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
+  unsubs.push(onSnapshot(col('shopItems'),s=>{shopItems=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
+}
+
+window.showPage=page=>{
+  currentPage=page;
+  ['routines','todos','winkellijst','instellingen'].forEach(p=>{document.getElementById(`page-${p}`).classList.add('hidden');document.getElementById(`nav-${p}`).classList.remove('active')});
+  document.getElementById(`page-${page}`).classList.remove('hidden');
+  document.getElementById(`nav-${page}`).classList.add('active');
+  renderCurrent();
+};
+
+function renderCurrent(){
+  if(currentPage==='routines')renderRoutines();
+  if(currentPage==='todos')renderTodos();
+  if(currentPage==='winkellijst')renderWinkellijst();
+  if(currentPage==='instellingen')renderInstellingen();
+}
+
+const FREQ_DAYS={dagelijks:1,wekelijks:7,'2wekelijks':14,'3wekelijks':21,maandelijks:30,kwartaal:90,jaarlijks:365};
+function computeNext(r){if(r.frequency==='aangepast')return r.nextDate?new Date(r.nextDate):null;if(!r.lastDone)return null;const d=new Date(r.lastDone);d.setDate(d.getDate()+(FREQ_DAYS[r.frequency]||7));return d}
+function daysUntil(r){const n=computeNext(r);if(!n)return null;const t=new Date();t.setHours(0,0,0,0);const nd=new Date(n);nd.setHours(0,0,0,0);return Math.round((nd-t)/86400000)}
+function urg(r){const d=daysUntil(r);if(d===null)return'neverDone';if(d<0)return'overdue';if(d===0)return'today';if(d<=3)return'soon';return'ok'}
+const UC={neverDone:'#9b4a4a',overdue:'#9b4a4a',today:'#8b6914',soon:'#8b6914',ok:'#5a8a5a'};
+function fLabel(f){return{dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal',jaarlijks:'Jaarlijks',aangepast:'Aangepast'}[f]||f}
+
+function renderRoutines(){
+  const el=document.getElementById('page-routines');
+  const sorted=[...routines].sort((a,b)=>(daysUntil(a)??-999)-(daysUntil(b)??-999));
+  let h=`<div class="page-header"><div class="page-title">Routines</div><button class="header-btn" onclick="openRoutineModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
+  if(!routines.length){h+=`<div class="empty"><div class="empty-icon">🔄</div><div class="empty-title">Geen routines</div><div class="empty-sub">Voeg je eerste routine toe</div></div>`}
+  else{
+    routineCats.filter(c=>sorted.some(r=>r.categoryId===c.id)).forEach(cat=>{
+      const cr=sorted.filter(r=>r.categoryId===cat.id);
+      if(!cr.length)return;
+      h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}</div><div class="card-list">`;
+      cr.forEach(r=>{
+        const u=urg(r),d=daysUntil(r),color=UC[u];
+        const st=d===null?'Nog nooit':d<0?`${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} te laat`:d===0?'Vandaag!':`Over ${d} dag${d===1?'':'en'}`;
+        h+=`<div class="row" onclick="openRoutineModal('${r.id}')"><div class="row-accent" style="background:${cat.colorHex}"></div><div class="row-content"><div class="row-title">${esc(r.name)}</div>${r.note?`<div class="row-sub">${esc(r.note)}</div>`:''}<div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color};background:${color}18">${st}</span></div>${r.lastDone?`<div class="row-sub" style="margin-top:3px">Laatste: ${fmtDate(r.lastDone)}</div>`:''}</div><button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button></div>`;
       });
-      body+='</div>';
-    }
-    body+='</div></div>';
-  } else if(curView==='dag'){
-    document.getElementById('topbar-title').textContent=`${viewDate.getDate()} ${MONTHS[viewDate.getMonth()]}`;
-    const evs=getEventsForDate(y,m,viewDate.getDate());
-    // Header
-    body+=`<div style="flex-shrink:0;padding:6px 0 8px;border-bottom:1px solid var(--border);text-align:center">
-      <span style="font-size:13px;color:var(--text2)">${['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'][viewDate.getDay()]}</span>
-    </div>`;
-    // Scrollable hour grid
-    body+=`<div style="flex:1;overflow-y:auto" id="dag-scroll">
-      <div style="display:flex;position:relative">
-        <div style="width:52px;flex-shrink:0">`;
-    for(let h=0;h<24;h++){
-      body+=`<div style="height:60px;border-bottom:1px solid var(--border);padding:2px 6px 0 0;font-size:10px;color:var(--text3);text-align:right;line-height:1">${String(h).padStart(2,'0')}:00</div>`;
-    }
-    body+='</div>';
-    // Event column
-    body+=`<div style="flex:1;position:relative;border-left:1px solid var(--border)">`;
-    for(let h=0;h<24;h++){
-      body+=`<div style="height:60px;border-bottom:1px solid var(--border)"></div>`;
-    }
-    // Current time line
-    const now=new Date();
-    if(viewDate.toDateString()===now.toDateString()){
-      const nowMins=now.getHours()*60+now.getMinutes();
-      body+=`<div style="position:absolute;top:${(nowMins/60)*60}px;left:0;right:0;height:2px;background:var(--red);z-index:3">
-        <div style="width:8px;height:8px;border-radius:50%;background:var(--red);position:absolute;left:-4px;top:-3px"></div>
-      </div>`;
-    }
-    // All-day events (no time)
-    const allDay=evs.filter(ev=>!ev.time);
-    const timed=evs.filter(ev=>ev.time);
-    timed.forEach(ev=>{
-      const [hh,mm]=ev.time.split(':').map(Number);
-      const mins=hh*60+mm;
-      const endMins=ev.endTime?(()=>{const[eh,em]=ev.endTime.split(':').map(Number);return eh*60+em;})():mins+60;
-      const top=(mins/60)*60;
-      const height=Math.max(((endMins-mins)/60)*60,24);
-      body+=`<div style="position:absolute;top:${top}px;left:4px;right:4px;height:${height}px;background:${ev.color};border-radius:6px;padding:4px 8px;overflow:hidden;cursor:pointer;z-index:2;box-shadow:0 1px 4px rgba(0,0,0,.2)">
-        <div style="font-size:12px;font-weight:700;color:#fff;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${ev.title}</div>
-        <div style="font-size:10px;color:rgba(255,255,255,.85)">${ev.time}${ev.endTime?` – ${ev.endTime}`:''}</div>
-        ${!ev.source?`<button onclick="event.stopPropagation();delEvent('${ev.id}')" style="position:absolute;top:3px;right:4px;border:none;background:rgba(255,255,255,.3);color:#fff;border-radius:4px;font-size:10px;cursor:pointer;padding:1px 5px">✕</button>`:''}
-      </div>`;
+      h+=`</div></div>`;
     });
-    body+='</div></div>';
-    // All-day section
-    if(allDay.length){
-      body+=`<div style="flex-shrink:0;border-top:1px solid var(--border);padding:6px 8px">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">HELE DAG</div>`;
-      allDay.forEach(ev=>{
-        body+=`<div style="background:${ev.color};color:#fff;border-radius:5px;padding:3px 8px;font-size:12px;font-weight:600;margin-bottom:3px;display:flex;justify-content:space-between">
-          ${ev.title}
-          ${!ev.source?`<button onclick="delEvent('${ev.id}')" style="border:none;background:transparent;color:#fff;cursor:pointer;font-size:12px">✕</button>`:''}
-        </div>`;
+  }
+  el.innerHTML=h;
+}
+
+function renderTodos(){
+  const el=document.getElementById('page-todos');
+  let h=`<div class="page-header"><div class="page-title">To-do</div><button class="header-btn" onclick="openTodoModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
+  h+=`<div class="seg"><button class="seg-btn${todoMode==='lijst'?' active':''}" onclick="setTodoMode('lijst')">Lijst</button><button class="seg-btn${todoMode==='matrix'?' active':''}" onclick="setTodoMode('matrix')">Eisenhower</button></div>`;
+  if(todoMode==='matrix'){h+=renderMatrix();el.innerHTML=h;return}
+  const po={hoog:0,normaal:1,laag:2};
+  const active=[...todos].filter(t=>!t.isDone).sort((a,b)=>(po[a.priority]||1)-(po[b.priority]||1));
+  const done=todos.filter(t=>t.isDone);
+  if(!todos.length){h+=`<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Geen to-dos</div><div class="empty-sub">Voeg je eerste taak toe</div></div>`}
+  else{
+    todoCats.forEach(cat=>{
+      const ct=active.filter(t=>t.categoryId===cat.id);if(!ct.length)return;
+      const tags=[...new Set(ct.flatMap(t=>t.tags||[]))].sort();
+      const untagged=ct.filter(t=>!t.tags||!t.tags.length);
+      h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${ct.length}</span></div><div class="card-list">`;
+      untagged.forEach(t=>{h+=todoRow(t,cat.colorHex)});
+      tags.forEach(tag=>{
+        const tg=ct.filter(t=>(t.tags||[]).includes(tag));
+        if(tg.length){h+=`<div style="padding:5px 14px 2px;font-size:11px;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)">${esc(tag)}</div>`;tg.forEach(t=>{h+=todoRow(t,cat.colorHex)})}
       });
-      body+='</div>';
-    }
-    body+=`<button class="btn btn-p" style="flex-shrink:0;width:calc(100% - 16px);margin:8px 8px;display:block" onclick="openAddEvent()">＋ Afspraak toevoegen</button>`;
-  } else if(curView==='jaar'){
-    document.getElementById('topbar-title').textContent=String(y);
-    body+='<div class="year-grid">';
-    for(let mo=0;mo<12;mo++){
-      const dim2=new Date(y,mo+1,0).getDate();
-      const first2=new Date(y,mo,1);
-      let s2=first2.getDay()-1;if(s2<0)s2=6;
-      body+=`<div class="mini-month"><div class="mini-title">${MONTHS_S[mo]}</div><div class="mini-grid">`;
-      for(let i=0;i<s2;i++)body+='<div class="mini-cell"></div>';
-      for(let d=1;d<=dim2;d++){
-        const isT=d===today.getDate()&&mo===today.getMonth()&&y===today.getFullYear();
-        const hasEv=getEventsForDate(y,mo,d).length>0;
-        body+=`<div class="mini-cell${isT?' m-today':hasEv?' m-ev':''}">${d}</div>`;
-      }
-      body+='</div></div>';
-    }
-    body+='</div>';
-  }
-
-  // For jaar view, add button at bottom
-  if(curView==='jaar'){
-    body+=`<button class="btn btn-p" style="width:100%;margin-top:10px;flex-shrink:0" onclick="openAddEvent()">＋ Afspraak toevoegen</button>`;
-  }
-  el.innerHTML=nav+body;
-  // Auto-scroll to current time for dag/week views
-  if(curView==='dag'||curView==='week'){
-    const scrollId=curView==='dag'?'dag-scroll':'week-scroll';
-    const scrollEl=document.getElementById(scrollId);
-    if(scrollEl){
-      const now=new Date();
-      const scrollTo=Math.max(0,(now.getHours()-1)*60);
-      scrollEl.scrollTop=scrollTo;
-    }
-  }
-  el.innerHTML=nav+body;
-  // Re-set title for month view
-  const titleEl=document.getElementById('cal-title');
-  if(titleEl){
-    if(curView==='maand')titleEl.textContent=MONTHS[m]+' '+y;
-    else if(curView==='jaar')titleEl.textContent=String(y);
-    else if(curView==='dag')titleEl.textContent=`${viewDate.getDate()} ${MONTHS[m]}`;
-    else titleEl.textContent='';
-  }
-}
-
-function openDay(y,m,d){viewDate=new Date(y,m,d);setView('dag');}
-
-function openAddEvent(){
-  populateCalSelect();
-  document.getElementById('ev-taakcat-select').innerHTML=S.taakCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  document.getElementById('ev-date').value=viewDate.toISOString().split('T')[0];
-  document.getElementById('ev-title').value='';
-  document.getElementById('ev-time').value='';
-  document.getElementById('ev-endtime').value='';
-  document.getElementById('ev-reminder').value='';
-  document.getElementById('ev-type').value='eenmalig';
-  document.getElementById('custom-days-picker').style.display='none';
-  openModal('modal-event');
-}
-
-function populateCalSelect(){
-  document.getElementById('ev-cal-select').innerHTML=
-    S.calendars.filter(c=>!c.ical||c.id==='eigen').map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  // Also show non-gcal calendars
-  document.getElementById('ev-cal-select').innerHTML=
-    S.calendars.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-}
-
-function addEvent(){
-  const title=document.getElementById('ev-title').value.trim();
-  const date=document.getElementById('ev-date').value;
-  const time=document.getElementById('ev-time').value;
-  const endTime=document.getElementById('ev-endtime').value;
-  const type=document.getElementById('ev-type').value;
-  const calId=document.getElementById('ev-cal-select').value;
-  const taakCatId=document.getElementById('ev-taakcat-select').value;
-  const reminder=document.getElementById('ev-reminder').value.trim();
-  if(!title||!date){alert('Vul titel en datum in');return;}
-  const ev={id:Date.now()+'',title,date,time,endTime,type,calId,taakCatId,reminder};
-  if(type==='custom-days'){
-    ev.customDays=[...document.querySelectorAll('.dcb:checked')].map(c=>parseInt(c.value));
-    ev.dayInterval=parseInt(document.getElementById('day-interval').value)||1;
-  }
-  S.events.push(ev);save();closeModal('modal-event');renderCalendar();
-  if(curTab==='taken')renderTaken();
-}
-function delEvent(id){S.events=S.events.filter(e=>e.id!==id);save();renderCalendar();}
-
-/* ===== ROUTINES ===== */
-const FREQ_DAYS={dagelijks:1,wekelijks:7,'2wekelijks':14,'3wekelijks':21,maandelijks:30,kwartaal:90,jaarlijks:365,aangepast:null};
-const FREQ_L={dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal',jaarlijks:'Jaarlijks',aangepast:'Aangepast'};
-
-function openAddRoutine(){
-  document.getElementById('routine-modal-title').innerHTML='Routine toevoegen<button class="modal-close" onclick="closeModal(\'modal-routine\')">×</button>';
-  document.getElementById('routine-edit-id').value='';
-  document.getElementById('routine-name').value='';
-  document.getElementById('routine-note').value='';
-  document.getElementById('routine-last').value=new Date().toISOString().split('T')[0];
-  document.getElementById('routine-next').value='';
-  document.getElementById('routine-freq').value='wekelijks';
-  document.getElementById('mini-cal-container').style.display='none';
-  document.getElementById('routine-cat-sel').innerHTML=S.routineCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  updateNextDateFromFreq();
-  openModal('modal-routine');
-}
-
-function openEditRoutine(id){
-  const r=S.routines.find(r=>r.id===id);if(!r)return;
-  document.getElementById('routine-modal-title').innerHTML='Routine bewerken<button class="modal-close" onclick="closeModal(\'modal-routine\')">×</button>';
-  document.getElementById('routine-edit-id').value=id;
-  document.getElementById('routine-name').value=r.name;
-  document.getElementById('routine-note').value=r.note||'';
-  document.getElementById('routine-last').value=r.last||'';
-  document.getElementById('routine-next').value=r.next||'';
-  document.getElementById('routine-freq').value=r.freq||'wekelijks';
-  document.getElementById('mini-cal-container').style.display='none';
-  document.getElementById('routine-cat-sel').innerHTML=S.routineCats.map(c=>`<option value="${c.id}"${c.id===r.cat?' selected':''}>${c.name}</option>`).join('');
-  openModal('modal-routine');
-}
-
-function saveRoutine(){
-  try{
-    const name=document.getElementById('routine-name').value.trim();if(!name)return;
-    const freq=document.getElementById('routine-freq').value;
-    const cat=document.getElementById('routine-cat-sel').value;
-    const last=document.getElementById('routine-last').value;
-    const next=document.getElementById('routine-next').value;
-    const note=document.getElementById('routine-note').value.trim();
-    const editId=document.getElementById('routine-edit-id').value;
-    if(editId){
-      const r=S.routines.find(r=>r.id===editId);
-      if(r){r.name=name;r.freq=freq;r.cat=cat;r.last=last;r.next=next;r.note=note;}
-    } else {
-      S.routines.push({id:Date.now()+'',name,freq,cat,last,next,note});
-    }
-    save();closeModal('modal-routine');renderTaken();
-  }catch(e){console.error('saveRoutine error:',e);alert('Fout bij opslaan: '+e.message);}
-}
-
-function markRoutineDone(id){
-  const r=S.routines.find(r=>r.id===id);
-  if(r){
-    r.last=new Date().toISOString().split('T')[0];
-    // Recalculate next date based on freq
-    const interval=FREQ_DAYS[r.freq];
-    if(interval){
-      const next=new Date();next.setDate(next.getDate()+interval);
-      r.next=next.toISOString().split('T')[0];
-    } else {
-      r.next=''; // aangepast: user must set manually
-    }
-  }
-  save();renderTaken();
-}
-
-function delRoutine(id){S.routines=S.routines.filter(r=>r.id!==id);save();renderTaken();}
-
-function getRoutineStatus(r){
-  const today=new Date();today.setHours(0,0,0,0);
-  // Use explicit next date if set (for aangepast or override)
-  if(r.next){
-    const next=new Date(r.next+'T00:00:00');
-    const daysLeft=Math.round((next-today)/86400000);
-    if(daysLeft<0)return{label:`${Math.abs(daysLeft)} dag${Math.abs(daysLeft)!==1?'en':''} te laat`,urgency:'overdue',daysLeft};
-    if(daysLeft===0)return{label:'Vandaag!',urgency:'today',daysLeft};
-    if(daysLeft<=3)return{label:`Over ${daysLeft} dag${daysLeft!==1?'en':''}`,urgency:'soon',daysLeft};
-    return{label:`Over ${daysLeft} dagen`,urgency:'ok',daysLeft};
-  }
-  if(!r.last)return{label:'Nog nooit gedaan',urgency:'overdue',daysLeft:-999};
-  const last=new Date(r.last+'T00:00:00');
-  const interval=FREQ_DAYS[r.freq];
-  if(!interval)return{label:'Datum niet ingesteld',urgency:'overdue',daysLeft:-999};
-  const next=new Date(last);next.setDate(last.getDate()+interval);
-  const daysLeft=Math.round((next-today)/86400000);
-  if(daysLeft<0)return{label:`${Math.abs(daysLeft)} dag${Math.abs(daysLeft)!==1?'en':''} te laat`,urgency:'overdue',daysLeft};
-  if(daysLeft===0)return{label:'Vandaag!',urgency:'today',daysLeft};
-  if(daysLeft<=3)return{label:`Over ${daysLeft} dag${daysLeft!==1?'en':''}`,urgency:'soon',daysLeft};
-  return{label:`Over ${daysLeft} dagen`,urgency:'ok',daysLeft};
-}
-
-function setLastToday(){
-  document.getElementById('routine-last').value=new Date().toISOString().split('T')[0];
-  updateNextDateFromFreq();
-}
-
-function updateNextDateFromFreq(){
-  const freq=document.getElementById('routine-freq').value;
-  const last=document.getElementById('routine-last').value;
-  if(freq==='aangepast')return; // user picks manually
-  if(!last)return;
-  const interval=FREQ_DAYS[freq];
-  if(!interval)return;
-  const next=new Date(last+'T00:00:00');
-  next.setDate(next.getDate()+interval);
-  document.getElementById('routine-next').value=next.toISOString().split('T')[0];
-}
-
-let miniCalDate=new Date();
-function openMiniCal(){
-  const container=document.getElementById('mini-cal-container');
-  if(container.style.display==='block'){container.style.display='none';return;}
-  // Try to init from current next value
-  const cur=document.getElementById('routine-next').value;
-  if(cur)miniCalDate=new Date(cur+'T00:00:00');
-  else miniCalDate=new Date();
-  renderMiniCal();
-  container.style.display='block';
-}
-
-function renderMiniCal(){
-  const container=document.getElementById('mini-cal-container');
-  const y=miniCalDate.getFullYear(),m=miniCalDate.getMonth();
-  const today=new Date();today.setHours(0,0,0,0);
-  const selVal=document.getElementById('routine-next').value;
-  const sel=selVal?new Date(selVal+'T00:00:00'):null;
-  const monthNames=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
-  let html=`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <button onclick="miniCalNav(-1)" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:var(--text)">‹</button>
-      <span style="font-weight:700;font-size:14px">${monthNames[m]} ${y}</span>
-      <button onclick="miniCalNav(1)" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:var(--text)">›</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">`;
-  ['M','D','W','D','V','Z','Z'].forEach(d=>{html+=`<div style="font-size:10px;color:var(--text3);font-weight:700;padding:2px">${d}</div>`;});
-  const first=new Date(y,m,1);
-  let start=first.getDay()-1;if(start<0)start=6;
-  const dim=new Date(y,m+1,0).getDate();
-  for(let i=0;i<start;i++)html+=`<div></div>`;
-  for(let d=1;d<=dim;d++){
-    const date=new Date(y,m,d);
-    const isToday=date.toDateString()===today.toDateString();
-    const isSel=sel&&date.toDateString()===sel.toDateString();
-    const isPast=date<today;
-    const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    html+=`<div onclick="pickMiniCalDate('${ds}')" style="height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;cursor:pointer;font-size:12px;font-weight:${isToday||isSel?'700':'400'};
-      background:${isSel?'var(--accent)':isToday?'var(--accent2)':'transparent'};
-      color:${isSel?'#fff':isPast?'var(--text3)':'var(--text)'}">${d}</div>`;
-  }
-  html+=`</div></div>`;
-  container.innerHTML=html;
-}
-
-function miniCalNav(d){
-  miniCalDate.setMonth(miniCalDate.getMonth()+d);
-  renderMiniCal();
-}
-
-function pickMiniCalDate(ds){
-  document.getElementById('routine-next').value=ds;
-  document.getElementById('mini-cal-container').style.display='none';
-  // Set freq to aangepast if manually picked
-  const freq=document.getElementById('routine-freq').value;
-  if(freq!=='aangepast'){
-    // keep freq but update the next date field
-  }
-}
-
-function renderTaken(){
-  const el=document.getElementById('panel-taken');
-  const urgencyColor={overdue:'var(--red)',today:'var(--amber)',soon:'var(--amber)',ok:'var(--green)'};
-  const urgencyBg={overdue:'#fee2e2',today:'#fef3c7',soon:'#fef9c3',ok:'#d1fae5'};
-
-  // Sort: overdue first, then by days left
-  const sorted=[...S.routines].sort((a,b)=>{
-    const sa=getRoutineStatus(a), sb=getRoutineStatus(b);
-    return sa.daysLeft-sb.daysLeft;
-  });
-
-  // Group by category
-  const byCat={};
-  sorted.forEach(r=>{
-    if(!byCat[r.cat])byCat[r.cat]=[];
-    byCat[r.cat].push(r);
-  });
-
-  let html=`<button class="btn btn-p" style="width:100%;margin-bottom:12px;flex-shrink:0" onclick="openAddRoutine()">＋ Routine toevoegen</button>`;
-
-  if(!S.routines.length){
-    html+=`<div class="empty">
-      <div style="font-size:32px;margin-bottom:8px">🔄</div>
-      <div>Nog geen routines.</div>
-      <div style="font-size:12px;margin-top:4px">Voeg bv. "Planten water geven" of "Lakens verversen" toe.</div>
-    </div>`;
-    el.innerHTML=html;return;
-  }
-
-  S.routineCats.forEach(cat=>{
-    const routines=byCat[cat.id];
-    if(!routines||!routines.length)return;
-    html+=`<div style="margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-shrink:0">
-        <div style="width:10px;height:10px;border-radius:50%;background:${cat.color}"></div>
-        <span style="font-weight:700;font-size:14px;color:${cat.color}">${cat.name}</span>
-        <span class="badge" style="background:${cat.color}">${routines.length}</span>
-      </div>`;
-    routines.forEach(r=>{
-      const st=getRoutineStatus(r);
-      const col=urgencyColor[st.urgency];
-      const bg=urgencyBg[st.urgency];
-      html+=`<div class="card-w" style="border-left:4px solid ${cat.color};padding:10px 12px;margin-bottom:6px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1">
-            <div style="font-weight:600;font-size:14px">${r.name}</div>
-            ${r.note?`<div class="muted" style="margin-top:2px">${r.note}</div>`:''}
-            <div style="display:flex;gap:6px;align-items:center;margin-top:5px;flex-wrap:wrap">
-              <span class="recur-tag">${FREQ_L[r.freq]||r.freq}</span>
-              <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${bg};color:${col}">${st.label}</span>
-              ${r.last?`<span class="muted">Laatste keer: ${new Date(r.last+'T00:00:00').toLocaleDateString('nl-BE')}</span>`:''}
-              ${r.next?`<span class="muted">Volgende: ${new Date(r.next+'T00:00:00').toLocaleDateString('nl-BE')}</span>`:''}
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:4px;align-items:center">
-            <button onclick="markRoutineDone('${r.id}')" style="border:none;background:var(--green);color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">✓ Gedaan</button>
-            <div style="display:flex;gap:4px">
-              <button onclick="openEditRoutine('${r.id}')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:14px;padding:3px">✏️</button>
-              <button onclick="delRoutine('${r.id}')" style="border:none;background:transparent;color:var(--red);cursor:pointer;font-size:13px;padding:3px">✕</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
+      h+=`</div></div>`;
     });
-    html+='</div>';
-  });
-
-  // Uncategorized
-  const uncatRoutines=sorted.filter(r=>!S.routineCats.find(c=>c.id===r.cat));
-  if(uncatRoutines.length){
-    html+=`<div class="lbl">Overig</div>`;
-    uncatRoutines.forEach(r=>{
-      const st=getRoutineStatus(r);
-      const col=urgencyColor[st.urgency];
-      const bg=urgencyBg[st.urgency];
-      html+=`<div class="card-w" style="padding:10px 12px;margin-bottom:6px">
-        <div style="font-weight:600">${r.name}</div>
-        <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:${bg};color:${col}">${st.label}</span>
-        <button onclick="markRoutineDone('${r.id}')" style="border:none;background:var(--green);color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer;font-size:12px;margin-left:8px">✓ Gedaan</button>
-        <button onclick="openEditRoutine('${r.id}')" style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:13px;margin-left:4px">✏️</button>
-        <button onclick="delRoutine('${r.id}')" style="border:none;background:transparent;color:var(--red);cursor:pointer;font-size:13px">✕</button>
-      </div>`;
-    });
+    if(done.length){
+      h+=`<div class="section"><div class="section-header">Afgerond (${done.length})</div><div class="card-list">`;
+      done.forEach(t=>{h+=`<div class="row" style="opacity:.6"><div style="font-size:18px;color:var(--accent);flex-shrink:0">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3)">${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
+      h+=`</div></div>`;
+    }
   }
-
-  el.innerHTML=html;
+  el.innerHTML=h;
 }
 
-/* ===== TODO ===== */
-function openAddTodo(){
-  document.getElementById('todo-modal-title').innerHTML='To-do toevoegen<button class="modal-close" onclick="closeModal(\'modal-todo\')">×</button>';
-  document.getElementById('todo-edit-id').value='';
-  document.getElementById('todo-txt').value='';
-  document.getElementById('todo-tags').value='';
-  document.getElementById('todo-prio').value='normaal';
-  document.getElementById('todo-urgent').value='niet-urgent';
-  document.getElementById('todo-cat-sel').innerHTML=S.todoCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
-  openModal('modal-todo');
+function todoRow(t,c){
+  const chips=(t.priority==='hoog'?'<span class="chip chip-red">Hoog</span>':'')+(t.urgent?'<span class="chip chip-orange">Urgent</span>':'')+(t.tags||[]).map(g=>`<span class="chip chip-green">${esc(g)}</span>`).join('');
+  return `<div class="row" onclick="openTodoModal('${t.id}')"><button class="check-btn" onclick="event.stopPropagation();toggleTodo('${t.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></button><div class="row-content"><div class="row-title">${esc(t.text)}</div>${chips?`<div style="margin-top:3px">${chips}</div>`:''} ${t.notes?`<div class="row-sub">${esc(t.notes)}</div>`:''}</div></div>`;
 }
 
-function openEditTodo(id){
-  const t=S.todos.find(t=>t.id===id);if(!t)return;
-  document.getElementById('todo-modal-title').innerHTML='To-do bewerken<button class="modal-close" onclick="closeModal(\'modal-todo\')">×</button>';
-  document.getElementById('todo-edit-id').value=id;
-  document.getElementById('todo-txt').value=t.text;
-  document.getElementById('todo-prio').value=t.prio||'normaal';
-  document.getElementById('todo-urgent').value=t.urgent||'niet-urgent';
-  document.getElementById('todo-cat-sel').innerHTML=S.todoCats.map(c=>`<option value="${c.id}"${c.id===t.cat?' selected':''}>${c.name}</option>`).join('');
-  document.getElementById('todo-tags').value=(t.tags||[]).join(', ');
-  openModal('modal-todo');
+function renderMatrix(){
+  const a=todos.filter(t=>!t.isDone);
+  const q=(title,sub,items,color)=>`<div class="quad" style="border-color:${color}33"><div class="quad-title" style="color:${color}">${title}</div><div class="quad-sub">${sub}</div>${items.length?items.map(t=>`<div class="quad-item" onclick="toggleTodo('${t.id}')" style="background:${color}15">${esc(t.text)}</div>`).join(''):'<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Leeg</div>'}</div>`;
+  return `<div class="matrix">${q('🔥 Doe nu','Urgent + Hoog',a.filter(t=>t.priority==='hoog'&&t.urgent),'#9b4a4a')}${q('📅 Plan in','Niet urgent + Hoog',a.filter(t=>t.priority==='hoog'&&!t.urgent),'#4a7a9b')}${q('🤝 Delegeer','Urgent + Laag',a.filter(t=>t.priority!=='hoog'&&t.urgent),'#8b6914')}${q('🗑 Elimineer','Niet urgent + Laag',a.filter(t=>t.priority!=='hoog'&&!t.urgent),'#7a8a6a')}</div>`;
 }
 
-function saveTodo(){
-  const text=document.getElementById('todo-txt').value.trim();if(!text)return;
-  const prio=document.getElementById('todo-prio').value;
-  const urgent=document.getElementById('todo-urgent').value;
-  const cat=document.getElementById('todo-cat-sel').value;
-  const tags=document.getElementById('todo-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
-  const editId=document.getElementById('todo-edit-id').value;
-  if(editId){
-    const t=S.todos.find(t=>t.id===editId);
-    if(t){t.text=text;t.prio=prio;t.urgent=urgent;t.cat=cat;t.tags=tags;}
-  } else {
-    S.todos.push({id:Date.now()+'',text,prio,urgent,cat,tags,done:false});
-  }
-  save();closeModal('modal-todo');renderTodo();
-}
-
-function addTodo(){saveTodo();} // backwards compat
-function toggleTodo(id){const t=S.todos.find(t=>t.id===id);if(t){t.done=!t.done;save();renderTodo();}}
-function delTodo(id){S.todos=S.todos.filter(t=>t.id!==id);save();renderTodo();}
-
-function setTodoView(v){
-  curTodoView=v;
-  document.querySelectorAll('#panel-todo .view-tab').forEach(b=>b.classList.toggle('active',b.dataset.v===v));
-  renderTodo();
-}
-
-function renderTodo(){
-  const el=document.getElementById('panel-todo');
-  let views=`<div class="view-tabs" style="margin-bottom:10px">
-    <button class="view-tab${curTodoView==='lijst'?' active':''}" data-v="lijst" onclick="setTodoView('lijst')">Lijst</button>
-    <button class="view-tab${curTodoView==='matrix'?' active':''}" data-v="matrix" onclick="setTodoView('matrix')">Eisenhower</button>
-  </div>`;
-  let html=views+`<button class="btn btn-p" style="width:100%;margin-bottom:12px" onclick="openAddTodo()">＋ To-do toevoegen</button>`;
-  if(curTodoView==='matrix'){el.innerHTML=html;renderEisenhower(el,html);return;}
-
-  const active=S.todos.filter(t=>!t.done);
-  const done=S.todos.filter(t=>t.done);
-  if(!S.todos.length){el.innerHTML=html+'<div class="empty">Nog geen to-dos</div>';return;}
-
-  const catMap={};
-  active.forEach(t=>{if(!catMap[t.cat])catMap[t.cat]=[];catMap[t.cat].push(t);});
-  S.todoCats.forEach(cat=>{
-    const todos=catMap[cat.id];if(!todos||!todos.length)return;
-    html+=`<div style="margin-bottom:14px">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
-        <div style="width:10px;height:10px;border-radius:50%;background:${cat.color}"></div>
-        <span style="font-weight:700;font-size:14px;color:${cat.color}">${cat.name}</span>
-        <span class="badge" style="background:${cat.color}">${todos.length}</span>
-      </div>`;
-    const tagMap={__none:[]};
-    todos.forEach(t=>{if(!t.tags||!t.tags.length)tagMap.__none.push(t);else t.tags.forEach(tag=>{if(!tagMap[tag])tagMap[tag]=[];tagMap[tag].push(t);});});
-    Object.entries(tagMap).forEach(([tag,items])=>{
-      if(!items.length)return;
-      if(tag!=='__none')html+=`<div class="lbl" style="margin-left:16px">${tag}</div>`;
-      html+=`<div class="card-w" style="border-left:3px solid ${cat.color};padding:7px 10px">`;
-      items.forEach(t=>{
-        const pb=t.prio==='hoog'?`<span class="tag" style="background:#fee2e2;color:#dc2626">Hoog</span>`:t.prio==='laag'?`<span class="tag" style="background:var(--bg3);color:var(--text2)">Laag</span>`:'';
-        const ub=t.urgent==='urgent'?`<span class="tag" style="background:#fef3c7;color:#d97706">Urgent</span>`:'';
-        html+=`<div class="item">
-          <div class="circle${t.done?' done':''}" onclick="toggleTodo('${t.id}')">
-            <svg class="chksvg" viewBox="0 0 11 11"><polyline points="1.5 5.5 4.5 8.5 9.5 2.5"/></svg>
-          </div>
-          <span style="flex:1;font-size:13px">${t.text}</span>
-          ${pb}${ub}
-          <button style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:14px;padding:3px 5px" onclick="openEditTodo('${t.id}')" title="Bewerken">✏️</button>
-          <button class="btn-d" onclick="delTodo('${t.id}')">✕</button>
-        </div>`;
-      });
-      html+='</div>';
-    });
-    html+='</div>';
-  });
-  if(done.length){
-    html+=`<div class="lbl">Afgerond (${done.length})</div><div class="card" style="opacity:.55">`;
-    done.forEach(t=>{
-      html+=`<div class="item">
-        <div class="circle done" onclick="toggleTodo('${t.id}')">
-          <svg class="chksvg" viewBox="0 0 11 11"><polyline points="1.5 5.5 4.5 8.5 9.5 2.5"/></svg>
-        </div>
-        <span style="flex:1;font-size:13px;text-decoration:line-through">${t.text}</span>
-        <button style="border:none;background:transparent;color:var(--text3);cursor:pointer;font-size:14px;padding:3px 5px" onclick="openEditTodo('${t.id}')">✏️</button>
-        <button class="btn-d" onclick="delTodo('${t.id}')">✕</button>
-      </div>`;
-    });
-    html+='</div>';
-  }
-  el.innerHTML=html;
-}
-
-function renderEisenhower(el,prefix){
-  const active=S.todos.filter(t=>!t.done);
-  const q1=active.filter(t=>t.prio==='hoog'&&t.urgent==='urgent');
-  const q2=active.filter(t=>t.prio==='hoog'&&t.urgent!=='urgent');
-  const q3=active.filter(t=>t.prio!=='hoog'&&t.urgent==='urgent');
-  const q4=active.filter(t=>t.prio!=='hoog'&&t.urgent!=='urgent');
-  const q=(title,items,bg,bc,tc)=>{
-    let h=`<div class="ei-q" style="background:${bg};border-color:${bc}"><div class="ei-qt" style="color:${tc}">${title}</div>`;
-    if(!items.length)h+=`<div style="font-size:11px;color:${tc};opacity:.4">Leeg</div>`;
-    items.forEach(t=>{h+=`<div class="ei-it" style="display:flex;align-items:center;gap:4px">
-      <span style="flex:1;cursor:pointer" onclick="toggleTodo('${t.id}')">${t.text}</span>
-      <button onclick="openEditTodo('${t.id}')" style="border:none;background:transparent;color:${tc};opacity:.6;cursor:pointer;font-size:12px;padding:1px 3px;flex-shrink:0">✏️</button>
-    </div>`});
-    return h+'</div>';
-  };
-  el.innerHTML=prefix+`<div class="ei-grid">
-    ${q('🔥 Doe nu',q1,'#fee2e222','#dc2626','#dc2626')}
-    ${q('📅 Plan in',q2,'#dbeafe22','#2563eb','#2563eb')}
-    ${q('🤝 Delegeer',q3,'#fef3c722','#d97706','#d97706')}
-    ${q('🗑 Elimineer',q4,'var(--bg3)','var(--border)','var(--text2)')}
-  </div>
-  <div style="display:flex;gap:10px;font-size:10px;color:var(--text3);justify-content:center;flex-wrap:wrap">
-    <span>🔥 Urgent + hoog</span><span>📅 Niet urgent + hoog</span><span>🤝 Urgent + laag</span><span>🗑 Niet urgent + laag</span>
-  </div>`;
-}
-
-/* ===== WINKEL ===== */
-function openAddStore(){
-  const name=prompt('Naam van de winkel?');
-  if(!name)return;
-  if(!S.stores.includes(name)){S.stores.push(name);S.shops[name]=[];}
-  save();activeStore=name;renderWinkel();
-}
-function renderWinkel(){
-  const el=document.getElementById('panel-winkel');
-  let html=`<div class="card">
-    <div class="row">
-      <input type="text" id="shop-new-nm" placeholder="Nieuwe winkel...">
-      <button class="btn btn-p btn-sm" onclick="quickAddStore()">＋ Winkel</button>
-    </div>
-    <div style="margin-top:6px">
-      <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Logo uploaden:</div>
-      <div class="row">
-        <select id="logo-store-sel" style="flex:1">${S.stores.map(s=>`<option value="${s}">${s}</option>`).join('')}</select>
-        <input type="file" id="logo-file" accept="image/*" style="display:none" onchange="doLogoUpload()">
-        <button class="btn btn-sm" onclick="document.getElementById('logo-file').click()">📷 Upload</button>
-      </div>
-    </div>
-  </div>`;
-  if(!S.stores.length){html+='<div class="empty">Nog geen winkels</div>';el.innerHTML=html;return;}
-  S.stores.forEach(store=>{
-    const items=S.shops[store]||[];
-    const rem=items.filter(i=>!i.got).length;
-    const logo=S.storeLogos[store];
-    const logoHtml=logo?`<img src="${logo}" alt="">`:'🛒';
-    const isOpen=activeStore===store;
-    html+=`<div class="shop-card">
-      <div class="shop-head" onclick="toggleStore('${store}')">
-        <div class="shop-logo">${logoHtml}</div>
-        <span class="shop-nm">${store}</span>
-        ${rem>0?`<span class="badge">${rem}</span>`:''}
-        <span style="color:var(--text3)">${isOpen?'▾':'▸'}</span>
-      </div>
-      <div class="shop-body${isOpen?' open':''}">`;
-    if(isOpen){
-      html+=`<button class="btn btn-p btn-sm" style="width:100%;margin-bottom:8px" onclick="openShopItem('${store}')">＋ Product</button>`;
-      const bycat={};items.forEach(it=>{if(!bycat[it.cat])bycat[it.cat]=[];bycat[it.cat].push(it);});
-      let has=false;
-      CAT_ORDER.forEach(cat=>{
-        if(!bycat[cat]||!bycat[cat].length)return;has=true;
-        html+=`<div class="shop-cat-h">${CAT_ICONS[cat]} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</div>`;
-        bycat[cat].forEach(it=>{
-          html+=`<div class="shop-row">
-            <div class="sq${it.got?' got':''}" onclick="toggleShop('${store}','${it.id}')">
-              <svg class="chksvg" viewBox="0 0 11 11"><polyline points="1.5 5.5 4.5 8.5 9.5 2.5"/></svg>
-            </div>
-            <span style="flex:1;font-size:14px;${it.got?'opacity:.35;text-decoration:line-through':''}">${it.name}</span>
-            ${it.qty?`<span class="muted">${it.qty}</span>`:''}
-            <button class="btn-d" onclick="delShopItem('${store}','${it.id}')">✕</button>
-          </div>`;
+function renderWinkellijst(){
+  const el=document.getElementById('page-winkellijst');
+  let h=`<div class="page-header"><div class="page-title">Winkellijst</div><button class="header-btn" onclick="openModal('modal-store');document.getElementById('s-name').value=''"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
+  if(!stores.length){h+=`<div class="empty"><div class="empty-icon">🛒</div><div class="empty-title">Geen winkels</div><div class="empty-sub">Voeg je eerste winkel toe</div></div>`}
+  else{
+    stores.forEach(store=>{
+      const items=shopItems.filter(i=>i.storeId===store.id);
+      const rem=items.filter(i=>!i.isGot).length;
+      const open=expandedStoreId===store.id;
+      h+=`<div style="margin:10px 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)"><div class="store-header" onclick="toggleStore('${store.id}')"><span style="font-size:14px;color:var(--text2)">${open?'▾':'▸'}</span><span class="store-name">${esc(store.name)}</span>${rem>0?`<span class="store-badge">${rem}</span>`:''}<button style="background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;padding:0 6px;font-weight:600" onclick="event.stopPropagation();deleteStore('${store.id}')">Verwijder</button></div>`;
+      if(open){
+        h+=`<div class="store-body" style="border-top:1px solid var(--border)"><div class="store-add-btn" onclick="openShopItemModal('${store.id}')"><span style="font-size:18px">＋</span> Product toevoegen</div>`;
+        ['groenten','fruit','vlees','vis','zuivel','brood','droog','drank','diepvries','hygiene','overig'].forEach(cat=>{
+          const ci=items.filter(i=>i.category===cat);if(!ci.length)return;
+          h+=`<div class="shop-cat-label">${shopCatLabels[cat]}</div>`;
+          ci.forEach(item=>{h+=`<div class="shop-item-row"><div class="check-sq${item.isGot?' checked':''}" onclick="toggleShop('${item.id}')"></div><span class="shop-item-name${item.isGot?' got':''}">${esc(item.name)}</span>${item.quantity?`<span class="shop-qty">${esc(item.quantity)}</span>`:''}<button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px" onclick="deleteShop('${item.id}')">✕</button></div>`});
         });
-      });
-      if(!has)html+='<div class="empty" style="padding:12px">Nog geen producten</div>';
-      html+=`<div style="display:flex;gap:6px;margin-top:8px">
-        <button class="btn btn-sm" style="flex:1" onclick="clearGot('${store}')">Afgevinkte wissen</button>
-        <button class="btn-d btn-sm" onclick="delStore('${store}')">Verwijder winkel</button>
-      </div>`;
-    }
-    html+='</div></div>';
-  });
-  el.innerHTML=html;
-}
-function quickAddStore(){
-  const name=document.getElementById('shop-new-nm').value.trim();if(!name)return;
-  if(!S.stores.includes(name)){S.stores.push(name);S.shops[name]=[];}
-  save();activeStore=name;renderWinkel();
-}
-function toggleStore(s){activeStore=activeStore===s?null:s;renderWinkel();}
-function openShopItem(store){
-  activeStore=store;
-  document.getElementById('shop-modal-t').innerHTML=`Product — ${store}<button class="modal-close" onclick="closeModal('modal-shop')">×</button>`;
-  document.getElementById('shop-item-nm').value='';document.getElementById('shop-qty').value='';
-  openModal('modal-shop');
-}
-function addShopItem(){
-  if(!activeStore)return;
-  const name=document.getElementById('shop-item-nm').value.trim();if(!name)return;
-  const qty=document.getElementById('shop-qty').value.trim();
-  const cat=document.getElementById('shop-cat-sel').value;
-  S.shops[activeStore]=S.shops[activeStore]||[];
-  S.shops[activeStore].push({id:Date.now()+'',name,qty,cat,got:false});
-  save();closeModal('modal-shop');renderWinkel();
-}
-function toggleShop(store,id){const it=(S.shops[store]||[]).find(i=>i.id===id);if(it){it.got=!it.got;save();renderWinkel();}}
-function delShopItem(store,id){if(S.shops[store])S.shops[store]=S.shops[store].filter(i=>i.id!==id);save();renderWinkel();}
-function clearGot(store){if(S.shops[store])S.shops[store]=S.shops[store].filter(i=>!i.got);save();renderWinkel();}
-function delStore(store){
-  if(!confirm(`"${store}" verwijderen?`))return;
-  S.stores=S.stores.filter(s=>s!==store);delete S.shops[store];delete S.storeLogos[store];
-  if(activeStore===store)activeStore=null;save();renderWinkel();
-}
-function doLogoUpload(){
-  const store=document.getElementById('logo-store-sel').value;
-  const file=document.getElementById('logo-file').files[0];
-  if(!file||!store)return;
-  const r=new FileReader();r.onload=e=>{S.storeLogos[store]=e.target.result;save();renderWinkel();};r.readAsDataURL(file);
-}
-
-/* ===== SETTINGS ===== */
-function renderSettings(){
-  const el=document.getElementById('panel-instellingen');
-  let html=`
-  <div class="st-sec">
-    <div class="st-title">☁️ Synchronisatie</div>
-    <div class="card">
-      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">Log in met Google om je data automatisch te synchroniseren tussen al je apparaten.</div>
-      <div id="fb-status" style="font-size:12px;margin-bottom:10px;color:var(--text3)">Laden...</div>
-      <button id="fb-login-btn" class="btn btn-p" style="width:100%;margin-bottom:8px">Inloggen met Google</button>
-      <button class="btn btn-sm" style="width:100%" onclick="if(window._fbSave&&window._fbUser){window._fbSave(window.S);alert('✓ Data gesynchroniseerd!');}else{alert('Eerst inloggen.');}">☁️ Nu synchroniseren</button>
-    </div>
-  </div>
-  <div class="st-sec">
-    <div class="st-title">Agenda's beheren</div>
-    <div class="card" id="cals-manage"></div>
-    <button class="btn btn-p btn-sm" style="width:100%;margin-top:-4px" onclick="openAddCalModal()">＋ Agenda toevoegen</button>
-  </div>
-  <div class="st-sec">
-    <div class="st-title">Categorieën — Routines</div>
-    <div class="card" id="routine-cats-manage"></div>
-    <div class="card" style="margin-top:-4px">
-      <div class="row">
-        <input type="text" id="new-rc-name" placeholder="Nieuwe categorie...">
-        <input type="color" id="new-rc-color" value="#059669" style="width:40px;flex:0 0 40px;height:34px;padding:2px;border-radius:7px;border:1px solid var(--border2)">
-        <button class="btn btn-p btn-sm" onclick="addRoutineCat()">＋</button>
-      </div>
-    </div>
-  </div>
-  <div class="st-sec">
-    <div class="st-title">Categorieën — Agenda</div>
-    <div class="card" id="taak-cats-manage"></div>
-    <div class="card" style="margin-top:-4px">
-      <div class="row">
-        <input type="text" id="new-taakcat-name" placeholder="Nieuwe categorie...">
-        <input type="color" id="new-taakcat-color" value="#7c3aed" style="width:40px;flex:0 0 40px;height:34px;padding:2px;border-radius:7px;border:1px solid var(--border2)">
-        <button class="btn btn-p btn-sm" onclick="addTaakCat()">＋</button>
-      </div>
-    </div>
-  </div>
-  <div class="st-sec">
-    <div class="st-title">Categorieën — To-do</div>
-    <div class="card" id="todo-cats-manage"></div>
-    <div class="card" style="margin-top:-4px">
-      <div class="row">
-        <input type="text" id="new-tc-name" placeholder="Nieuwe categorie...">
-        <input type="color" id="new-tc-color" value="#7c3aed" style="width:40px;flex:0 0 40px;height:34px;padding:2px;border-radius:7px;border:1px solid var(--border2)">
-        <button class="btn btn-p btn-sm" onclick="addTodoCat()">＋</button>
-      </div>
-    </div>
-  </div>
-  <div class="st-sec">
-    <div class="st-title">Uiterlijk</div>
-    <div class="card">
-      <div class="st-row">
-        <div><div class="st-lbl">Accentkleur</div><div class="st-sub">Hoofdkleur van de app</div></div>
-        <input type="color" value="#7c3aed" id="accent-color-pick" onchange="setAccent(this.value)" style="width:36px;height:32px;border:none;border-radius:7px;cursor:pointer;background:none">
-      </div>
-    </div>
-  </div>
-  <div class="st-sec">
-    <div class="st-title">Gegevens</div>
-    <div class="card">
-      <button class="btn btn-sm" style="width:100%;margin-bottom:8px" onclick="exportData()">📤 Exporteer backup (JSON)</button>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Sla regelmatig een backup op om je data te beschermen.</div>
-      <div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:8px">
-        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">📥 Importeer backup</div>
-        <input type="file" id="import-file" accept=".json" style="font-size:13px;padding:4px;margin-bottom:6px" onchange="importData()">
-        <div style="font-size:11px;color:var(--text2)">Kies een eerder geëxporteerd JSON-bestand. Je huidige data wordt overschreven.</div>
-      </div>
-      <button class="btn-d btn-sm" style="width:100%;padding:8px;border-top:1px solid var(--border);padding-top:10px" onclick="clearAll()">🗑 Alle gegevens wissen</button>
-    </div>
-  </div>`;
-  el.innerHTML=html;
-  renderCalsManage();renderRoutineCatsManage();renderTaakCatsManage();renderTodoCatsManage();
-  // Update Firebase UI state
-  setTimeout(()=>{if(window._fbUpdateUI)window._fbUpdateUI(window._fbUser);},50);
-}
-
-function renderCalsManage(){
-  const el=document.getElementById('cals-manage');if(!el)return;
-  el.innerHTML=S.calendars.map(c=>`
-    <div class="st-row">
-      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
-        <div style="width:12px;height:12px;border-radius:50%;background:${c.color};flex-shrink:0"></div>
-        <div style="min-width:0">
-          <div class="st-lbl">${c.name}</div>
-          <div id="cal-status-${c.id}" class="st-sub">${c.ical?(S._status&&S._status[c.id]||'Google Agenda gekoppeld'):'Eigen agenda'}</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
-        <input type="color" value="${c.color}" onchange="updateCalColor('${c.id}',this.value)" style="width:28px;height:24px;border:none;border-radius:5px;cursor:pointer;background:none">
-        ${c.ical?`<button class="btn btn-sm" onclick="fetchIcal('${c.id}')">↻</button>`:''}
-        ${c.id!=='eigen'?`<button class="btn-d" onclick="deleteCalendar('${c.id}')">✕</button>`:''}
-      </div>
-    </div>`).join('');
-}
-function updateCalColor(id,color){const c=S.calendars.find(c=>c.id===id);if(c){c.color=color;save();renderCalSidebar();}}
-
-function renderRoutineCatsManage(){
-  const el=document.getElementById('routine-cats-manage');if(!el)return;
-  el.innerHTML=S.routineCats.map(c=>`
-    <div class="st-row">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:12px;height:12px;border-radius:50%;background:${c.color}"></div>
-        <span>${c.name}</span>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input type="color" value="${c.color}" onchange="updateRCColor('${c.id}',this.value)" style="width:30px;height:26px;border:none;border-radius:6px;cursor:pointer;background:none">
-        <button class="btn-d" onclick="delRoutineCat('${c.id}')">✕</button>
-      </div>
-    </div>`).join('');
-}
-function addRoutineCat(){
-  const name=document.getElementById('new-rc-name').value.trim();
-  const color=document.getElementById('new-rc-color').value;
-  if(!name)return;
-  S.routineCats.push({id:Date.now()+'',name,color});save();
-  renderRoutineCatsManage();document.getElementById('new-rc-name').value='';
-}
-function delRoutineCat(id){S.routineCats=S.routineCats.filter(c=>c.id!==id);save();renderRoutineCatsManage();}
-function updateRCColor(id,color){const c=S.routineCats.find(c=>c.id===id);if(c){c.color=color;save();}}
-
-function renderTaakCatsManage(){
-  const el=document.getElementById('taak-cats-manage');if(!el)return;
-  el.innerHTML=S.taakCats.map(c=>`
-    <div class="st-row">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:12px;height:12px;border-radius:50%;background:${c.color}"></div>
-        <span>${c.name}</span>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input type="color" value="${c.color}" onchange="updateTaakCatColor('${c.id}',this.value)" style="width:30px;height:26px;border:none;border-radius:6px;cursor:pointer;background:none">
-        <button class="btn-d" onclick="delTaakCat('${c.id}')">✕</button>
-      </div>
-    </div>`).join('');
-}
-function addTaakCat(){
-  const name=document.getElementById('new-taakcat-name').value.trim();
-  const color=document.getElementById('new-taakcat-color').value;
-  if(!name)return;
-  S.taakCats.push({id:Date.now()+'',name,color});save();
-  renderTaakCatsManage();document.getElementById('new-taakcat-name').value='';
-}
-function delTaakCat(id){S.taakCats=S.taakCats.filter(c=>c.id!==id);save();renderTaakCatsManage();}
-function updateTaakCatColor(id,color){const c=S.taakCats.find(c=>c.id===id);if(c){c.color=color;save();}}
-function setAccent(color){document.documentElement.style.setProperty('--accent',color);}
-
-function renderTodoCatsManage(){
-  const el=document.getElementById('todo-cats-manage');if(!el)return;
-  el.innerHTML=S.todoCats.map(c=>`
-    <div class="st-row">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="width:12px;height:12px;border-radius:50%;background:${c.color}"></div>
-        <span>${c.name}</span>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <input type="color" value="${c.color}" onchange="updateTCColor('${c.id}',this.value)" style="width:30px;height:26px;border:none;border-radius:6px;cursor:pointer;background:none">
-        <button class="btn-d" onclick="delTodoCat('${c.id}')">✕</button>
-      </div>
-    </div>`).join('');
-}
-function addTodoCat(){
-  const name=document.getElementById('new-tc-name').value.trim();
-  const color=document.getElementById('new-tc-color').value;
-  if(!name)return;
-  S.todoCats.push({id:Date.now()+'',name,color});save();
-  renderTodoCatsManage();document.getElementById('new-tc-name').value='';
-}
-function delTodoCat(id){S.todoCats=S.todoCats.filter(c=>c.id!==id);save();renderTodoCatsManage();}
-function updateTCColor(id,color){const c=S.todoCats.find(c=>c.id===id);if(c){c.color=color;save();}}
-function exportData(){
-  const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download=`planr-backup-${new Date().toISOString().split('T')[0]}.json`;a.click();
-}
-function importData(){
-  const file=document.getElementById('import-file').files[0];
-  if(!file)return;
-  if(!confirm('Je huidige data wordt overschreven met de backup. Doorgaan?')){
-    document.getElementById('import-file').value='';return;
-  }
-  const reader=new FileReader();
-  reader.onload=e=>{
-    try{
-      const imported=JSON.parse(e.target.result);
-      // Validate it looks like planr data
-      if(typeof imported!=='object'||Array.isArray(imported)){
-        alert('Ongeldig bestand. Kies een Planr backup JSON.');return;
+        if(items.some(i=>i.isGot))h+=`<div class="store-clear-btn" onclick="clearGot('${store.id}')">Afgevinkte wissen</div>`;
+        h+=`</div>`;
       }
-      // Merge with defaults to ensure all keys exist
-      const def=load();
-      S={...def,...imported,
-        calendars:imported.calendars||def.calendars,
-        taakCats:imported.taakCats||def.taakCats,
-        todoCats:imported.todoCats||def.todoCats,
-        routines:imported.routines||def.routines,
-        routineCats:imported.routineCats||def.routineCats,
-        storeLogos:imported.storeLogos||{},
-        stores:imported.stores||[],
-        shops:imported.shops||{},
-        events:imported.events||[],
-        todos:imported.todos||[]
-      };
-      save();
-      alert('✓ Backup succesvol geladen!');
-      location.reload();
-    }catch(err){
-      alert('Fout bij inladen: '+err.message);
-    }
-  };
-  reader.readAsText(file);
-}
-function clearAll(){if(confirm('Alles wissen?')){localStorage.removeItem(KEY);location.reload();}}
-
-/* ===== FIREBASE SYNC ===== */
-const FB_CONFIG={
-  apiKey:"AIzaSyC3srCJohuA5HKvt2K6_bNIlvgnjBpXn9I",
-  authDomain:"planr-45155.firebaseapp.com",
-  projectId:"planr-45155",
-  storageBucket:"planr-45155.firebasestorage.app",
-  messagingSenderId:"706335599227",
-  appId:"1:706335599227:web:760d845bb34d26a92150de"
-};
-
-let db=null, fbUser=null, syncIndicator=null;
-
-function initFirebase(){
-  try{
-    const script1=document.createElement('script');
-    script1.type='module';
-    script1.textContent=`
-      import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-      import {getFirestore,doc,setDoc,getDoc,onSnapshot} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-      import {getAuth,signInWithPopup,signInWithRedirect,getRedirectResult,GoogleAuthProvider,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-
-      const app=initializeApp(${JSON.stringify(FB_CONFIG)});
-      const firestore=getFirestore(app);
-      const auth=getAuth(app);
-      let unsubscribe=null;
-
-      window._fbSignIn=async()=>{
-        try{
-          const provider=new GoogleAuthProvider();
-          // Use redirect on mobile, popup on desktop
-          if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
-            await signInWithRedirect(auth,provider);
-          } else {
-            await signInWithPopup(auth,provider);
-          }
-        }catch(e){console.error('Sign in error:',e);alert('Inloggen mislukt: '+e.message);}
-      };
-      window._fbSignOut=async()=>{
-        if(unsubscribe)unsubscribe();
-        await signOut(auth);
-        window._fbUser=null;
-        window._fbUpdateUI(null);
-      };
-      window._fbSave=async(data)=>{
-        if(!window._fbUser)return;
-        try{
-          await setDoc(doc(firestore,'planr',window._fbUser.uid),{data:JSON.stringify(data),updated:Date.now()});
-        }catch(e){console.error('Firebase save error:',e);}
-      };
-
-      onAuthStateChanged(auth,async user=>{
-        // Handle redirect result first (for mobile)
-        try{
-          const result=await getRedirectResult(auth);
-          if(result)user=result.user;
-        }catch(e){console.error('Redirect result error:',e);}
-        window._fbUser=user;
-        window._fbUpdateUI(user);
-        if(user){
-          // First: check what's in Firebase
-          try{
-            const snap=await getDoc(doc(firestore,'planr',user.uid));
-            const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
-            if(snap.exists()&&snap.data()&&snap.data().data){
-              const remote=snap.data();
-              const remoteUpdated=remote.updated||0;
-              if(remoteUpdated>localUpdated){
-                // Firebase is newer — pull it down
-                const parsed=JSON.parse(remote.data);
-                const def=window._fbLoadDefaults();
-                window.S={...def,...parsed,
-                  calendars:parsed.calendars||def.calendars,
-                  taakCats:parsed.taakCats||def.taakCats,
-                  todoCats:parsed.todoCats||def.todoCats,
-                  routines:(parsed.routines&&parsed.routines.length)?parsed.routines:def.routines,
-                  routineCats:parsed.routineCats||def.routineCats,
-                  storeLogos:parsed.storeLogos||{},
-                  stores:parsed.stores||[],
-                  shops:parsed.shops||{}
-                };
-                localStorage.setItem(window._planrKey,JSON.stringify(window.S));
-                localStorage.setItem('planr_updated',remoteUpdated);
-                window._fbRefreshUI();
-              } else {
-                // Local is newer or equal — push to Firebase
-                window._fbSave(window.S);
-              }
-            } else {
-              // Nothing in Firebase yet — push local data
-              window._fbSave(window.S);
-            }
-          }catch(e){console.error('Initial sync error:',e);}
-
-      window._fbCheckUpdates=async()=>{
-        if(!window._fbUser)return;
-        try{
-          const snap=await getDoc(doc(firestore,'planr',window._fbUser.uid));
-          if(snap.exists()&&snap.data()&&snap.data().data){
-            const remote=snap.data();
-            const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
-            if((remote.updated||0)>localUpdated){
-              const parsed=JSON.parse(remote.data);
-              const def=window._fbLoadDefaults();
-              window.S={...def,...parsed,
-                calendars:parsed.calendars||def.calendars,
-                taakCats:parsed.taakCats||def.taakCats,
-                todoCats:parsed.todoCats||def.todoCats,
-                routines:parsed.routines||[],
-                routineCats:parsed.routineCats||def.routineCats,
-                storeLogos:parsed.storeLogos||{},
-                stores:parsed.stores||[],
-                shops:parsed.shops||{}
-              };
-              localStorage.setItem(window._planrKey,JSON.stringify(window.S));
-              localStorage.setItem('planr_updated',remote.updated);
-              window._fbRefreshUI();
-            }
-          }
-        }catch(e){console.error('Check updates error:',e);}
-      };
-
-      // Realtime listener — always apply remote if newer
-      if(unsubscribe)unsubscribe();
-      unsubscribe=onSnapshot(doc(firestore,'planr',user.uid),snap=>{
-        if(snap.exists()&&snap.data()&&snap.data().data){
-          const remote=snap.data();
-          const localUpdated=parseInt(localStorage.getItem('planr_updated')||'0');
-          if((remote.updated||0)>localUpdated){
-            try{
-              const parsed=JSON.parse(remote.data);
-              const def=window._fbLoadDefaults();
-              window.S={...def,...parsed,
-                calendars:parsed.calendars||def.calendars,
-                taakCats:parsed.taakCats||def.taakCats,
-                todoCats:parsed.todoCats||def.todoCats,
-                routines:parsed.routines||[],
-                routineCats:parsed.routineCats||def.routineCats,
-                storeLogos:parsed.storeLogos||{},
-                stores:parsed.stores||[],
-                shops:parsed.shops||{}
-              };
-              localStorage.setItem(window._planrKey,JSON.stringify(window.S));
-              localStorage.setItem('planr_updated',remote.updated);
-              window._fbRefreshUI();
-            }catch(e){console.error('Snapshot sync error:',e);}
-          }
-        }
-      });
-        }
-      });
-    `;
-    document.head.appendChild(script1);
-  }catch(e){console.error('Firebase init error:',e);}
-}
-
-window._planrKey=KEY;
-window._fbUser=null;
-window._fbUpdateUI=function(user){
-  const btn=document.getElementById('fb-login-btn');
-  const status=document.getElementById('fb-status');
-  if(!btn||!status)return;
-  if(user){
-    btn.textContent='Uitloggen';
-    btn.onclick=window._fbSignOut;
-    status.textContent='✓ Ingelogd als '+user.email;
-    status.style.color='var(--green)';
-  }else{
-    btn.textContent='Inloggen met Google';
-    btn.onclick=window._fbSignIn;
-    status.textContent='Niet ingelogd — geen sync';
-    status.style.color='var(--text3)';
+      h+=`</div>`;
+    });
   }
-};
-window._fbRefreshUI=function(){
-  try{renderCalSidebar();renderCalendar();}catch(e){}
-  try{if(document.getElementById('panel-taken').classList.contains('active'))renderTaken();}catch(e){}
-  try{if(document.getElementById('panel-todo').classList.contains('active'))renderTodo();}catch(e){}
-  try{if(document.getElementById('panel-winkel').classList.contains('active'))renderWinkel();}catch(e){}
-  try{if(document.getElementById('panel-instellingen').classList.contains('active'))renderSettings();}catch(e){}
-};
-window._fbLoadDefaults=function(){return load();};
-
-// Override save to also sync to Firebase
-const _origSave=save;
-window._planrSave=function(){
-  _origSave();
-  localStorage.setItem('planr_updated',Date.now());
-  if(window._fbUser&&window._fbSave)window._fbSave(S);
-};
-// Patch save globally
-const _realSave=save;
-save=function(){
-  try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){console.error('Save error:',e);}
-  try{localStorage.setItem('planr_updated',Date.now());}catch(e){}
-  try{if(window._fbUser&&window._fbSave)window._fbSave(S);}catch(e){}
-};
-
-// Init
-try{
-  renderCalSidebar();
-  renderCalendar();
-} catch(e){console.error('Init error:',e);}
-// Auto-refresh Google Agenda every 30 min
-setInterval(()=>{try{refreshAllIcal();}catch(e){}}, 30*60*1000);
-try{refreshAllIcal();}catch(e){}
-// Init Firebase sync
-try{initFirebase();}catch(e){console.error('Firebase init error:',e);}
-// Check Firebase every 30 seconds
-setInterval(()=>{
-  try{if(window._fbUser&&window._fbCheckUpdates)window._fbCheckUpdates();}catch(e){}
-},30*1000);
-// Check Firebase when app comes back into focus (crucial for iPhone)
-document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible'){
-    try{if(window._fbUser&&window._fbCheckUpdates)window._fbCheckUpdates();}catch(e){}
-  }
-});
-// Also check when window gets focus
-window.addEventListener('focus',()=>{
-  try{if(window._fbUser&&window._fbCheckUpdates)window._fbCheckUpdates();}catch(e){}
-});
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').then(reg=>{
-    reg.update();
-  }).catch(()=>{});
+  el.innerHTML=h;
 }
+
+function renderInstellingen(){
+  const user=auth.currentUser;
+  const dark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.getElementById('page-instellingen').innerHTML=`
+    <div class="page-header"><div class="page-title">Instellingen</div></div>
+    <div class="settings-section"><div class="settings-row">${user?.photoURL?`<img class="user-avatar" src="${user.photoURL}" alt="">`:'<span style="font-size:24px">👤</span>'}<span class="settings-label">${esc(user?.displayName||user?.email||'Gebruiker')}</span><button style="background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;font-weight:600" onclick="doSignOut()">Uitloggen</button></div></div>
+    <div style="margin:16px 12px 0;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Uiterlijk</div>
+    <div class="settings-section"><div class="settings-row"><span class="settings-label">Donkere modus</span><button class="toggle-switch${dark?' on':''}" onclick="toggleDark()"></button></div></div>
+    <div style="margin:16px 12px 0;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Routine categorieën</div>
+    <div class="settings-section">${routineCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="settings-del" onclick="deleteCat('routineCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('routine')">＋ Categorie toevoegen</div></div>
+    <div style="margin:16px 12px 0;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">To-do categorieën</div>
+    <div class="settings-section">${todoCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="settings-del" onclick="deleteCat('todoCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('todo')">＋ Categorie toevoegen</div></div>
+    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.0 · 🌿</div>`;
+}
+
+window.openModal=id=>{const el=document.getElementById(id);el.classList.add('open');el.onclick=e=>{if(e.target===el)closeModal(id)}};
+window.closeModal=id=>document.getElementById(id).classList.remove('open');
+
+window.openRoutineModal=id=>{
+  editingRoutineId=id||null;
+  const r=id?routines.find(x=>x.id===id):null;
+  document.getElementById('routine-modal-title').textContent=id?'Routine bewerken':'Routine toevoegen';
+  document.getElementById('r-name').value=r?.name||'';
+  document.getElementById('r-note').value=r?.note||'';
+  document.getElementById('r-freq').value=r?.frequency||'wekelijks';
+  document.getElementById('r-last-done').value=r?.lastDone?toDateInput(r.lastDone):'';
+  document.getElementById('r-next-date').value=r?.nextDate?toDateInput(r.nextDate):'';
+  const sel=document.getElementById('r-cat');
+  sel.innerHTML=routineCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  sel.value=r?.categoryId||routineCats[0]?.id||'';
+  toggleCD();
+  document.getElementById('r-freq').onchange=toggleCD;
+  openModal('modal-routine');
+};
+function toggleCD(){document.getElementById('r-custom-date-group').classList.toggle('hidden',document.getElementById('r-freq').value!=='aangepast')}
+
+window.saveRoutine=async()=>{
+  const name=document.getElementById('r-name').value.trim();if(!name)return;
+  const data={name,note:document.getElementById('r-note').value.trim(),frequency:document.getElementById('r-freq').value,categoryId:document.getElementById('r-cat').value,lastDone:document.getElementById('r-last-done').value?new Date(document.getElementById('r-last-done').value).getTime():null,nextDate:document.getElementById('r-next-date').value?new Date(document.getElementById('r-next-date').value).getTime():null};
+  if(editingRoutineId)await updateDoc(docRef('routines',editingRoutineId),data);
+  else await setDoc(docRef('routines',uuid()),{...data,createdAt:Date.now()});
+  closeModal('modal-routine');
+};
+window.markDone=async id=>await updateDoc(docRef('routines',id),{lastDone:Date.now()});
+
+window.openTodoModal=id=>{
+  editingTodoId=id||null;
+  const t=id?todos.find(x=>x.id===id):null;
+  document.getElementById('todo-modal-title').textContent=id?'To-do bewerken':'To-do toevoegen';
+  document.getElementById('t-text').value=t?.text||'';
+  document.getElementById('t-notes').value=t?.notes||'';
+  document.getElementById('t-tags').value=(t?.tags||[]).join(', ');
+  currentPrio=t?.priority||'normaal';setPrio(currentPrio);
+  const urg=document.getElementById('t-urgent-toggle');
+  t?.urgent?urg.classList.add('on'):urg.classList.remove('on');
+  const sel=document.getElementById('t-cat');
+  sel.innerHTML=todoCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  sel.value=t?.categoryId||todoCats[0]?.id||'';
+  openModal('modal-todo');
+};
+window.setPrio=p=>{currentPrio=p;['laag','normaal','hoog'].forEach(x=>document.getElementById(`prio-${x}`).classList.toggle('active',x===p))};
+window.toggleUrgent=()=>document.getElementById('t-urgent-toggle').classList.toggle('on');
+window.saveTodo=async()=>{
+  const text=document.getElementById('t-text').value.trim();if(!text)return;
+  const tags=document.getElementById('t-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const data={text,notes:document.getElementById('t-notes').value.trim(),priority:currentPrio,urgent:document.getElementById('t-urgent-toggle').classList.contains('on'),categoryId:document.getElementById('t-cat').value,tags};
+  if(editingTodoId){const ex=todos.find(t=>t.id===editingTodoId);await updateDoc(docRef('todos',editingTodoId),{...data,isDone:ex?.isDone||false})}
+  else await setDoc(docRef('todos',uuid()),{...data,isDone:false,createdAt:Date.now()});
+  closeModal('modal-todo');
+};
+window.toggleTodo=async id=>{const t=todos.find(x=>x.id===id);if(t)await updateDoc(docRef('todos',id),{isDone:!t.isDone})};
+window.setTodoMode=m=>{todoMode=m;renderTodos()};
+
+window.toggleStore=id=>{expandedStoreId=expandedStoreId===id?null:id;renderWinkellijst()};
+window.saveStore=async()=>{const n=document.getElementById('s-name').value.trim();if(!n)return;await setDoc(docRef('stores',uuid()),{name:n,order:stores.length});closeModal('modal-store')};
+window.deleteStore=async id=>{if(!confirm('Winkel verwijderen?'))return;for(const i of shopItems.filter(i=>i.storeId===id))await deleteDoc(docRef('shopItems',i.id));await deleteDoc(docRef('stores',id));if(expandedStoreId===id)expandedStoreId=null};
+window.openShopItemModal=id=>{addingShopItemForStore=id;document.getElementById('si-name').value='';document.getElementById('si-qty').value='';document.getElementById('si-cat').value='overig';openModal('modal-shopitem')};
+window.saveShopItem=async()=>{const n=document.getElementById('si-name').value.trim();if(!n||!addingShopItemForStore)return;await setDoc(docRef('shopItems',uuid()),{name:n,quantity:document.getElementById('si-qty').value.trim(),category:document.getElementById('si-cat').value,storeId:addingShopItemForStore,isGot:false,createdAt:Date.now()});closeModal('modal-shopitem')};
+window.toggleShop=async id=>{const i=shopItems.find(x=>x.id===id);if(i)await updateDoc(docRef('shopItems',id),{isGot:!i.isGot})};
+window.deleteShop=async id=>await deleteDoc(docRef('shopItems',id));
+window.clearGot=async sid=>{for(const i of shopItems.filter(i=>i.storeId===sid&&i.isGot))await deleteDoc(docRef('shopItems',i.id))};
+
+window.openCatModal=type=>{addingCatFor=type;document.getElementById('cat-modal-title').textContent=type==='routine'?'Routine categorie':'To-do categorie';document.getElementById('cat-name').value='';document.getElementById('cat-color').value='#5a8a5a';openModal('modal-cat')};
+window.saveCat=async()=>{const n=document.getElementById('cat-name').value.trim();if(!n)return;await setDoc(docRef(addingCatFor==='routine'?'routineCats':'todoCats',uuid()),{name:n,colorHex:document.getElementById('cat-color').value});closeModal('modal-cat')};
+window.deleteCat=async(col,id)=>{if(!confirm('Categorie verwijderen?'))return;await deleteDoc(docRef(col,id))};
+
+window.toggleDark=()=>{const d=document.documentElement.getAttribute('data-theme')==='dark';localStorage.setItem('planr_dark',d?'0':'1');document.documentElement.setAttribute('data-theme',d?'':'dark');renderInstellingen()};
+(()=>{if(localStorage.getItem('planr_dark')==='1')document.documentElement.setAttribute('data-theme','dark')})();
+
+function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16)})}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtDate(ts){return new Date(ts).toLocaleDateString('nl-BE',{day:'numeric',month:'short',year:'numeric'})}
+function toDateInput(ts){return new Date(ts).toISOString().split('T')[0]}
+
+showPage('routines');
 </script>
+<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/Planr/sw.js').catch(()=>{})</script>
 </body>
 </html>
