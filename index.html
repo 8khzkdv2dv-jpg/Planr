@@ -70,8 +70,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .quad{background:var(--card);border-radius:12px;padding:10px;border:1.5px solid var(--border);min-height:110px}
 .quad-title{font-size:12px;font-weight:700;margin-bottom:2px}.quad-sub{font-size:10px;color:var(--text3);margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .quad-item{font-size:11px;color:var(--text);padding:4px 6px;border-radius:6px;margin-bottom:3px;cursor:pointer}
-.store-header{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--card);user-select:none}
-.store-name{font-size:15px;font-weight:700;color:var(--text);flex:1}
+.store-header{display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--card);user-select:none}
+.store-logo{width:36px;height:36px;border-radius:8px;object-fit:cover;cursor:pointer;flex-shrink:0}
+.store-logo-placeholder{width:36px;height:36px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px}
+.store-name{font-size:15px;font-weight:700;color:var(--text);flex:1;cursor:pointer}
 .store-badge{background:var(--accent);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
 .shop-cat-label{padding:6px 14px 3px;font-size:11px;color:var(--text3);font-weight:600}
 .shop-item-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--bg2)}
@@ -99,9 +101,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .user-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
 .hidden{display:none!important}
 input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);cursor:pointer;background:none;padding:0}
-.emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:12px 16px}
-.emoji-btn{font-size:24px;padding:6px;border:2px solid transparent;border-radius:8px;cursor:pointer;background:none;text-align:center}
-.emoji-btn.selected{border-color:var(--accent);background:var(--bg2)}
+.logo-upload-area{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;margin:0 16px 12px}
+.logo-preview{width:72px;height:72px;border-radius:12px;object-fit:cover;margin:0 auto 8px;display:block}
+/* emoji picker */
+.emoji-picker{border:1.5px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden}
+.emoji-search{width:100%;padding:9px 12px;border:none;border-bottom:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none;font-family:inherit}
+.emoji-results{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:6px;max-height:140px;overflow-y:auto}
+.ep-btn{font-size:22px;padding:4px;border:none;background:none;cursor:pointer;border-radius:6px;text-align:center;line-height:1}
+.ep-btn:hover{background:var(--bg2)}
+.ep-btn.selected{background:var(--bg3);outline:2px solid var(--accent)}
+.emoji-selected-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--border)}
+.emoji-clear{font-size:12px;color:var(--red);cursor:pointer;background:none;border:none;padding:0}
 </style>
 </head>
 <body>
@@ -184,6 +194,17 @@ input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(
     </div>
     <div class="form-group"><label class="form-label">Omschrijving</label><input class="form-input" id="t-text" placeholder="Wat moet er gedaan worden?" type="text"></div>
     <div class="form-group"><label class="form-label">Notities</label><textarea class="form-input" id="t-notes" placeholder="Optioneel" rows="2" style="resize:none"></textarea></div>
+    <div class="form-group"><label class="form-label">Emoji <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)">(optioneel)</span></label>
+      <div class="emoji-picker">
+        <input class="emoji-search" id="t-emoji-search" placeholder="Zoek emoji... bv: huis, auto, sport" oninput="searchEmoji(this.value)">
+        <div class="emoji-results" id="t-emoji-results"></div>
+        <div class="emoji-selected-row" id="t-emoji-selected-row" style="display:none">
+          <span style="font-size:18px" id="t-emoji-selected-display"></span>
+          <span style="font-size:13px;color:var(--text2)">Geselecteerd</span>
+          <button class="emoji-clear" onclick="clearEmoji()">✕ Wissen</button>
+        </div>
+      </div>
+    </div>
     <div class="form-group"><label class="form-label">Prioriteit</label>
       <div class="seg" style="margin:0">
         <button class="seg-btn" id="prio-laag" onclick="setPrio('laag')">Laag</button>
@@ -215,7 +236,16 @@ input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(
       <button id="store-delete-btn" class="btn btn-danger" style="flex:none;padding:8px 14px;font-size:13px;display:none" onclick="deleteStoreFromModal()">Verwijder</button>
     </div>
     <div class="form-group"><label class="form-label">Naam</label><input class="form-input" id="s-name" placeholder="Bijv. Delhaize, Lidl..." type="text"></div>
-    <div class="form-group"><label class="form-label">Emoji</label><div class="emoji-grid" id="emoji-grid"></div></div>
+    <div class="form-group"><label class="form-label">Logo</label>
+      <label class="logo-upload-area" id="logo-upload-area">
+        <input type="file" accept="image/*" id="s-logo-input" style="display:none" onchange="handleLogoUpload(this)">
+        <div id="logo-preview-wrap">
+          <div style="font-size:32px;margin-bottom:6px">🖼️</div>
+          <div style="font-size:13px;color:var(--text2);font-weight:500">Tik om foto te kiezen</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Wordt automatisch verkleind</div>
+        </div>
+      </label>
+    </div>
     <div class="sheet-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-store')">Annuleer</button>
       <button class="btn btn-primary" onclick="saveStore()">Opslaan</button>
@@ -296,9 +326,56 @@ const db=getFirestore(app);
 let uid=null,currentPage='routines',todoMode='lijst',currentPrio='normaal';
 let editingRoutineId=null,editingTodoId=null,editingStoreId=null,addingShopItemForStore=null,addingCatFor=null,editingCatId=null,expandedStoreId=null;
 let routines=[],routineCats=[],todos=[],todoCats=[],stores=[],shopItems=[],unsubs=[];
-let selectedEmoji='🛒';
+let currentLogoBase64=null,currentTodoEmoji=null;
 
-const STORE_EMOJIS=['🛒','🏪','🥩','🥖','🧴','🌿','🐟','🍷','🥗','💊','🏠','⚽','📦','🌸','🍕','☕','🎯','🚗','✈️','🎁'];
+// ── Emoji database met zoektermen ──
+const EMOJI_DB=[
+  ['😀','blij lachen gezicht'],['😂','lachen tranen grappig'],['😍','verliefd hart ogen'],['😎','cool zonnebril'],['🤔','denken nadenken'],
+  ['😴','slapen moe'],['🥳','feest vieren'],['😡','boos kwaad'],['😢','huilen verdriet'],['🤒','ziek'],
+  ['🏠','huis thuis woning'],['🏡','huis tuin'],['🏢','kantoor gebouw werk'],['🏪','winkel'],['🏥','ziekenhuis'],
+  ['🚗','auto rijden'],['🚕','taxi'],['🚲','fiets'],['🏃','rennen sport'],['✈️','vliegtuig reizen'],
+  ['🍕','pizza eten'],['🍔','hamburger'],['🍎','appel fruit'],['🥗','salade gezond'],['☕','koffie'],
+  ['💊','medicijn gezondheid'],['💉','vaccin spuit'],['🩺','dokter'],['🏋️','sporten gewichten'],['⚽','voetbal'],
+  ['🎯','doel target'],['📚','boek lezen studie'],['✏️','potlood schrijven'],['📝','notitie schrijven'],['💻','laptop computer werk'],
+  ['📱','telefoon gsm'],['🖨️','printer'],['📧','email bericht'],['📞','bellen telefoon'],['🔑','sleutel'],
+  ['💡','idee lamp'],['🔧','gereedschap repareren'],['🛒','winkelwagen boodschappen'],['🧹','stofzuigen schoonmaken'],['🧺','was wasgoed'],
+  ['🌿','plant natuur groen'],['🌸','bloem'],['🌳','boom natuur'],['🌻','zonnebloem'],['🍀','klavertje geluk'],
+  ['⭐','ster'],['🏆','trofee winnen'],['🎁','cadeau'],['🎂','verjaardag taart'],['🎵','muziek'],
+  ['💰','geld'],['💳','bankkaart betalen'],['📦','pakket doos'],['🗓️','kalender datum'],['⏰','alarm wekker tijd'],
+  ['🔒','slot beveiligen'],['🧴','verzorging hygiene'],['🪥','tandenborstel'],['🛁','bad douchen'],['🧽','spons schoonmaken'],
+  ['🐶','hond huisdier'],['🐱','kat poes'],['🌙','maan nacht'],['☀️','zon warm zomer'],['❄️','sneeuw winter koud'],
+  ['💪','spier kracht sport'],['🧘','yoga mediteren'],['🏊','zwemmen water'],['🚴','fietsen sport'],['🎾','tennis'],
+  ['👨‍👩‍👧','gezin familie'],['👶','baby kind'],['👴','opa ouder'],['❤️','hart liefde'],['🤝','samenwerking afspraak'],
+];
+
+let currentEmojiSearch='';
+
+window.searchEmoji=q=>{
+  currentEmojiSearch=q.toLowerCase();
+  renderEmojiResults();
+};
+
+function renderEmojiResults(){
+  const q=currentEmojiSearch;
+  const filtered=q?EMOJI_DB.filter(([e,k])=>k.includes(q)||e.includes(q)):EMOJI_DB;
+  const el=document.getElementById('t-emoji-results');
+  el.innerHTML=filtered.slice(0,64).map(([e])=>`<button class="ep-btn${currentTodoEmoji===e?' selected':''}" onclick="selectTodoEmoji('${e}')">${e}</button>`).join('');
+}
+
+window.selectTodoEmoji=e=>{
+  currentTodoEmoji=e;
+  renderEmojiResults();
+  const row=document.getElementById('t-emoji-selected-row');
+  document.getElementById('t-emoji-selected-display').textContent=e;
+  row.style.display='flex';
+};
+
+window.clearEmoji=()=>{
+  currentTodoEmoji=null;
+  renderEmojiResults();
+  document.getElementById('t-emoji-selected-row').style.display='none';
+};
+
 const defaultRoutineCats=[{id:'huishouden',name:'Huishouden',colorHex:'#5a8a5a'},{id:'persoonlijk',name:'Persoonlijk',colorHex:'#4a7a9b'},{id:'tuin',name:'Tuin',colorHex:'#6b8c3a'},{id:'overig',name:'Overig',colorHex:'#7a8a6a'}];
 const defaultTodoCats=[{id:'persoonlijk',name:'Persoonlijk',colorHex:'#5a8a5a'},{id:'werk',name:'Werk',colorHex:'#4a7a9b'},{id:'thuis',name:'Thuis',colorHex:'#6b8c3a'}];
 const defaultRoutines=[{name:'Stofzuigen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Dweilen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Badkamer poetsen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Keuken poetsen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Wasgoed doen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Handdoeken verversen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Lakens verversen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Koelkast opruimen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Oven reinigen',frequency:'maandelijks',categoryId:'huishouden'},{name:'Wasmachine reinigen',frequency:'maandelijks',categoryId:'huishouden'},{name:'Terras vegen',frequency:'maandelijks',categoryId:'tuin'}];
@@ -392,7 +469,7 @@ function renderTodos(){
     if(noCat.length){h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;noCat.forEach(t=>{h+=todoRow(t,'#7a8a6a')});h+=`</div></div>`}
     if(done.length){
       h+=`<div class="section"><div class="section-header">Afgerond (${done.length})</div><div class="card-list">`;
-      done.forEach(t=>{h+=`<div class="row"><div style="font-size:18px;color:var(--accent);flex-shrink:0">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3);cursor:pointer" onclick="openTodoModal('${t.id}')">${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
+      done.forEach(t=>{h+=`<div class="row"><div style="font-size:18px;color:var(--accent);flex-shrink:0">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3);cursor:pointer" onclick="openTodoModal('${t.id}')">${t.emoji?`<span style="font-size:14px">${t.emoji}</span> `:''}${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
       h+=`</div></div>`;
     }
   }
@@ -401,12 +478,20 @@ function renderTodos(){
 
 function todoRow(t,c){
   const chips=(t.priority==='hoog'?'<span class="chip chip-red">Hoog</span>':'')+(t.urgent?'<span class="chip chip-orange">Urgent</span>':'')+(t.tags||[]).map(g=>`<span class="chip chip-green">${esc(g)}</span>`).join('');
-  return `<div class="row" onclick="openTodoModal('${t.id}')"><button class="check-btn" onclick="event.stopPropagation();toggleTodo('${t.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></button><div class="row-content"><div class="row-title">${esc(t.text)}</div>${chips?`<div style="margin-top:3px">${chips}</div>`:''}${t.notes?`<div class="row-sub">${esc(t.notes)}</div>`:''}</div></div>`;
+  const emojiHtml=t.emoji?`<span style="font-size:14px;margin-right:3px">${t.emoji}</span>`:'';
+  return `<div class="row" onclick="openTodoModal('${t.id}')">
+    <button class="check-btn" onclick="event.stopPropagation();toggleTodo('${t.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></button>
+    <div class="row-content">
+      <div class="row-title">${emojiHtml}${esc(t.text)}</div>
+      ${chips?`<div style="margin-top:3px">${chips}</div>`:''}
+      ${t.notes?`<div class="row-sub">${esc(t.notes)}</div>`:''}
+    </div>
+  </div>`;
 }
 
 function renderMatrix(){
   const a=todos.filter(t=>!t.isDone);
-  const q=(title,sub,items,color)=>`<div class="quad" style="border-color:${color}33"><div class="quad-title" style="color:${color}">${title}</div><div class="quad-sub">${sub}</div>${items.length?items.map(t=>`<div class="quad-item" onclick="openTodoModal('${t.id}')" style="background:${color}15">${esc(t.text)}</div>`).join(''):'<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Leeg</div>'}</div>`;
+  const q=(title,sub,items,color)=>`<div class="quad" style="border-color:${color}33"><div class="quad-title" style="color:${color}">${title}</div><div class="quad-sub">${sub}</div>${items.length?items.map(t=>`<div class="quad-item" onclick="openTodoModal('${t.id}')" style="background:${color}15">${t.emoji?`${t.emoji} `:''}${esc(t.text)}</div>`).join(''):'<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Leeg</div>'}</div>`;
   return `<div class="matrix">${q('🔥 Doe nu','Urgent + Hoog',a.filter(t=>t.priority==='hoog'&&t.urgent),'#9b4a4a')}${q('📅 Plan in','Niet urgent + Hoog',a.filter(t=>t.priority==='hoog'&&!t.urgent),'#4a7a9b')}${q('🤝 Delegeer','Urgent + Laag',a.filter(t=>t.priority!=='hoog'&&t.urgent),'#8b6914')}${q('🗑 Elimineer','Niet urgent + Laag',a.filter(t=>t.priority!=='hoog'&&!t.urgent),'#7a8a6a')}</div>`;
 }
 
@@ -419,8 +504,8 @@ function renderWinkellijst(){
       const items=shopItems.filter(i=>i.storeId===store.id);
       const rem=items.filter(i=>!i.isGot).length;
       const open=expandedStoreId===store.id;
-      const emoji=store.emoji||'🛒';
-      h+=`<div style="margin:10px 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)"><div class="store-header"><span style="font-size:22px;cursor:pointer" onclick="openStoreModal('${store.id}')">${emoji}</span><span class="store-name" onclick="toggleStore('${store.id}')">${esc(store.name)}</span>${rem>0?`<span class="store-badge">${rem}</span>`:''}<span style="font-size:14px;color:var(--text2)" onclick="toggleStore('${store.id}')">${open?'▾':'▸'}</span></div>`;
+      const logoHtml=store.logo?`<img class="store-logo" src="${store.logo}" onclick="openStoreModal('${store.id}')">`:`<div class="store-logo-placeholder" onclick="openStoreModal('${store.id}')">🛒</div>`;
+      h+=`<div style="margin:10px 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)"><div class="store-header">${logoHtml}<span class="store-name" onclick="toggleStore('${store.id}')">${esc(store.name)}</span>${rem>0?`<span class="store-badge">${rem}</span>`:''}<span style="font-size:14px;color:var(--text2);cursor:pointer" onclick="toggleStore('${store.id}')">${open?'▾':'▸'}</span></div>`;
       if(open){
         h+=`<div style="border-top:1px solid var(--border)"><div class="store-add-btn" onclick="openShopItemModal('${store.id}')"><span style="font-size:18px">＋</span> Product toevoegen</div>`;
         ['groenten','fruit','vlees','vis','zuivel','brood','droog','drank','diepvries','hygiene','overig'].forEach(cat=>{
@@ -452,7 +537,7 @@ function renderInstellingen(){
     <div class="settings-section">${routineCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="btn btn-secondary" style="flex:none;padding:6px 12px;font-size:12px" onclick="openCatModal('routine','${c.id}')">Bewerk</button><button class="settings-del" onclick="deleteCat('routineCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('routine',null)">＋ Categorie toevoegen</div></div>
     <div class="settings-group-label">To-do categorieën</div>
     <div class="settings-section">${todoCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="btn btn-secondary" style="flex:none;padding:6px 12px;font-size:12px" onclick="openCatModal('todo','${c.id}')">Bewerk</button><button class="settings-del" onclick="deleteCat('todoCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('todo',null)">＋ Categorie toevoegen</div></div>
-    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.1 · 🌿</div>`;
+    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.3 · 🌿</div>`;
 }
 
 window.openModal=id=>{const el=document.getElementById(id);el.classList.add('open');el.onclick=e=>{if(e.target===el)closeModal(id)}};
@@ -500,6 +585,14 @@ window.openTodoModal=id=>{
   const sel=document.getElementById('t-cat');
   sel.innerHTML=todoCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   sel.value=t?.categoryId||todoCats[0]?.id||'';
+  // emoji
+  currentTodoEmoji=t?.emoji||null;
+  document.getElementById('t-emoji-search').value='';
+  currentEmojiSearch='';
+  renderEmojiResults();
+  const row=document.getElementById('t-emoji-selected-row');
+  if(currentTodoEmoji){document.getElementById('t-emoji-selected-display').textContent=currentTodoEmoji;row.style.display='flex'}
+  else{row.style.display='none'}
   openModal('modal-todo');
 };
 window.setPrio=p=>{currentPrio=p;['laag','normaal','hoog'].forEach(x=>document.getElementById(`prio-${x}`).classList.toggle('active',x===p))};
@@ -507,7 +600,7 @@ window.toggleUrgent=()=>document.getElementById('t-urgent-toggle').classList.tog
 window.saveTodo=async()=>{
   const text=document.getElementById('t-text').value.trim();if(!text)return;
   const tags=document.getElementById('t-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const data={text,notes:document.getElementById('t-notes').value.trim(),priority:currentPrio,urgent:document.getElementById('t-urgent-toggle').classList.contains('on'),categoryId:document.getElementById('t-cat').value,tags};
+  const data={text,notes:document.getElementById('t-notes').value.trim(),priority:currentPrio,urgent:document.getElementById('t-urgent-toggle').classList.contains('on'),categoryId:document.getElementById('t-cat').value,tags,emoji:currentTodoEmoji||null};
   if(editingTodoId){const ex=todos.find(t=>t.id===editingTodoId);await updateDoc(dref('todos',editingTodoId),{...data,isDone:ex?.isDone||false})}
   else await setDoc(dref('todos',uuid()),{...data,isDone:false,createdAt:Date.now()});
   closeModal('modal-todo');
@@ -522,15 +615,36 @@ window.openStoreModal=id=>{
   document.getElementById('store-modal-title').textContent=id?'Winkel bewerken':'Winkel toevoegen';
   document.getElementById('store-delete-btn').style.display=id?'block':'none';
   document.getElementById('s-name').value=s?.name||'';
-  selectedEmoji=s?.emoji||'🛒';
-  const grid=document.getElementById('emoji-grid');
-  grid.innerHTML=STORE_EMOJIS.map(e=>`<button class="emoji-btn${e===selectedEmoji?' selected':''}" onclick="selectEmoji('${e}')">${e}</button>`).join('');
+  currentLogoBase64=s?.logo||null;
+  updateLogoPreview(currentLogoBase64);
   openModal('modal-store');
 };
-window.selectEmoji=e=>{selectedEmoji=e;document.querySelectorAll('.emoji-btn').forEach(b=>{b.classList.toggle('selected',b.textContent===e)})};
+function updateLogoPreview(base64){
+  const wrap=document.getElementById('logo-preview-wrap');
+  if(base64){wrap.innerHTML=`<img class="logo-preview" src="${base64}"><div style="font-size:12px;color:var(--text2);margin-top:4px">Tik om te wijzigen</div>`}
+  else{wrap.innerHTML=`<div style="font-size:32px;margin-bottom:6px">🖼️</div><div style="font-size:13px;color:var(--text2);font-weight:500">Tik om foto te kiezen</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Wordt automatisch verkleind</div>`}
+}
+window.handleLogoUpload=input=>{
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const MAX=200;let w=img.width,h=img.height;
+      if(w>h){if(w>MAX){h=h*MAX/w;w=MAX}}else{if(h>MAX){w=w*MAX/h;h=MAX}}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      currentLogoBase64=canvas.toDataURL('image/jpeg',0.7);
+      updateLogoPreview(currentLogoBase64);
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
 window.saveStore=async()=>{
   const n=document.getElementById('s-name').value.trim();if(!n)return;
-  const data={name:n,emoji:selectedEmoji,order:editingStoreId?stores.find(s=>s.id===editingStoreId)?.order??stores.length:stores.length};
+  const data={name:n,logo:currentLogoBase64||null,order:editingStoreId?stores.find(s=>s.id===editingStoreId)?.order??stores.length:stores.length};
   if(editingStoreId)await updateDoc(dref('stores',editingStoreId),data);
   else await setDoc(dref('stores',uuid()),data);
   closeModal('modal-store');
@@ -600,6 +714,7 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 function fmtDate(ts){return new Date(ts).toLocaleDateString('nl-BE',{day:'numeric',month:'short',year:'numeric'})}
 function toDateInput(ts){return new Date(ts).toISOString().split('T')[0]}
 
+renderEmojiResults();
 showPage('routines');
 </script>
 <script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/Planr/sw.js').catch(()=>{})</script>
