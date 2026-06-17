@@ -1,25 +1,15 @@
 {
   "name": "Planr",
   "short_name": "Planr",
-  "description": "Agenda, routines, to-do en winkellijsten",
+  "description": "Jouw persoonlijke planner — routines, to-dos en winkellijst",
   "start_url": "/Planr/",
   "scope": "/Planr/",
   "display": "standalone",
-  "background_color": "#0e0a1a",
-  "theme_color": "#f5f0ff",
-  "lang": "nl",
+  "background_color": "#f4f8f1",
+  "theme_color": "#4a7c3f",
+  "orientation": "portrait",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
