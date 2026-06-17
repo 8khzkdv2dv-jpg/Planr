@@ -25,6 +25,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .page-title{font-size:22px;font-weight:700;color:var(--text);flex:1}
 .header-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--accent)}
 .header-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.header-btn.active{background:var(--accent);color:white}
 .section{margin:12px 0}
 .section-header{padding:6px 16px 4px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
 .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
@@ -37,6 +38,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .row-sub{font-size:12px;color:var(--text3);margin-bottom:4px}
 .chip{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin-right:4px;margin-top:2px;font-weight:500}
 .chip-green{background:var(--bg3);color:var(--text2)}.chip-red{background:rgba(155,74,74,.12);color:var(--red)}.chip-orange{background:rgba(139,105,20,.12);color:var(--orange)}
+.chip-blue{background:rgba(74,122,155,.12);color:#4a7a9b}
 .check-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0;margin-top:2px}
 .check-btn svg{width:26px;height:26px;stroke:var(--accent);fill:none;stroke-width:1.7}
 .empty{padding:40px 20px;text-align:center}
@@ -101,7 +103,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .user-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
 .hidden{display:none!important}
 input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);cursor:pointer;background:none;padding:0}
-.logo-upload-area{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;margin:0 16px 12px}
+.logo-upload-area{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;margin:0 16px 12px}
 .logo-preview{width:72px;height:72px;border-radius:12px;object-fit:cover;margin:0 auto 8px;display:block}
 .emoji-picker{border:1.5px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden}
 .emoji-search{width:100%;padding:9px 12px;border:none;border-bottom:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none;font-family:inherit}
@@ -110,8 +112,31 @@ input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(
 .ep-btn:hover{background:var(--bg2)}.ep-btn.selected{background:var(--bg3);outline:2px solid var(--accent)}
 .emoji-selected-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--border)}
 .emoji-clear{font-size:12px;color:var(--red);cursor:pointer;background:none;border:none;padding:0}
-.date-row{display:flex;gap:8px}
-.date-row .form-input{flex:1}
+
+/* ── Kalender ── */
+.cal-wrap{padding:12px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px}
+.cal-nav-btn{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text2);padding:4px 10px;border-radius:8px}
+.cal-nav-btn:active{background:var(--bg2)}
+.cal-month{font-size:16px;font-weight:700;color:var(--text)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-day-name{text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:4px 0}
+.cal-day{min-height:52px;border-radius:8px;padding:3px;background:var(--card);cursor:pointer;border:1.5px solid transparent;transition:border-color .1s;position:relative}
+.cal-day:active{background:var(--bg2)}
+.cal-day.today{border-color:var(--accent)}
+.cal-day.selected{background:var(--bg3);border-color:var(--accent)}
+.cal-day.other-month{opacity:.35}
+.cal-day-num{font-size:11px;font-weight:600;color:var(--text2);text-align:center;margin-bottom:2px}
+.cal-day.today .cal-day-num{background:var(--accent);color:white;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 2px}
+.cal-dots{display:flex;flex-wrap:wrap;gap:2px;justify-content:center}
+.cal-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cal-selected-items{margin:0 12px 12px;background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px var(--shadow)}
+.cal-selected-header{padding:10px 14px 6px;font-size:13px;font-weight:600;color:var(--text2);border-bottom:1px solid var(--border)}
+.cal-item-row{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);cursor:pointer}
+.cal-item-row:last-child{border-bottom:none}
+.cal-item-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cal-item-name{font-size:13px;color:var(--text);flex:1}
+.cal-item-chip{font-size:10px;padding:1px 6px;border-radius:8px;font-weight:500}
 </style>
 </head>
 <body>
@@ -173,10 +198,7 @@ input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(
       </select>
     </div>
     <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="r-cat"></select></div>
-    <div class="form-group">
-      <label class="form-label">Laatste keer gedaan</label>
-      <input class="form-input" id="r-last-done" type="date">
-    </div>
+    <div class="form-group"><label class="form-label">Laatste keer gedaan</label><input class="form-input" id="r-last-done" type="date"></div>
     <div class="form-group">
       <label class="form-label">Volgende keer <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)">(optioneel — overschrijft berekening)</span></label>
       <input class="form-input" id="r-next-manual" type="date">
@@ -199,6 +221,10 @@ input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(
     </div>
     <div class="form-group"><label class="form-label">Omschrijving</label><input class="form-input" id="t-text" placeholder="Wat moet er gedaan worden?" type="text"></div>
     <div class="form-group"><label class="form-label">Notities</label><textarea class="form-input" id="t-notes" placeholder="Optioneel" rows="2" style="resize:none"></textarea></div>
+    <div class="form-group">
+      <label class="form-label">Datum <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)">(optioneel — vastpinnen op kalender)</span></label>
+      <input class="form-input" id="t-date" type="date">
+    </div>
     <div class="form-group"><label class="form-label">Emoji <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)">(optioneel)</span></label>
       <div class="emoji-picker">
         <input class="emoji-search" id="t-emoji-search" placeholder="Zoek emoji... bv: huis, auto, sport" oninput="searchEmoji(this.value)">
@@ -332,17 +358,19 @@ let uid=null,currentPage='routines',todoMode='lijst',currentPrio='normaal';
 let editingRoutineId=null,editingTodoId=null,editingStoreId=null,addingShopItemForStore=null,addingCatFor=null,editingCatId=null,expandedStoreId=null;
 let routines=[],routineCats=[],todos=[],todoCats=[],stores=[],shopItems=[],unsubs=[];
 let currentLogoBase64=null,currentTodoEmoji=null,currentEmojiSearch='';
+let routineCalView=false,todoCalView=false;
+let routineCalDate=new Date(),todoCalDate=new Date();
+let routineCalSelected=null,todoCalSelected=null;
 
-// ── Uitgebreide emoji database ──
 const EMOJI_DB=[
   ['😀','blij lachen gezicht vrolijk'],['😂','lachen tranen grappig humor'],['😍','verliefd hart ogen mooi'],['😎','cool zonnebril stijl'],['🤔','denken nadenken idee'],
-  ['😴','slapen moe rust'],['🥳','feest vieren party'],['😡','boos kwaad frustratie'],['😢','huilen verdriet triest'],['🤒','ziek ziek zijn'],
+  ['😴','slapen moe rust'],['🥳','feest vieren party'],['😡','boos kwaad frustratie'],['😢','huilen verdriet triest'],['🤒','ziek'],
   ['🤧','niezen verkouden ziek'],['🥰','liefde knuffelen schattig'],['😇','engel goed lief'],['🤓','nerd bril slim studie'],['😤','trots gefrustreerd'],
-  ['🙏','bidden danken alstublieft'],['👍','goed akkoord prima'],['👎','slecht nee afkeuren'],['👏','applaus bravo goed gedaan'],['🤝','afspraak samenwerking deal'],
+  ['🙏','bidden danken alstublieft'],['👍','goed akkoord prima'],['👎','slecht nee afkeuren'],['👏','applaus bravo'],['🤝','afspraak samenwerking deal'],
   ['💪','spier kracht sterk sport'],['🖐️','stop hand hallo'],['✌️','vrede twee'],['🤞','geluk vingers hopen'],['👌','ok prima perfect'],
   ['🏠','huis thuis woning'],['🏡','huis tuin buiten'],['🏢','kantoor gebouw werk bedrijf'],['🏪','winkel shop'],['🏥','ziekenhuis dokter'],
   ['🏫','school onderwijs leren'],['🏋️','sportschool gewichten fitness'],['🏊','zwemmen water sport'],['🏃','rennen joggen sport'],['🚴','fietsen sport buiten'],
-  ['⚽','voetbal sport'],['🏀','basketball sport'],['🎾','tennis sport'],['🏐','volleybal sport'],['🏊','zwemmen sport water'],
+  ['⚽','voetbal sport'],['🏀','basketball sport'],['🎾','tennis sport'],['🏐','volleybal sport'],['🎱','biljart sport'],
   ['🚗','auto rijden transport'],['🚕','taxi transport'],['🚲','fiets fietsen eco'],['✈️','vliegtuig reizen vliegen'],['🚂','trein transport'],
   ['🚌','bus transport'],['🛵','scooter rijden'],['🚁','helikopter vliegen'],['⛵','boot zeilen water'],['🚀','raket ruimte snel'],
   ['🍕','pizza eten avond'],['🍔','hamburger fastfood'],['🍎','appel fruit gezond'],['🥗','salade groenten gezond'],['☕','koffie ochtend warm'],
@@ -366,8 +394,10 @@ const EMOJI_DB=[
   ['❤️','hart liefde rood'],['💙','blauw hart liefde'],['💚','groen hart natuur'],['💛','geel hart vrolijk'],['🖤','zwart hart stijl'],
   ['🎯','doel target raak'],['🎮','gamen spelen hobby'],['🧩','puzzel denken oplossen'],['♟️','schaken strategie denken'],['🎲','dobbelstenen spellen kans'],
   ['👨‍👩‍👧','gezin familie kinderen'],['👶','baby kind klein'],['👴','opa grootvader ouder'],['👩‍🍳','koken chef eten'],['👨‍💻','programmeren developer werk'],
-  ['🧘','yoga mediteren rust'],['🛌','slapen bed rust nacht'],['🏡','thuis wonen buiten'],['🎓','afstuderen diploma studie'],['🧑‍💼','werk professional business'],
-  ['🏐','volleybal sport team'],['🎒','rugzak school reizen'],['📋','lijst taken overzicht'],['🗑️','prullenbak verwijderen weggooien'],['♻️','recyclen duurzaam groen'],
+  ['🧘','yoga mediteren rust'],['🛌','slapen bed rust nacht'],['🎓','afstuderen diploma studie'],['🧑‍💼','werk professional business'],['♻️','recyclen duurzaam groen'],
+  ['🏐','volleybal sport team'],['🎒','rugzak school reizen'],['📋','lijst taken overzicht'],['🗑️','prullenbak verwijderen'],['🪞','spiegel kijken verzorging'],
+  ['🧠','brein denken slim studie'],['👁️','oog kijken zien'],['🦷','tand tandarts gezondheid'],['💈','kapper haar'],['🧣','sjaal winter warm'],
+  ['🎪','circus feest entertainment'],['🎠','carrousel feest plezier'],['🎡','reuzenrad feest vakantie'],['🌅','zonsopgang ochtend nieuw'],['🌄','landschap natuur mooi'],
 ];
 
 window.searchEmoji=q=>{currentEmojiSearch=q.toLowerCase();renderEmojiResults()};
@@ -376,11 +406,7 @@ function renderEmojiResults(){
   const filtered=q?EMOJI_DB.filter(([e,k])=>k.includes(q)):EMOJI_DB;
   document.getElementById('t-emoji-results').innerHTML=filtered.slice(0,80).map(([e])=>`<button class="ep-btn${currentTodoEmoji===e?' selected':''}" onclick="selectTodoEmoji('${e}')">${e}</button>`).join('');
 }
-window.selectTodoEmoji=e=>{
-  currentTodoEmoji=e;renderEmojiResults();
-  document.getElementById('t-emoji-selected-display').textContent=e;
-  document.getElementById('t-emoji-selected-row').style.display='flex';
-};
+window.selectTodoEmoji=e=>{currentTodoEmoji=e;renderEmojiResults();document.getElementById('t-emoji-selected-display').textContent=e;document.getElementById('t-emoji-selected-row').style.display='flex'};
 window.clearEmoji=()=>{currentTodoEmoji=null;renderEmojiResults();document.getElementById('t-emoji-selected-row').style.display='none'};
 
 const defaultRoutineCats=[{id:'huishouden',name:'Huishouden',colorHex:'#5a8a5a'},{id:'persoonlijk',name:'Persoonlijk',colorHex:'#4a7a9b'},{id:'tuin',name:'Tuin',colorHex:'#6b8c3a'},{id:'overig',name:'Overig',colorHex:'#7a8a6a'}];
@@ -404,7 +430,7 @@ function startListeners(){
   unsubs.forEach(u=>u());unsubs=[];
   unsubs.push(onSnapshot(col('routineCats'),s=>{routineCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!routineCats.length)defaultRoutineCats.forEach(c=>setDoc(dref('routineCats',c.id),c));else renderCurrent()}));
   unsubs.push(onSnapshot(col('todoCats'),s=>{todoCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!todoCats.length)defaultTodoCats.forEach(c=>setDoc(dref('todoCats',c.id),c));else renderCurrent()}));
-  unsubs.push(onSnapshot(query(col('routines'),orderBy('createdAt','asc')),s=>{routines=s.docs.map(d=>({id:d.id,...d.data()}));if(!routines.length)defaultRoutines.forEach(r=>setDoc(dref('routines',uuid()),{...r,note:'',lastDone:null,nextDate:null,nextManual:null,createdAt:Date.now()}));else renderCurrent()}));
+  unsubs.push(onSnapshot(query(col('routines'),orderBy('createdAt','asc')),s=>{routines=s.docs.map(d=>({id:d.id,...d.data()}));if(!routines.length)defaultRoutines.forEach(r=>setDoc(dref('routines',uuid()),{...r,note:'',lastDone:null,nextManual:null,createdAt:Date.now()}));else renderCurrent()}));
   unsubs.push(onSnapshot(query(col('todos'),orderBy('createdAt','asc')),s=>{todos=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
   unsubs.push(onSnapshot(query(col('stores'),orderBy('order','asc')),s=>{stores=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
   unsubs.push(onSnapshot(col('shopItems'),s=>{shopItems=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
@@ -425,112 +451,247 @@ function renderCurrent(){
   if(currentPage==='instellingen')renderInstellingen();
 }
 
+// ── Datum helpers ──
 const FREQ_DAYS={dagelijks:1,wekelijks:7,'2wekelijks':14,'3wekelijks':21,maandelijks:30,kwartaal:90,jaarlijks:365};
-
-// Berekende volgende datum op basis van frequentie + lastDone
-function computeNextAuto(r){
-  if(!r.lastDone)return null;
-  const d=new Date(r.lastDone);
-  d.setDate(d.getDate()+(FREQ_DAYS[r.frequency]||7));
-  return d;
-}
-
-// Effectieve volgende datum: manueel heeft voorrang, anders berekend
-function effectiveNext(r){
-  if(r.nextManual)return new Date(r.nextManual);
-  return computeNextAuto(r);
-}
-
-function daysUntil(r){
-  const n=effectiveNext(r);if(!n)return null;
-  const t=new Date();t.setHours(0,0,0,0);
-  const nd=new Date(n);nd.setHours(0,0,0,0);
-  return Math.round((nd-t)/86400000);
-}
+function computeNextAuto(r){if(!r.lastDone)return null;const d=new Date(r.lastDone);d.setDate(d.getDate()+(FREQ_DAYS[r.frequency]||7));return d}
+function effectiveNext(r){if(r.nextManual)return new Date(r.nextManual);return computeNextAuto(r)}
+function daysUntil(r){const n=effectiveNext(r);if(!n)return null;const t=new Date();t.setHours(0,0,0,0);const nd=new Date(n);nd.setHours(0,0,0,0);return Math.round((nd-t)/86400000)}
 function urgColor(r){const d=daysUntil(r);if(d===null||d<0)return'#9b4a4a';if(d<=3)return'#8b6914';return'#5a8a5a'}
 function urgStatus(r){const d=daysUntil(r);if(d===null)return'Nog nooit gedaan';if(d<0)return`${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} te laat`;if(d===0)return'Vandaag!';return`Over ${d} dag${d===1?'':'en'}`}
 function fLabel(f){return{dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal',jaarlijks:'Jaarlijks'}[f]||f}
+function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
+function dateKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 
+// ── Kalender renderer ──
+function renderCalendar({year,month,selectedDate,onPrev,onNext,onSelect,getDots,getItems}){
+  const today=new Date();
+  const firstDay=new Date(year,month,1);
+  const lastDay=new Date(year,month+1,0);
+  const startDow=(firstDay.getDay()+6)%7; // Monday=0
+  const maanden=['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+  const dagen=['Ma','Di','Wo','Do','Vr','Za','Zo'];
+
+  let h=`<div class="cal-wrap">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="${onPrev}">‹</button>
+      <span class="cal-month">${maanden[month]} ${year}</span>
+      <button class="cal-nav-btn" onclick="${onNext}">›</button>
+    </div>
+    <div class="cal-grid">`;
+
+  dagen.forEach(d=>{h+=`<div class="cal-day-name">${d}</div>`});
+
+  // lege cellen voor eerste dag
+  for(let i=0;i<startDow;i++) h+=`<div></div>`;
+
+  for(let d=1;d<=lastDay.getDate();d++){
+    const date=new Date(year,month,d);
+    const isToday=sameDay(date,today);
+    const isSel=selectedDate&&sameDay(date,selectedDate);
+    const dots=getDots(date);
+    const cls=['cal-day',isToday?'today':'',isSel?'selected':''].filter(Boolean).join(' ');
+    h+=`<div class="${cls}" onclick="${onSelect}('${dateKey(date)}')">
+      <div class="cal-day-num">${d}</div>
+      <div class="cal-dots">${dots.map(color=>`<div class="cal-dot" style="background:${color}"></div>`).join('')}</div>
+    </div>`;
+  }
+  h+=`</div></div>`;
+
+  // geselecteerde dag items
+  if(selectedDate){
+    const items=getItems(selectedDate);
+    if(items.length){
+      h+=`<div class="cal-selected-items">
+        <div class="cal-selected-header">${selectedDate.toLocaleDateString('nl-BE',{weekday:'long',day:'numeric',month:'long'})}</div>
+        ${items.map(i=>i.html).join('')}
+      </div>`;
+    } else {
+      h+=`<div class="cal-selected-items"><div style="padding:14px;text-align:center;font-size:13px;color:var(--text3)">Niets gepland op deze dag</div></div>`;
+    }
+  }
+  return h;
+}
+
+// ── Routines render ──
 function renderRoutines(){
   const el=document.getElementById('page-routines');
   const sorted=[...routines].sort((a,b)=>(daysUntil(a)??-999)-(daysUntil(b)??-999));
-  let h=`<div class="page-header"><div class="page-title">Routines</div><button class="header-btn" onclick="openRoutineModal(null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
-  if(!routines.length){h+=`<div class="empty"><div class="empty-icon">🔄</div><div class="empty-title">Geen routines</div><div class="empty-sub">Voeg je eerste routine toe</div></div>`}
-  else{
-    routineCats.filter(c=>sorted.some(r=>r.categoryId===c.id)).forEach(cat=>{
-      const cr=sorted.filter(r=>r.categoryId===cat.id);if(!cr.length)return;
-      h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}</div><div class="card-list">`;
-      cr.forEach(r=>{
-        const color=urgColor(r),st=urgStatus(r);
-        const autoNext=computeNextAuto(r);
-        const manualNext=r.nextManual?new Date(r.nextManual):null;
-        let nextInfo='';
-        if(manualNext){
-          nextInfo=`<div class="row-sub" style="margin-top:2px">📌 Volgende: ${fmtDate(manualNext.getTime())}${autoNext?` · berekend: ${fmtDate(autoNext.getTime())}`:''}</div>`;
-        } else if(autoNext){
-          nextInfo=`<div class="row-sub" style="margin-top:2px">📅 Volgende: ${fmtDate(autoNext.getTime())}</div>`;
-        }
-        h+=`<div class="row" onclick="openRoutineModal('${r.id}')">
-          <div class="row-accent" style="background:${cat.colorHex}"></div>
-          <div class="row-content">
-            <div class="row-title">${esc(r.name)}</div>
-            ${r.note?`<div class="row-sub">${esc(r.note)}</div>`:''}
-            <div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color};background:${color}18">${st}</span></div>
-            ${r.lastDone?`<div class="row-sub" style="margin-top:2px">✓ Laatste: ${fmtDate(r.lastDone)}</div>`:''}
-            ${nextInfo}
-          </div>
-          <button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')">
-            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          </button>
-        </div>`;
-      });
-      h+=`</div></div>`;
+
+  let h=`<div class="page-header">
+    <div class="page-title">Routines</div>
+    <button class="header-btn${routineCalView?' active':''}" onclick="toggleRoutineCal()" title="Kalender">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </button>
+    <button class="header-btn" onclick="openRoutineModal(null)">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>`;
+
+  if(routineCalView){
+    h+=renderCalendar({
+      year:routineCalDate.getFullYear(),
+      month:routineCalDate.getMonth(),
+      selectedDate:routineCalSelected,
+      onPrev:'prevRoutineCal',
+      onNext:'nextRoutineCal',
+      onSelect:'selectRoutineCalDay',
+      getDots:(date)=>{
+        const dots=[];
+        routines.forEach(r=>{
+          const next=effectiveNext(r);
+          if(next&&sameDay(next,date)){
+            const cat=routineCats.find(c=>c.id===r.categoryId);
+            dots.push(cat?.colorHex||'#5a8a5a');
+          }
+        });
+        return dots.slice(0,4);
+      },
+      getItems:(date)=>{
+        return routines.filter(r=>{
+          const next=effectiveNext(r);
+          return next&&sameDay(next,date);
+        }).map(r=>{
+          const cat=routineCats.find(c=>c.id===r.categoryId);
+          const color=cat?.colorHex||'#5a8a5a';
+          return {html:`<div class="cal-item-row" onclick="openRoutineModal('${r.id}')">
+            <div class="cal-item-dot" style="background:${color}"></div>
+            <span class="cal-item-name">${esc(r.name)}</span>
+            <span class="cal-item-chip chip-green">${fLabel(r.frequency)}</span>
+          </div>`};
+        });
+      }
     });
-    const noCat=sorted.filter(r=>!routineCats.find(c=>c.id===r.categoryId));
-    if(noCat.length){
-      h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;
-      noCat.forEach(r=>{
-        const color=urgColor(r),st=urgStatus(r);
-        h+=`<div class="row" onclick="openRoutineModal('${r.id}')"><div class="row-accent" style="background:#7a8a6a"></div><div class="row-content"><div class="row-title">${esc(r.name)}</div><div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color}">${st}</span></div></div><button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button></div>`;
+  } else {
+    if(!routines.length){
+      h+=`<div class="empty"><div class="empty-icon">🔄</div><div class="empty-title">Geen routines</div><div class="empty-sub">Voeg je eerste routine toe</div></div>`;
+    } else {
+      routineCats.filter(c=>sorted.some(r=>r.categoryId===c.id)).forEach(cat=>{
+        const cr=sorted.filter(r=>r.categoryId===cat.id);if(!cr.length)return;
+        h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}</div><div class="card-list">`;
+        cr.forEach(r=>{
+          const color=urgColor(r),st=urgStatus(r);
+          const autoNext=computeNextAuto(r);
+          const manualNext=r.nextManual?new Date(r.nextManual):null;
+          let nextInfo='';
+          if(manualNext){nextInfo=`<div class="row-sub" style="margin-top:2px">📌 Volgende: ${fmtDate(manualNext.getTime())}${autoNext?` · berekend: ${fmtDate(autoNext.getTime())}`:''}</div>`}
+          else if(autoNext){nextInfo=`<div class="row-sub" style="margin-top:2px">📅 Volgende: ${fmtDate(autoNext.getTime())}</div>`}
+          h+=`<div class="row" onclick="openRoutineModal('${r.id}')">
+            <div class="row-accent" style="background:${cat.colorHex}"></div>
+            <div class="row-content">
+              <div class="row-title">${esc(r.name)}</div>
+              ${r.note?`<div class="row-sub">${esc(r.note)}</div>`:''}
+              <div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color};background:${color}18">${st}</span></div>
+              ${r.lastDone?`<div class="row-sub" style="margin-top:2px">✓ Laatste: ${fmtDate(r.lastDone)}</div>`:''}
+              ${nextInfo}
+            </div>
+            <button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')">
+              <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </button>
+          </div>`;
+        });
+        h+=`</div></div>`;
       });
-      h+=`</div></div>`;
+      const noCat=sorted.filter(r=>!routineCats.find(c=>c.id===r.categoryId));
+      if(noCat.length){
+        h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;
+        noCat.forEach(r=>{const color=urgColor(r),st=urgStatus(r);h+=`<div class="row" onclick="openRoutineModal('${r.id}')"><div class="row-accent" style="background:#7a8a6a"></div><div class="row-content"><div class="row-title">${esc(r.name)}</div><div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color}">${st}</span></div></div><button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button></div>`});
+        h+=`</div></div>`;
+      }
     }
   }
   el.innerHTML=h;
 }
 
+window.toggleRoutineCal=()=>{routineCalView=!routineCalView;routineCalSelected=null;renderRoutines()};
+window.prevRoutineCal=()=>{routineCalDate=new Date(routineCalDate.getFullYear(),routineCalDate.getMonth()-1,1);renderRoutines()};
+window.nextRoutineCal=()=>{routineCalDate=new Date(routineCalDate.getFullYear(),routineCalDate.getMonth()+1,1);renderRoutines()};
+window.selectRoutineCalDay=key=>{
+  const [y,m,d]=key.split('-').map(Number);
+  const date=new Date(y,m-1,d);
+  routineCalSelected=routineCalSelected&&sameDay(routineCalSelected,date)?null:date;
+  renderRoutines();
+};
+
+// ── Todos render ──
 function renderTodos(){
   const el=document.getElementById('page-todos');
-  let h=`<div class="page-header"><div class="page-title">To-do</div><button class="header-btn" onclick="openTodoModal(null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
-  h+=`<div class="seg"><button class="seg-btn${todoMode==='lijst'?' active':''}" onclick="setTodoMode('lijst')">Lijst</button><button class="seg-btn${todoMode==='matrix'?' active':''}" onclick="setTodoMode('matrix')">Eisenhower</button></div>`;
-  if(todoMode==='matrix'){h+=renderMatrix();el.innerHTML=h;return}
-  const po={hoog:0,normaal:1,laag:2};
-  const active=[...todos].filter(t=>!t.isDone).sort((a,b)=>(po[a.priority]||1)-(po[b.priority]||1));
-  const done=todos.filter(t=>t.isDone);
-  if(!todos.length){h+=`<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Geen to-dos</div><div class="empty-sub">Voeg je eerste taak toe</div></div>`}
-  else{
-    todoCats.forEach(cat=>{
-      const ct=active.filter(t=>t.categoryId===cat.id);if(!ct.length)return;
-      const tags=[...new Set(ct.flatMap(t=>t.tags||[]))].sort();
-      const untagged=ct.filter(t=>!t.tags||!t.tags.length);
-      h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${ct.length}</span></div><div class="card-list">`;
-      untagged.forEach(t=>{h+=todoRow(t,cat.colorHex)});
-      tags.forEach(tag=>{const tg=ct.filter(t=>(t.tags||[]).includes(tag));if(tg.length){h+=`<div style="padding:5px 14px 2px;font-size:11px;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)">${esc(tag)}</div>`;tg.forEach(t=>{h+=todoRow(t,cat.colorHex)})}});
-      h+=`</div></div>`;
+  let h=`<div class="page-header">
+    <div class="page-title">To-do</div>
+    <button class="header-btn${todoCalView?' active':''}" onclick="toggleTodoCal()" title="Kalender">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    </button>
+    <button class="header-btn" onclick="openTodoModal(null)">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>`;
+
+  if(todoCalView){
+    h+=renderCalendar({
+      year:todoCalDate.getFullYear(),
+      month:todoCalDate.getMonth(),
+      selectedDate:todoCalSelected,
+      onPrev:'prevTodoCal',
+      onNext:'nextTodoCal',
+      onSelect:'selectTodoCalDay',
+      getDots:(date)=>{
+        return todos.filter(t=>!t.isDone&&t.date&&sameDay(new Date(t.date),date)).map(t=>{
+          const cat=todoCats.find(c=>c.id===t.categoryId);
+          return cat?.colorHex||'#5a8a5a';
+        }).slice(0,4);
+      },
+      getItems:(date)=>{
+        return todos.filter(t=>t.date&&sameDay(new Date(t.date),date)).map(t=>{
+          const cat=todoCats.find(c=>c.id===t.categoryId);
+          const color=cat?.colorHex||'#5a8a5a';
+          return {html:`<div class="cal-item-row" onclick="openTodoModal('${t.id}')">
+            <div class="cal-item-dot" style="background:${color}"></div>
+            <span class="cal-item-name">${t.emoji?`${t.emoji} `:''}${esc(t.text)}${t.isDone?' ✓':''}</span>
+            ${t.priority==='hoog'?`<span class="cal-item-chip chip-red">Hoog</span>`:''}
+          </div>`};
+        });
+      }
     });
-    const noCat=active.filter(t=>!todoCats.find(c=>c.id===t.categoryId));
-    if(noCat.length){h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;noCat.forEach(t=>{h+=todoRow(t,'#7a8a6a')});h+=`</div></div>`}
-    if(done.length){
-      h+=`<div class="section"><div class="section-header">Afgerond (${done.length})</div><div class="card-list">`;
-      done.forEach(t=>{h+=`<div class="row" style="opacity:.6"><div class="row-accent" style="background:var(--border)"></div><div style="font-size:18px;color:var(--accent);flex-shrink:0;margin-top:2px">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3);cursor:pointer" onclick="openTodoModal('${t.id}')">${t.emoji?`<span style="font-size:14px">${t.emoji}</span> `:''}${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
-      h+=`</div></div>`;
+  } else {
+    h+=`<div class="seg"><button class="seg-btn${todoMode==='lijst'?' active':''}" onclick="setTodoMode('lijst')">Lijst</button><button class="seg-btn${todoMode==='matrix'?' active':''}" onclick="setTodoMode('matrix')">Eisenhower</button></div>`;
+    if(todoMode==='matrix'){h+=renderMatrix();el.innerHTML=h;return}
+    const po={hoog:0,normaal:1,laag:2};
+    const active=[...todos].filter(t=>!t.isDone).sort((a,b)=>(po[a.priority]||1)-(po[b.priority]||1));
+    const done=todos.filter(t=>t.isDone);
+    if(!todos.length){h+=`<div class="empty"><div class="empty-icon">✅</div><div class="empty-title">Geen to-dos</div><div class="empty-sub">Voeg je eerste taak toe</div></div>`}
+    else{
+      todoCats.forEach(cat=>{
+        const ct=active.filter(t=>t.categoryId===cat.id);if(!ct.length)return;
+        const tags=[...new Set(ct.flatMap(t=>t.tags||[]))].sort();
+        const untagged=ct.filter(t=>!t.tags||!t.tags.length);
+        h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${ct.length}</span></div><div class="card-list">`;
+        untagged.forEach(t=>{h+=todoRow(t,cat.colorHex)});
+        tags.forEach(tag=>{const tg=ct.filter(t=>(t.tags||[]).includes(tag));if(tg.length){h+=`<div style="padding:5px 14px 2px;font-size:11px;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)">${esc(tag)}</div>`;tg.forEach(t=>{h+=todoRow(t,cat.colorHex)})}});
+        h+=`</div></div>`;
+      });
+      const noCat=active.filter(t=>!todoCats.find(c=>c.id===t.categoryId));
+      if(noCat.length){h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;noCat.forEach(t=>{h+=todoRow(t,'#7a8a6a')});h+=`</div></div>`}
+      if(done.length){
+        h+=`<div class="section"><div class="section-header">Afgerond (${done.length})</div><div class="card-list">`;
+        done.forEach(t=>{h+=`<div class="row" style="opacity:.6"><div class="row-accent" style="background:var(--border)"></div><div style="font-size:18px;color:var(--accent);flex-shrink:0;margin-top:2px">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3);cursor:pointer" onclick="openTodoModal('${t.id}')">${t.emoji?`<span style="font-size:14px">${t.emoji}</span> `:''}${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
+        h+=`</div></div>`;
+      }
     }
   }
   el.innerHTML=h;
 }
 
+window.toggleTodoCal=()=>{todoCalView=!todoCalView;todoCalSelected=null;renderTodos()};
+window.prevTodoCal=()=>{todoCalDate=new Date(todoCalDate.getFullYear(),todoCalDate.getMonth()-1,1);renderTodos()};
+window.nextTodoCal=()=>{todoCalDate=new Date(todoCalDate.getFullYear(),todoCalDate.getMonth()+1,1);renderTodos()};
+window.selectTodoCalDay=key=>{
+  const [y,m,d]=key.split('-').map(Number);
+  const date=new Date(y,m-1,d);
+  todoCalSelected=todoCalSelected&&sameDay(todoCalSelected,date)?null:date;
+  renderTodos();
+};
+
 function todoRow(t,colorHex){
-  const chips=(t.priority==='hoog'?'<span class="chip chip-red">Hoog</span>':'')+(t.urgent?'<span class="chip chip-orange">Urgent</span>':'')+(t.tags||[]).map(g=>`<span class="chip chip-green">${esc(g)}</span>`).join('');
+  const chips=(t.priority==='hoog'?'<span class="chip chip-red">Hoog</span>':'')+(t.urgent?'<span class="chip chip-orange">Urgent</span>':'')+(t.date?`<span class="chip chip-blue">📅 ${fmtDateShort(t.date)}</span>`:'')+(t.tags||[]).map(g=>`<span class="chip chip-green">${esc(g)}</span>`).join('');
   const emojiHtml=t.emoji?`<span style="font-size:14px;margin-right:3px">${t.emoji}</span>`:'';
   return `<div class="row" onclick="openTodoModal('${t.id}')">
     <div class="row-accent" style="background:${colorHex}"></div>
@@ -591,7 +752,7 @@ function renderInstellingen(){
     <div class="settings-section">${routineCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="btn btn-secondary" style="flex:none;padding:6px 12px;font-size:12px" onclick="openCatModal('routine','${c.id}')">Bewerk</button><button class="settings-del" onclick="deleteCat('routineCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('routine',null)">＋ Categorie toevoegen</div></div>
     <div class="settings-group-label">To-do categorieën</div>
     <div class="settings-section">${todoCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="btn btn-secondary" style="flex:none;padding:6px 12px;font-size:12px" onclick="openCatModal('todo','${c.id}')">Bewerk</button><button class="settings-del" onclick="deleteCat('todoCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('todo',null)">＋ Categorie toevoegen</div></div>
-    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.5 · 🌿</div>`;
+    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.6 · 🌿</div>`;
 }
 
 window.openModal=id=>{const el=document.getElementById(id);el.classList.add('open');el.onclick=e=>{if(e.target===el)closeModal(id)}};
@@ -612,27 +773,15 @@ window.openRoutineModal=id=>{
   sel.value=r?.categoryId||routineCats[0]?.id||'';
   openModal('modal-routine');
 };
-
 window.saveRoutine=async()=>{
   const name=document.getElementById('r-name').value.trim();if(!name)return;
-  const lastDoneVal=document.getElementById('r-last-done').value;
-  const nextManualVal=document.getElementById('r-next-manual').value;
-  const data={
-    name,
-    note:document.getElementById('r-note').value.trim(),
-    frequency:document.getElementById('r-freq').value,
-    categoryId:document.getElementById('r-cat').value,
-    lastDone:lastDoneVal?new Date(lastDoneVal).getTime():null,
-    nextManual:nextManualVal?new Date(nextManualVal).getTime():null,
-  };
+  const data={name,note:document.getElementById('r-note').value.trim(),frequency:document.getElementById('r-freq').value,categoryId:document.getElementById('r-cat').value,lastDone:document.getElementById('r-last-done').value?new Date(document.getElementById('r-last-done').value).getTime():null,nextManual:document.getElementById('r-next-manual').value?new Date(document.getElementById('r-next-manual').value).getTime():null};
   if(editingRoutineId)await updateDoc(dref('routines',editingRoutineId),data);
   else await setDoc(dref('routines',uuid()),{...data,createdAt:Date.now()});
   closeModal('modal-routine');
 };
 window.deleteRoutine=async()=>{if(!editingRoutineId||!confirm('Routine verwijderen?'))return;await deleteDoc(dref('routines',editingRoutineId));closeModal('modal-routine')};
-window.markDone=async id=>{
-  await updateDoc(dref('routines',id),{lastDone:Date.now(),nextManual:null});
-};
+window.markDone=async id=>await updateDoc(dref('routines',id),{lastDone:Date.now(),nextManual:null});
 
 window.openTodoModal=id=>{
   editingTodoId=id||null;
@@ -642,6 +791,7 @@ window.openTodoModal=id=>{
   document.getElementById('t-text').value=t?.text||'';
   document.getElementById('t-notes').value=t?.notes||'';
   document.getElementById('t-tags').value=(t?.tags||[]).join(', ');
+  document.getElementById('t-date').value=t?.date?toDateInput(t.date):'';
   currentPrio=t?.priority||'normaal';setPrio(currentPrio);
   const urg=document.getElementById('t-urgent-toggle');
   t?.urgent?urg.classList.add('on'):urg.classList.remove('on');
@@ -662,7 +812,8 @@ window.toggleUrgent=()=>document.getElementById('t-urgent-toggle').classList.tog
 window.saveTodo=async()=>{
   const text=document.getElementById('t-text').value.trim();if(!text)return;
   const tags=document.getElementById('t-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const data={text,notes:document.getElementById('t-notes').value.trim(),priority:currentPrio,urgent:document.getElementById('t-urgent-toggle').classList.contains('on'),categoryId:document.getElementById('t-cat').value,tags,emoji:currentTodoEmoji||null};
+  const dateVal=document.getElementById('t-date').value;
+  const data={text,notes:document.getElementById('t-notes').value.trim(),priority:currentPrio,urgent:document.getElementById('t-urgent-toggle').classList.contains('on'),categoryId:document.getElementById('t-cat').value,tags,emoji:currentTodoEmoji||null,date:dateVal?new Date(dateVal).getTime():null};
   if(editingTodoId){const ex=todos.find(t=>t.id===editingTodoId);await updateDoc(dref('todos',editingTodoId),{...data,isDone:ex?.isDone||false})}
   else await setDoc(dref('todos',uuid()),{...data,isDone:false,createdAt:Date.now()});
   closeModal('modal-todo');
@@ -774,6 +925,7 @@ window.importBackup=async input=>{
 function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16)})}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function fmtDate(ts){return new Date(ts).toLocaleDateString('nl-BE',{day:'numeric',month:'short',year:'numeric'})}
+function fmtDateShort(ts){return new Date(ts).toLocaleDateString('nl-BE',{day:'numeric',month:'short'})}
 function toDateInput(ts){return new Date(ts).toISOString().split('T')[0]}
 
 renderEmojiResults();
