@@ -11,119 +11,102 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>Planr</title>
 <style>
-  :root {
-    --bg:#f4f8f1;--bg2:#e8f0e2;--bg3:#d4e6c8;--text:#2d4a1e;--text2:#5a7a45;
-    --text3:#8aaa75;--accent:#4a7c3f;--accent2:#c8e6b8;--red:#9b4a4a;
-    --orange:#8b6914;--border:#c8dab8;--card:#ffffff;--shadow:rgba(74,124,63,0.10);--nav-h:64px;
-  }
-  [data-theme="dark"] {
-    --bg:#1a2416;--bg2:#212f1a;--bg3:#2a3d20;--text:#d4e6c8;--text2:#8aaa75;
-    --text3:#5a7a45;--accent:#6ab05f;--accent2:#2a3d20;--border:#2a3d20;--card:#212f1a;--shadow:rgba(0,0,0,0.3);
-  }
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;overscroll-behavior:none}
-  #app{display:flex;flex-direction:column;height:100%;height:100dvh}
-  #main{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
-  #nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;z-index:100;box-shadow:0 -2px 12px var(--shadow)}
-  .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:none;cursor:pointer;color:var(--text3);padding:8px 4px;transition:color .15s;font-size:10px;font-weight:500;letter-spacing:.3px}
-  .nav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-  .nav-btn.active{color:var(--accent)}
-  .nav-btn.active svg{stroke-width:2.2}
-  .page-header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 16px 12px;display:flex;align-items:center;gap:10px}
-  .page-title{font-size:22px;font-weight:700;color:var(--text);flex:1}
-  .header-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--accent);transition:background .15s}
-  .header-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .section{margin:12px 0}
-  .section-header{padding:6px 16px 4px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
-  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-  .card-list{margin:0 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)}
-  .row{display:flex;align-items:flex-start;padding:12px 14px;gap:10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
-  .row:last-child{border-bottom:none}
-  .row:active{background:var(--bg2)}
-  .row-accent{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0}
-  .row-content{flex:1;min-width:0}
-  .row-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
-  .row-sub{font-size:12px;color:var(--text3);margin-bottom:4px}
-  .chip{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin-right:4px;margin-top:2px;font-weight:500}
-  .chip-green{background:var(--bg3);color:var(--text2)}
-  .chip-red{background:rgba(155,74,74,.12);color:var(--red)}
-  .chip-orange{background:rgba(139,105,20,.12);color:var(--orange)}
-  .check-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0}
-  .check-btn svg{width:26px;height:26px;stroke:var(--accent);fill:none;stroke-width:1.7}
-  .empty{padding:40px 20px;text-align:center}
-  .empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
-  .empty-title{font-size:17px;font-weight:600;color:var(--text);margin-bottom:4px}
-  .empty-sub{font-size:14px;color:var(--text3)}
-  .seg{display:flex;background:var(--bg2);border-radius:10px;padding:2px;margin:10px 16px}
-  .seg-btn{flex:1;padding:6px;border:none;background:none;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s}
-  .seg-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px var(--shadow);font-weight:600}
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s}
-  .overlay.open{opacity:1;pointer-events:all}
-  .sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom);transform:translateY(100%);transition:transform .25s cubic-bezier(.25,.46,.45,.94)}
-  .overlay.open .sheet{transform:translateY(0)}
-  .sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 4px}
-  .sheet-title{font-size:18px;font-weight:700;color:var(--text);padding:8px 16px 14px}
-  .form-group{padding:0 16px;margin-bottom:12px}
-  .form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
-  .form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:15px;outline:none;transition:border-color .15s;font-family:inherit}
-  .form-input:focus{border-color:var(--accent)}
-  .form-select{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:15px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238aaa75' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer;font-family:inherit}
-  .form-toggle{display:flex;align-items:center;justify-content:space-between;padding:11px 13px}
-  .toggle-switch{width:44px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
-  .toggle-switch.on{background:var(--accent)}
-  .toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:white;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-  .toggle-switch.on::after{transform:translateX(18px)}
-  .sheet-actions{display:flex;gap:8px;padding:12px 16px 8px}
-  .btn{padding:13px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;flex:1;transition:opacity .15s}
-  .btn-primary{background:var(--accent);color:white}
-  .btn-secondary{background:var(--bg2);color:var(--text2)}
-  .btn:active{opacity:.8}
-  .btn:disabled{opacity:.45;cursor:default}
-  .matrix{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
-  .quad{background:var(--card);border-radius:12px;padding:10px;border:1.5px solid var(--border);min-height:110px}
-  .quad-title{font-size:12px;font-weight:700;margin-bottom:2px}
-  .quad-sub{font-size:10px;color:var(--text3);margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border)}
-  .quad-item{font-size:11px;color:var(--text);padding:4px 6px;border-radius:6px;margin-bottom:3px;cursor:pointer}
-  .store-header{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--card);user-select:none}
-  .store-name{font-size:15px;font-weight:700;color:var(--text);flex:1}
-  .store-badge{background:var(--accent);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
-  .store-body{background:var(--card)}
-  .shop-cat-label{padding:6px 14px 3px;font-size:11px;color:var(--text3);font-weight:600}
-  .shop-item-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--bg2)}
-  .shop-item-name{flex:1;font-size:14px;color:var(--text)}
-  .shop-item-name.got{text-decoration:line-through;color:var(--text3)}
-  .shop-qty{font-size:12px;color:var(--text3)}
-  .check-sq{width:22px;height:22px;border:2px solid var(--border);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-  .check-sq.checked{background:var(--accent);border-color:var(--accent)}
-  .check-sq.checked::after{content:'✓';color:white;font-size:13px;font-weight:700}
-  .store-add-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--accent);font-size:14px;cursor:pointer;border-bottom:1px solid var(--bg2)}
-  .store-clear-btn{padding:8px 14px;color:var(--red);font-size:13px;cursor:pointer;text-align:center}
-  .settings-section{margin:16px 12px 0;background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px var(--shadow)}
-  .settings-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border)}
-  .settings-row:last-child{border-bottom:none}
-  .settings-label{flex:1;font-size:14px;color:var(--text)}
-  .cat-color-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0}
-  .settings-del{background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:2px 6px}
-  .add-cat-row{display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--accent);cursor:pointer;font-size:14px;font-weight:500}
-  #auth-screen{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
-  .auth-logo{font-size:56px;margin-bottom:8px}
-  .auth-title{font-size:32px;font-weight:800;color:var(--text);margin-bottom:6px}
-  .auth-sub{font-size:15px;color:var(--text2);margin-bottom:36px;text-align:center}
-  .google-btn{display:flex;align-items:center;gap:12px;padding:14px 24px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:16px;font-weight:600;color:var(--text);cursor:pointer;box-shadow:0 2px 8px var(--shadow)}
-  #loading{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
-  .spinner{width:32px;height:32px;border:3px solid var(--bg3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .user-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
-  .hidden{display:none!important}
-  input[type=color]{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;background:none;padding:0}
+:root{--bg:#f4f8f1;--bg2:#e8f0e2;--bg3:#d4e6c8;--text:#2d4a1e;--text2:#5a7a45;--text3:#8aaa75;--accent:#4a7c3f;--red:#9b4a4a;--orange:#8b6914;--border:#c8dab8;--card:#ffffff;--shadow:rgba(74,124,63,0.10);--nav-h:64px}
+[data-theme="dark"]{--bg:#1a2416;--bg2:#212f1a;--bg3:#2a3d20;--text:#d4e6c8;--text2:#8aaa75;--text3:#5a7a45;--accent:#6ab05f;--border:#2a3d20;--card:#212f1a;--shadow:rgba(0,0,0,0.3)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;overscroll-behavior:none}
+#app{display:flex;flex-direction:column;height:100%;height:100dvh}
+#main{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom))}
+#nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;z-index:100;box-shadow:0 -2px 12px var(--shadow)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:none;background:none;cursor:pointer;color:var(--text3);padding:8px 4px;font-size:10px;font-weight:500;letter-spacing:.3px}
+.nav-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nav-btn.active{color:var(--accent)}.nav-btn.active svg{stroke-width:2.2}
+.page-header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--border);padding:14px 16px 12px;display:flex;align-items:center;gap:10px}
+.page-title{font-size:22px;font-weight:700;color:var(--text);flex:1}
+.header-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--accent)}
+.header-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.section{margin:12px 0}
+.section-header{padding:6px 16px 4px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.card-list{margin:0 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)}
+.row{display:flex;align-items:flex-start;padding:12px 14px;gap:10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
+.row:last-child{border-bottom:none}.row:active{background:var(--bg2)}
+.row-accent{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0}
+.row-content{flex:1;min-width:0}
+.row-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.row-sub{font-size:12px;color:var(--text3);margin-bottom:4px}
+.chip{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin-right:4px;margin-top:2px;font-weight:500}
+.chip-green{background:var(--bg3);color:var(--text2)}.chip-red{background:rgba(155,74,74,.12);color:var(--red)}.chip-orange{background:rgba(139,105,20,.12);color:var(--orange)}
+.check-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0}
+.check-btn svg{width:26px;height:26px;stroke:var(--accent);fill:none;stroke-width:1.7}
+.empty{padding:40px 20px;text-align:center}
+.empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
+.empty-title{font-size:17px;font-weight:600;color:var(--text);margin-bottom:4px}
+.empty-sub{font-size:14px;color:var(--text3)}
+.seg{display:flex;background:var(--bg2);border-radius:10px;padding:2px;margin:10px 16px}
+.seg-btn{flex:1;padding:6px;border:none;background:none;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s}
+.seg-btn.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px var(--shadow);font-weight:600}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom);transform:translateY(100%);transition:transform .25s cubic-bezier(.25,.46,.45,.94)}
+.overlay.open .sheet{transform:translateY(0)}
+.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 4px}
+.sheet-title{font-size:18px;font-weight:700;color:var(--text);padding:8px 16px 14px}
+.form-group{padding:0 16px;margin-bottom:12px}
+.form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.4px}
+.form-input{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:15px;outline:none;transition:border-color .15s;font-family:inherit}
+.form-input:focus{border-color:var(--accent)}
+.form-select{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:15px;outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238aaa75' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer;font-family:inherit}
+.form-toggle{display:flex;align-items:center;justify-content:space-between;padding:11px 13px}
+.toggle-switch{width:44px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
+.toggle-switch.on{background:var(--accent)}
+.toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;background:white;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle-switch.on::after{transform:translateX(18px)}
+.sheet-actions{display:flex;gap:8px;padding:12px 16px 8px}
+.btn{padding:13px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;flex:1;transition:opacity .15s}
+.btn-primary{background:var(--accent);color:white}.btn-secondary{background:var(--bg2);color:var(--text2)}.btn-danger{background:var(--red);color:white}
+.btn:active{opacity:.8}.btn:disabled{opacity:.45;cursor:default}
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}
+.quad{background:var(--card);border-radius:12px;padding:10px;border:1.5px solid var(--border);min-height:110px}
+.quad-title{font-size:12px;font-weight:700;margin-bottom:2px}.quad-sub{font-size:10px;color:var(--text3);margin-bottom:6px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.quad-item{font-size:11px;color:var(--text);padding:4px 6px;border-radius:6px;margin-bottom:3px;cursor:pointer}
+.store-header{display:flex;align-items:center;gap:10px;padding:13px 14px;cursor:pointer;background:var(--card);user-select:none}
+.store-name{font-size:15px;font-weight:700;color:var(--text);flex:1}
+.store-badge{background:var(--accent);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
+.shop-cat-label{padding:6px 14px 3px;font-size:11px;color:var(--text3);font-weight:600}
+.shop-item-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--bg2)}
+.shop-item-name{flex:1;font-size:14px;color:var(--text)}.shop-item-name.got{text-decoration:line-through;color:var(--text3)}
+.shop-qty{font-size:12px;color:var(--text3)}
+.check-sq{width:22px;height:22px;border:2px solid var(--border);border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.check-sq.checked{background:var(--accent);border-color:var(--accent)}.check-sq.checked::after{content:'✓';color:white;font-size:13px;font-weight:700}
+.store-add-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--accent);font-size:14px;cursor:pointer;border-bottom:1px solid var(--bg2)}
+.store-clear-btn{padding:8px 14px;color:var(--red);font-size:13px;cursor:pointer;text-align:center}
+.settings-section{margin:8px 12px 0;background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 1px 4px var(--shadow)}
+.settings-row{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-label{flex:1;font-size:14px;color:var(--text)}
+.cat-color-dot{width:16px;height:16px;border-radius:50%;flex-shrink:0}
+.settings-del{background:none;border:none;color:var(--red);font-size:18px;cursor:pointer;padding:2px 6px}
+.add-cat-row{display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--accent);cursor:pointer;font-size:14px;font-weight:500}
+.settings-group-label{margin:16px 12px 0;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
+#auth-screen{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+.auth-logo{font-size:56px;margin-bottom:8px}.auth-title{font-size:32px;font-weight:800;color:var(--text);margin-bottom:6px}
+.auth-sub{font-size:15px;color:var(--text2);margin-bottom:36px;text-align:center}
+.google-btn{display:flex;align-items:center;gap:12px;padding:14px 24px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;font-size:16px;font-weight:600;color:var(--text);cursor:pointer;box-shadow:0 2px 8px var(--shadow)}
+#loading{position:fixed;inset:0;background:var(--bg);z-index:400;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid var(--bg3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.user-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.hidden{display:none!important}
+input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);cursor:pointer;background:none;padding:0}
+.emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:12px 16px}
+.emoji-btn{font-size:24px;padding:6px;border:2px solid transparent;border-radius:8px;cursor:pointer;background:none;text-align:center}
+.emoji-btn.selected{border-color:var(--accent);background:var(--bg2)}
 </style>
 </head>
 <body>
 
-<div id="loading">
-  <div style="font-size:40px">🌿</div>
-  <div class="spinner"></div>
-</div>
+<div id="loading"><div style="font-size:40px">🌿</div><div class="spinner"></div></div>
 
 <div id="auth-screen" class="hidden">
   <div class="auth-logo">🌿</div>
@@ -144,20 +127,16 @@
   </div>
   <nav id="nav">
     <button class="nav-btn active" onclick="showPage('routines')" id="nav-routines">
-      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><polyline points="12 6 12 12 16 14"/></svg>
-      Routines
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><polyline points="12 6 12 12 16 14"/></svg>Routines
     </button>
     <button class="nav-btn" onclick="showPage('todos')" id="nav-todos">
-      <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      To-do
+      <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>To-do
     </button>
     <button class="nav-btn" onclick="showPage('winkellijst')" id="nav-winkellijst">
-      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
-      Winkel
+      <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>Winkel
     </button>
     <button class="nav-btn" onclick="showPage('instellingen')" id="nav-instellingen">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Instellingen
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Instellingen
     </button>
   </nav>
 </div>
@@ -166,17 +145,13 @@
 <div class="overlay" id="modal-routine">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title" id="routine-modal-title">Routine toevoegen</div>
-    <div class="form-group">
-      <label class="form-label">Naam</label>
-      <input class="form-input" id="r-name" placeholder="Bijv. Stofzuigen" type="text">
+    <div style="display:flex;align-items:center;padding:8px 16px 14px">
+      <div class="sheet-title" id="routine-modal-title" style="padding:0;flex:1">Routine toevoegen</div>
+      <button id="r-delete-btn" class="btn btn-danger" style="flex:none;padding:8px 14px;font-size:13px;display:none" onclick="deleteRoutine()">Verwijder</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Notitie</label>
-      <input class="form-input" id="r-note" placeholder="Optioneel" type="text">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Frequentie</label>
+    <div class="form-group"><label class="form-label">Naam</label><input class="form-input" id="r-name" placeholder="Bijv. Stofzuigen" type="text"></div>
+    <div class="form-group"><label class="form-label">Notitie</label><input class="form-input" id="r-note" placeholder="Optioneel" type="text"></div>
+    <div class="form-group"><label class="form-label">Frequentie</label>
       <select class="form-select" id="r-freq">
         <option value="dagelijks">Dagelijks</option>
         <option value="wekelijks" selected>Wekelijks</option>
@@ -188,18 +163,9 @@
         <option value="aangepast">Aangepaste datum</option>
       </select>
     </div>
-    <div class="form-group hidden" id="r-custom-date-group">
-      <label class="form-label">Volgende keer</label>
-      <input class="form-input" id="r-next-date" type="date">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Categorie</label>
-      <select class="form-select" id="r-cat"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Laatste keer gedaan</label>
-      <input class="form-input" id="r-last-done" type="date">
-    </div>
+    <div class="form-group hidden" id="r-custom-date-group"><label class="form-label">Volgende keer</label><input class="form-input" id="r-next-date" type="date"></div>
+    <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="r-cat"></select></div>
+    <div class="form-group"><label class="form-label">Laatste keer gedaan</label><input class="form-input" id="r-last-done" type="date"></div>
     <div class="sheet-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-routine')">Annuleer</button>
       <button class="btn btn-primary" onclick="saveRoutine()">Opslaan</button>
@@ -212,17 +178,13 @@
 <div class="overlay" id="modal-todo">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title" id="todo-modal-title">To-do toevoegen</div>
-    <div class="form-group">
-      <label class="form-label">Omschrijving</label>
-      <input class="form-input" id="t-text" placeholder="Wat moet er gedaan worden?" type="text">
+    <div style="display:flex;align-items:center;padding:8px 16px 14px">
+      <div class="sheet-title" id="todo-modal-title" style="padding:0;flex:1">To-do toevoegen</div>
+      <button id="t-delete-btn" class="btn btn-danger" style="flex:none;padding:8px 14px;font-size:13px;display:none" onclick="deleteTodo()">Verwijder</button>
     </div>
-    <div class="form-group">
-      <label class="form-label">Notities</label>
-      <textarea class="form-input" id="t-notes" placeholder="Optioneel" rows="2" style="resize:none"></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Prioriteit</label>
+    <div class="form-group"><label class="form-label">Omschrijving</label><input class="form-input" id="t-text" placeholder="Wat moet er gedaan worden?" type="text"></div>
+    <div class="form-group"><label class="form-label">Notities</label><textarea class="form-input" id="t-notes" placeholder="Optioneel" rows="2" style="resize:none"></textarea></div>
+    <div class="form-group"><label class="form-label">Prioriteit</label>
       <div class="seg" style="margin:0">
         <button class="seg-btn" id="prio-laag" onclick="setPrio('laag')">Laag</button>
         <button class="seg-btn active" id="prio-normaal" onclick="setPrio('normaal')">Normaal</button>
@@ -231,20 +193,11 @@
     </div>
     <div class="form-group" style="margin-top:10px">
       <div style="background:var(--card);border:1.5px solid var(--border);border-radius:10px">
-        <div class="form-toggle">
-          <span style="font-size:14px;color:var(--text)">Urgent</span>
-          <button class="toggle-switch" id="t-urgent-toggle" onclick="toggleUrgent()"></button>
-        </div>
+        <div class="form-toggle"><span style="font-size:14px;color:var(--text)">Urgent</span><button class="toggle-switch" id="t-urgent-toggle" onclick="toggleUrgent()"></button></div>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Categorie</label>
-      <select class="form-select" id="t-cat"></select>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Tags <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)">(komma-gescheiden)</span></label>
-      <input class="form-input" id="t-tags" placeholder="bv: creatief, admin" type="text">
-    </div>
+    <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="t-cat"></select></div>
+    <div class="form-group"><label class="form-label">Tags <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)">(komma-gescheiden)</span></label><input class="form-input" id="t-tags" placeholder="bv: creatief, admin" type="text"></div>
     <div class="sheet-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-todo')">Annuleer</button>
       <button class="btn btn-primary" onclick="saveTodo()">Opslaan</button>
@@ -257,14 +210,15 @@
 <div class="overlay" id="modal-store">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">Winkel toevoegen</div>
-    <div class="form-group">
-      <label class="form-label">Naam</label>
-      <input class="form-input" id="s-name" placeholder="Bijv. Delhaize, Lidl..." type="text">
+    <div style="display:flex;align-items:center;padding:8px 16px 14px">
+      <div class="sheet-title" id="store-modal-title" style="padding:0;flex:1">Winkel toevoegen</div>
+      <button id="store-delete-btn" class="btn btn-danger" style="flex:none;padding:8px 14px;font-size:13px;display:none" onclick="deleteStoreFromModal()">Verwijder</button>
     </div>
+    <div class="form-group"><label class="form-label">Naam</label><input class="form-input" id="s-name" placeholder="Bijv. Delhaize, Lidl..." type="text"></div>
+    <div class="form-group"><label class="form-label">Emoji</label><div class="emoji-grid" id="emoji-grid"></div></div>
     <div class="sheet-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-store')">Annuleer</button>
-      <button class="btn btn-primary" onclick="saveStore()">Toevoegen</button>
+      <button class="btn btn-primary" onclick="saveStore()">Opslaan</button>
     </div>
     <div style="height:8px"></div>
   </div>
@@ -275,27 +229,15 @@
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">Product toevoegen</div>
-    <div class="form-group">
-      <label class="form-label">Naam</label>
-      <input class="form-input" id="si-name" placeholder="Naam van product" type="text">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Hoeveelheid</label>
-      <input class="form-input" id="si-qty" placeholder="bv: 2x, 500g..." type="text">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Categorie</label>
+    <div class="form-group"><label class="form-label">Naam</label><input class="form-input" id="si-name" placeholder="Naam van product" type="text"></div>
+    <div class="form-group"><label class="form-label">Hoeveelheid</label><input class="form-input" id="si-qty" placeholder="bv: 2x, 500g..." type="text"></div>
+    <div class="form-group"><label class="form-label">Categorie</label>
       <select class="form-select" id="si-cat">
-        <option value="groenten">🥦 Groenten</option>
-        <option value="fruit">🍎 Fruit</option>
-        <option value="vlees">🥩 Vlees</option>
-        <option value="vis">🐟 Vis</option>
-        <option value="zuivel">🧀 Zuivel</option>
-        <option value="brood">🍞 Brood</option>
-        <option value="droog">🥫 Droog</option>
-        <option value="drank">🧃 Drank</option>
-        <option value="diepvries">❄️ Diepvries</option>
-        <option value="hygiene">🧴 Hygiëne</option>
+        <option value="groenten">🥦 Groenten</option><option value="fruit">🍎 Fruit</option>
+        <option value="vlees">🥩 Vlees</option><option value="vis">🐟 Vis</option>
+        <option value="zuivel">🧀 Zuivel</option><option value="brood">🍞 Brood</option>
+        <option value="droog">🥫 Droog</option><option value="drank">🧃 Drank</option>
+        <option value="diepvries">❄️ Diepvries</option><option value="hygiene">🧴 Hygiëne</option>
         <option value="overig">🛒 Overig</option>
       </select>
     </div>
@@ -311,19 +253,33 @@
 <div class="overlay" id="modal-cat">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title" id="cat-modal-title">Categorie toevoegen</div>
-    <div class="form-group">
-      <label class="form-label">Naam</label>
-      <input class="form-input" id="cat-name" placeholder="Naam" type="text">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Kleur</label>
-      <input type="color" id="cat-color" value="#5a8a5a">
-    </div>
+    <div class="sheet-title" id="cat-modal-title">Categorie</div>
+    <div class="form-group"><label class="form-label">Naam</label><input class="form-input" id="cat-name" placeholder="Naam" type="text"></div>
+    <div class="form-group"><label class="form-label">Kleur</label><input type="color" id="cat-color" value="#5a8a5a"></div>
     <div class="sheet-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-cat')">Annuleer</button>
-      <button class="btn btn-primary" onclick="saveCat()">Toevoegen</button>
+      <button class="btn btn-primary" onclick="saveCat()">Opslaan</button>
     </div>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- Backup modal -->
+<div class="overlay" id="modal-backup">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Backup</div>
+    <div style="padding:0 16px 16px;display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-primary" onclick="exportBackup()">📥 Exporteer backup (JSON)</button>
+      <div style="font-size:12px;color:var(--text3);text-align:center">of</div>
+      <label style="display:block">
+        <div class="btn btn-secondary" style="text-align:center;cursor:pointer">📤 Importeer backup</div>
+        <input type="file" accept=".json" id="import-file" style="display:none" onchange="importBackup(this)">
+      </label>
+      <div id="import-status" style="font-size:13px;color:var(--accent);text-align:center;min-height:20px"></div>
+      <div style="font-size:12px;color:var(--red);background:rgba(155,74,74,.08);border-radius:8px;padding:10px">⚠️ Importeren overschrijft alle bestaande data!</div>
+    </div>
+    <div class="sheet-actions"><button class="btn btn-secondary" onclick="closeModal('modal-backup')">Sluiten</button></div>
     <div style="height:8px"></div>
   </div>
 </div>
@@ -331,16 +287,18 @@
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import{getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,query,orderBy,updateDoc}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import{getFirestore,collection,doc,setDoc,deleteDoc,onSnapshot,query,orderBy,updateDoc,getDocs,writeBatch}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const app=initializeApp({apiKey:"AIzaSyC3srCJohuA5HKvt2K6_bNIlvgnjBpXn9I",authDomain:"planr-45155.firebaseapp.com",projectId:"planr-45155",storageBucket:"planr-45155.firebasestorage.app",messagingSenderId:"706335599227",appId:"1:706335599227:web:760d845bb34d26a92150de"});
 const auth=getAuth(app);
 const db=getFirestore(app);
 
 let uid=null,currentPage='routines',todoMode='lijst',currentPrio='normaal';
-let editingRoutineId=null,editingTodoId=null,addingShopItemForStore=null,addingCatFor=null,expandedStoreId=null;
+let editingRoutineId=null,editingTodoId=null,editingStoreId=null,addingShopItemForStore=null,addingCatFor=null,editingCatId=null,expandedStoreId=null;
 let routines=[],routineCats=[],todos=[],todoCats=[],stores=[],shopItems=[],unsubs=[];
+let selectedEmoji='🛒';
 
+const STORE_EMOJIS=['🛒','🏪','🥩','🥖','🧴','🌿','🐟','🍷','🥗','💊','🏠','⚽','📦','🌸','🍕','☕','🎯','🚗','✈️','🎁'];
 const defaultRoutineCats=[{id:'huishouden',name:'Huishouden',colorHex:'#5a8a5a'},{id:'persoonlijk',name:'Persoonlijk',colorHex:'#4a7a9b'},{id:'tuin',name:'Tuin',colorHex:'#6b8c3a'},{id:'overig',name:'Overig',colorHex:'#7a8a6a'}];
 const defaultTodoCats=[{id:'persoonlijk',name:'Persoonlijk',colorHex:'#5a8a5a'},{id:'werk',name:'Werk',colorHex:'#4a7a9b'},{id:'thuis',name:'Thuis',colorHex:'#6b8c3a'}];
 const defaultRoutines=[{name:'Stofzuigen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Dweilen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Badkamer poetsen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Keuken poetsen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Wasgoed doen',frequency:'wekelijks',categoryId:'huishouden'},{name:'Handdoeken verversen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Lakens verversen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Koelkast opruimen',frequency:'2wekelijks',categoryId:'huishouden'},{name:'Oven reinigen',frequency:'maandelijks',categoryId:'huishouden'},{name:'Wasmachine reinigen',frequency:'maandelijks',categoryId:'huishouden'},{name:'Terras vegen',frequency:'maandelijks',categoryId:'tuin'}];
@@ -356,13 +314,13 @@ onAuthStateChanged(auth,user=>{
 });
 
 const col=p=>collection(db,`users/${uid}/${p}`);
-const docRef=(p,id)=>doc(db,`users/${uid}/${p}/${id}`);
+const dref=(p,id)=>doc(db,`users/${uid}/${p}/${id}`);
 
 function startListeners(){
   unsubs.forEach(u=>u());unsubs=[];
-  unsubs.push(onSnapshot(col('routineCats'),s=>{routineCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!routineCats.length)defaultRoutineCats.forEach(c=>setDoc(docRef('routineCats',c.id),c));else renderCurrent()}));
-  unsubs.push(onSnapshot(col('todoCats'),s=>{todoCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!todoCats.length)defaultTodoCats.forEach(c=>setDoc(docRef('todoCats',c.id),c));else renderCurrent()}));
-  unsubs.push(onSnapshot(query(col('routines'),orderBy('createdAt','asc')),s=>{routines=s.docs.map(d=>({id:d.id,...d.data()}));if(!routines.length)defaultRoutines.forEach(r=>setDoc(docRef('routines',uuid()),{...r,note:'',lastDone:null,nextDate:null,createdAt:Date.now()}));else renderCurrent()}));
+  unsubs.push(onSnapshot(col('routineCats'),s=>{routineCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!routineCats.length)defaultRoutineCats.forEach(c=>setDoc(dref('routineCats',c.id),c));else renderCurrent()}));
+  unsubs.push(onSnapshot(col('todoCats'),s=>{todoCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!todoCats.length)defaultTodoCats.forEach(c=>setDoc(dref('todoCats',c.id),c));else renderCurrent()}));
+  unsubs.push(onSnapshot(query(col('routines'),orderBy('createdAt','asc')),s=>{routines=s.docs.map(d=>({id:d.id,...d.data()}));if(!routines.length)defaultRoutines.forEach(r=>setDoc(dref('routines',uuid()),{...r,note:'',lastDone:null,nextDate:null,createdAt:Date.now()}));else renderCurrent()}));
   unsubs.push(onSnapshot(query(col('todos'),orderBy('createdAt','asc')),s=>{todos=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
   unsubs.push(onSnapshot(query(col('stores'),orderBy('order','asc')),s=>{stores=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
   unsubs.push(onSnapshot(col('shopItems'),s=>{shopItems=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
@@ -386,34 +344,34 @@ function renderCurrent(){
 const FREQ_DAYS={dagelijks:1,wekelijks:7,'2wekelijks':14,'3wekelijks':21,maandelijks:30,kwartaal:90,jaarlijks:365};
 function computeNext(r){if(r.frequency==='aangepast')return r.nextDate?new Date(r.nextDate):null;if(!r.lastDone)return null;const d=new Date(r.lastDone);d.setDate(d.getDate()+(FREQ_DAYS[r.frequency]||7));return d}
 function daysUntil(r){const n=computeNext(r);if(!n)return null;const t=new Date();t.setHours(0,0,0,0);const nd=new Date(n);nd.setHours(0,0,0,0);return Math.round((nd-t)/86400000)}
-function urg(r){const d=daysUntil(r);if(d===null)return'neverDone';if(d<0)return'overdue';if(d===0)return'today';if(d<=3)return'soon';return'ok'}
-const UC={neverDone:'#9b4a4a',overdue:'#9b4a4a',today:'#8b6914',soon:'#8b6914',ok:'#5a8a5a'};
+function urgColor(r){const d=daysUntil(r);if(d===null||d<0)return'#9b4a4a';if(d<=3)return'#8b6914';return'#5a8a5a'}
+function urgStatus(r){const d=daysUntil(r);if(d===null)return'Nog nooit';if(d<0)return`${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} te laat`;if(d===0)return'Vandaag!';return`Over ${d} dag${d===1?'':'en'}`}
 function fLabel(f){return{dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal',jaarlijks:'Jaarlijks',aangepast:'Aangepast'}[f]||f}
 
 function renderRoutines(){
   const el=document.getElementById('page-routines');
   const sorted=[...routines].sort((a,b)=>(daysUntil(a)??-999)-(daysUntil(b)??-999));
-  let h=`<div class="page-header"><div class="page-title">Routines</div><button class="header-btn" onclick="openRoutineModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
+  let h=`<div class="page-header"><div class="page-title">Routines</div><button class="header-btn" onclick="openRoutineModal(null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
   if(!routines.length){h+=`<div class="empty"><div class="empty-icon">🔄</div><div class="empty-title">Geen routines</div><div class="empty-sub">Voeg je eerste routine toe</div></div>`}
   else{
     routineCats.filter(c=>sorted.some(r=>r.categoryId===c.id)).forEach(cat=>{
-      const cr=sorted.filter(r=>r.categoryId===cat.id);
-      if(!cr.length)return;
+      const cr=sorted.filter(r=>r.categoryId===cat.id);if(!cr.length)return;
       h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}</div><div class="card-list">`;
       cr.forEach(r=>{
-        const u=urg(r),d=daysUntil(r),color=UC[u];
-        const st=d===null?'Nog nooit':d<0?`${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} te laat`:d===0?'Vandaag!':`Over ${d} dag${d===1?'':'en'}`;
+        const color=urgColor(r),st=urgStatus(r);
         h+=`<div class="row" onclick="openRoutineModal('${r.id}')"><div class="row-accent" style="background:${cat.colorHex}"></div><div class="row-content"><div class="row-title">${esc(r.name)}</div>${r.note?`<div class="row-sub">${esc(r.note)}</div>`:''}<div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color};background:${color}18">${st}</span></div>${r.lastDone?`<div class="row-sub" style="margin-top:3px">Laatste: ${fmtDate(r.lastDone)}</div>`:''}</div><button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button></div>`;
       });
       h+=`</div></div>`;
     });
+    const noCat=sorted.filter(r=>!routineCats.find(c=>c.id===r.categoryId));
+    if(noCat.length){h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;noCat.forEach(r=>{const color=urgColor(r),st=urgStatus(r);h+=`<div class="row" onclick="openRoutineModal('${r.id}')"><div class="row-accent" style="background:#7a8a6a"></div><div class="row-content"><div class="row-title">${esc(r.name)}</div><div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color}">${st}</span></div></div><button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button></div>`});h+=`</div></div>`}
   }
   el.innerHTML=h;
 }
 
 function renderTodos(){
   const el=document.getElementById('page-todos');
-  let h=`<div class="page-header"><div class="page-title">To-do</div><button class="header-btn" onclick="openTodoModal()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
+  let h=`<div class="page-header"><div class="page-title">To-do</div><button class="header-btn" onclick="openTodoModal(null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
   h+=`<div class="seg"><button class="seg-btn${todoMode==='lijst'?' active':''}" onclick="setTodoMode('lijst')">Lijst</button><button class="seg-btn${todoMode==='matrix'?' active':''}" onclick="setTodoMode('matrix')">Eisenhower</button></div>`;
   if(todoMode==='matrix'){h+=renderMatrix();el.innerHTML=h;return}
   const po={hoog:0,normaal:1,laag:2};
@@ -427,15 +385,14 @@ function renderTodos(){
       const untagged=ct.filter(t=>!t.tags||!t.tags.length);
       h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}<span style="margin-left:auto;font-size:11px;color:var(--text3)">${ct.length}</span></div><div class="card-list">`;
       untagged.forEach(t=>{h+=todoRow(t,cat.colorHex)});
-      tags.forEach(tag=>{
-        const tg=ct.filter(t=>(t.tags||[]).includes(tag));
-        if(tg.length){h+=`<div style="padding:5px 14px 2px;font-size:11px;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)">${esc(tag)}</div>`;tg.forEach(t=>{h+=todoRow(t,cat.colorHex)})}
-      });
+      tags.forEach(tag=>{const tg=ct.filter(t=>(t.tags||[]).includes(tag));if(tg.length){h+=`<div style="padding:5px 14px 2px;font-size:11px;color:var(--text3);background:var(--bg2);border-bottom:1px solid var(--border)">${esc(tag)}</div>`;tg.forEach(t=>{h+=todoRow(t,cat.colorHex)})}});
       h+=`</div></div>`;
     });
+    const noCat=active.filter(t=>!todoCats.find(c=>c.id===t.categoryId));
+    if(noCat.length){h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;noCat.forEach(t=>{h+=todoRow(t,'#7a8a6a')});h+=`</div></div>`}
     if(done.length){
       h+=`<div class="section"><div class="section-header">Afgerond (${done.length})</div><div class="card-list">`;
-      done.forEach(t=>{h+=`<div class="row" style="opacity:.6"><div style="font-size:18px;color:var(--accent);flex-shrink:0">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3)">${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
+      done.forEach(t=>{h+=`<div class="row"><div style="font-size:18px;color:var(--accent);flex-shrink:0">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3);cursor:pointer" onclick="openTodoModal('${t.id}')">${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
       h+=`</div></div>`;
     }
   }
@@ -444,31 +401,32 @@ function renderTodos(){
 
 function todoRow(t,c){
   const chips=(t.priority==='hoog'?'<span class="chip chip-red">Hoog</span>':'')+(t.urgent?'<span class="chip chip-orange">Urgent</span>':'')+(t.tags||[]).map(g=>`<span class="chip chip-green">${esc(g)}</span>`).join('');
-  return `<div class="row" onclick="openTodoModal('${t.id}')"><button class="check-btn" onclick="event.stopPropagation();toggleTodo('${t.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></button><div class="row-content"><div class="row-title">${esc(t.text)}</div>${chips?`<div style="margin-top:3px">${chips}</div>`:''} ${t.notes?`<div class="row-sub">${esc(t.notes)}</div>`:''}</div></div>`;
+  return `<div class="row" onclick="openTodoModal('${t.id}')"><button class="check-btn" onclick="event.stopPropagation();toggleTodo('${t.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></button><div class="row-content"><div class="row-title">${esc(t.text)}</div>${chips?`<div style="margin-top:3px">${chips}</div>`:''}${t.notes?`<div class="row-sub">${esc(t.notes)}</div>`:''}</div></div>`;
 }
 
 function renderMatrix(){
   const a=todos.filter(t=>!t.isDone);
-  const q=(title,sub,items,color)=>`<div class="quad" style="border-color:${color}33"><div class="quad-title" style="color:${color}">${title}</div><div class="quad-sub">${sub}</div>${items.length?items.map(t=>`<div class="quad-item" onclick="toggleTodo('${t.id}')" style="background:${color}15">${esc(t.text)}</div>`).join(''):'<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Leeg</div>'}</div>`;
+  const q=(title,sub,items,color)=>`<div class="quad" style="border-color:${color}33"><div class="quad-title" style="color:${color}">${title}</div><div class="quad-sub">${sub}</div>${items.length?items.map(t=>`<div class="quad-item" onclick="openTodoModal('${t.id}')" style="background:${color}15">${esc(t.text)}</div>`).join(''):'<div style="font-size:11px;color:var(--text3);text-align:center;padding:8px">Leeg</div>'}</div>`;
   return `<div class="matrix">${q('🔥 Doe nu','Urgent + Hoog',a.filter(t=>t.priority==='hoog'&&t.urgent),'#9b4a4a')}${q('📅 Plan in','Niet urgent + Hoog',a.filter(t=>t.priority==='hoog'&&!t.urgent),'#4a7a9b')}${q('🤝 Delegeer','Urgent + Laag',a.filter(t=>t.priority!=='hoog'&&t.urgent),'#8b6914')}${q('🗑 Elimineer','Niet urgent + Laag',a.filter(t=>t.priority!=='hoog'&&!t.urgent),'#7a8a6a')}</div>`;
 }
 
 function renderWinkellijst(){
   const el=document.getElementById('page-winkellijst');
-  let h=`<div class="page-header"><div class="page-title">Winkellijst</div><button class="header-btn" onclick="openModal('modal-store');document.getElementById('s-name').value=''"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
+  let h=`<div class="page-header"><div class="page-title">Winkellijst</div><button class="header-btn" onclick="openStoreModal(null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>`;
   if(!stores.length){h+=`<div class="empty"><div class="empty-icon">🛒</div><div class="empty-title">Geen winkels</div><div class="empty-sub">Voeg je eerste winkel toe</div></div>`}
   else{
     stores.forEach(store=>{
       const items=shopItems.filter(i=>i.storeId===store.id);
       const rem=items.filter(i=>!i.isGot).length;
       const open=expandedStoreId===store.id;
-      h+=`<div style="margin:10px 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)"><div class="store-header" onclick="toggleStore('${store.id}')"><span style="font-size:14px;color:var(--text2)">${open?'▾':'▸'}</span><span class="store-name">${esc(store.name)}</span>${rem>0?`<span class="store-badge">${rem}</span>`:''}<button style="background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;padding:0 6px;font-weight:600" onclick="event.stopPropagation();deleteStore('${store.id}')">Verwijder</button></div>`;
+      const emoji=store.emoji||'🛒';
+      h+=`<div style="margin:10px 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)"><div class="store-header"><span style="font-size:22px;cursor:pointer" onclick="openStoreModal('${store.id}')">${emoji}</span><span class="store-name" onclick="toggleStore('${store.id}')">${esc(store.name)}</span>${rem>0?`<span class="store-badge">${rem}</span>`:''}<span style="font-size:14px;color:var(--text2)" onclick="toggleStore('${store.id}')">${open?'▾':'▸'}</span></div>`;
       if(open){
-        h+=`<div class="store-body" style="border-top:1px solid var(--border)"><div class="store-add-btn" onclick="openShopItemModal('${store.id}')"><span style="font-size:18px">＋</span> Product toevoegen</div>`;
+        h+=`<div style="border-top:1px solid var(--border)"><div class="store-add-btn" onclick="openShopItemModal('${store.id}')"><span style="font-size:18px">＋</span> Product toevoegen</div>`;
         ['groenten','fruit','vlees','vis','zuivel','brood','droog','drank','diepvries','hygiene','overig'].forEach(cat=>{
           const ci=items.filter(i=>i.category===cat);if(!ci.length)return;
           h+=`<div class="shop-cat-label">${shopCatLabels[cat]}</div>`;
-          ci.forEach(item=>{h+=`<div class="shop-item-row"><div class="check-sq${item.isGot?' checked':''}" onclick="toggleShop('${item.id}')"></div><span class="shop-item-name${item.isGot?' got':''}">${esc(item.name)}</span>${item.quantity?`<span class="shop-qty">${esc(item.quantity)}</span>`:''}<button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px" onclick="deleteShop('${item.id}')">✕</button></div>`});
+          ci.forEach(item=>{h+=`<div class="shop-item-row"><div class="check-sq${item.isGot?' checked':''}" onclick="toggleShop('${item.id}')"></div><span class="shop-item-name${item.isGot?' got':''}">${esc(item.name)}</span>${item.quantity?`<span class="shop-qty">${esc(item.quantity)}</span>`:''}<button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 6px" onclick="deleteShop('${item.id}')">✕</button></div>`});
         });
         if(items.some(i=>i.isGot))h+=`<div class="store-clear-btn" onclick="clearGot('${store.id}')">Afgevinkte wissen</div>`;
         h+=`</div>`;
@@ -484,14 +442,17 @@ function renderInstellingen(){
   const dark=document.documentElement.getAttribute('data-theme')==='dark';
   document.getElementById('page-instellingen').innerHTML=`
     <div class="page-header"><div class="page-title">Instellingen</div></div>
+    <div class="settings-group-label">Account</div>
     <div class="settings-section"><div class="settings-row">${user?.photoURL?`<img class="user-avatar" src="${user.photoURL}" alt="">`:'<span style="font-size:24px">👤</span>'}<span class="settings-label">${esc(user?.displayName||user?.email||'Gebruiker')}</span><button style="background:none;border:none;color:var(--red);font-size:13px;cursor:pointer;font-weight:600" onclick="doSignOut()">Uitloggen</button></div></div>
-    <div style="margin:16px 12px 0;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Uiterlijk</div>
+    <div class="settings-group-label">Uiterlijk</div>
     <div class="settings-section"><div class="settings-row"><span class="settings-label">Donkere modus</span><button class="toggle-switch${dark?' on':''}" onclick="toggleDark()"></button></div></div>
-    <div style="margin:16px 12px 0;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Routine categorieën</div>
-    <div class="settings-section">${routineCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="settings-del" onclick="deleteCat('routineCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('routine')">＋ Categorie toevoegen</div></div>
-    <div style="margin:16px 12px 0;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">To-do categorieën</div>
-    <div class="settings-section">${todoCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="settings-del" onclick="deleteCat('todoCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('todo')">＋ Categorie toevoegen</div></div>
-    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.0 · 🌿</div>`;
+    <div class="settings-group-label">Backup</div>
+    <div class="settings-section"><div class="settings-row" onclick="openModal('modal-backup')" style="cursor:pointer"><span style="font-size:20px">💾</span><span class="settings-label">Backup beheren</span><span style="color:var(--text3);font-size:18px">›</span></div></div>
+    <div class="settings-group-label">Routine categorieën</div>
+    <div class="settings-section">${routineCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="btn btn-secondary" style="flex:none;padding:6px 12px;font-size:12px" onclick="openCatModal('routine','${c.id}')">Bewerk</button><button class="settings-del" onclick="deleteCat('routineCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('routine',null)">＋ Categorie toevoegen</div></div>
+    <div class="settings-group-label">To-do categorieën</div>
+    <div class="settings-section">${todoCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="btn btn-secondary" style="flex:none;padding:6px 12px;font-size:12px" onclick="openCatModal('todo','${c.id}')">Bewerk</button><button class="settings-del" onclick="deleteCat('todoCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('todo',null)">＋ Categorie toevoegen</div></div>
+    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.1 · 🌿</div>`;
 }
 
 window.openModal=id=>{const el=document.getElementById(id);el.classList.add('open');el.onclick=e=>{if(e.target===el)closeModal(id)}};
@@ -501,6 +462,7 @@ window.openRoutineModal=id=>{
   editingRoutineId=id||null;
   const r=id?routines.find(x=>x.id===id):null;
   document.getElementById('routine-modal-title').textContent=id?'Routine bewerken':'Routine toevoegen';
+  document.getElementById('r-delete-btn').style.display=id?'block':'none';
   document.getElementById('r-name').value=r?.name||'';
   document.getElementById('r-note').value=r?.note||'';
   document.getElementById('r-freq').value=r?.frequency||'wekelijks';
@@ -514,20 +476,21 @@ window.openRoutineModal=id=>{
   openModal('modal-routine');
 };
 function toggleCD(){document.getElementById('r-custom-date-group').classList.toggle('hidden',document.getElementById('r-freq').value!=='aangepast')}
-
 window.saveRoutine=async()=>{
   const name=document.getElementById('r-name').value.trim();if(!name)return;
   const data={name,note:document.getElementById('r-note').value.trim(),frequency:document.getElementById('r-freq').value,categoryId:document.getElementById('r-cat').value,lastDone:document.getElementById('r-last-done').value?new Date(document.getElementById('r-last-done').value).getTime():null,nextDate:document.getElementById('r-next-date').value?new Date(document.getElementById('r-next-date').value).getTime():null};
-  if(editingRoutineId)await updateDoc(docRef('routines',editingRoutineId),data);
-  else await setDoc(docRef('routines',uuid()),{...data,createdAt:Date.now()});
+  if(editingRoutineId)await updateDoc(dref('routines',editingRoutineId),data);
+  else await setDoc(dref('routines',uuid()),{...data,createdAt:Date.now()});
   closeModal('modal-routine');
 };
-window.markDone=async id=>await updateDoc(docRef('routines',id),{lastDone:Date.now()});
+window.deleteRoutine=async()=>{if(!editingRoutineId||!confirm('Routine verwijderen?'))return;await deleteDoc(dref('routines',editingRoutineId));closeModal('modal-routine')};
+window.markDone=async id=>await updateDoc(dref('routines',id),{lastDone:Date.now()});
 
 window.openTodoModal=id=>{
   editingTodoId=id||null;
   const t=id?todos.find(x=>x.id===id):null;
   document.getElementById('todo-modal-title').textContent=id?'To-do bewerken':'To-do toevoegen';
+  document.getElementById('t-delete-btn').style.display=id?'block':'none';
   document.getElementById('t-text').value=t?.text||'';
   document.getElementById('t-notes').value=t?.notes||'';
   document.getElementById('t-tags').value=(t?.tags||[]).join(', ');
@@ -545,28 +508,92 @@ window.saveTodo=async()=>{
   const text=document.getElementById('t-text').value.trim();if(!text)return;
   const tags=document.getElementById('t-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
   const data={text,notes:document.getElementById('t-notes').value.trim(),priority:currentPrio,urgent:document.getElementById('t-urgent-toggle').classList.contains('on'),categoryId:document.getElementById('t-cat').value,tags};
-  if(editingTodoId){const ex=todos.find(t=>t.id===editingTodoId);await updateDoc(docRef('todos',editingTodoId),{...data,isDone:ex?.isDone||false})}
-  else await setDoc(docRef('todos',uuid()),{...data,isDone:false,createdAt:Date.now()});
+  if(editingTodoId){const ex=todos.find(t=>t.id===editingTodoId);await updateDoc(dref('todos',editingTodoId),{...data,isDone:ex?.isDone||false})}
+  else await setDoc(dref('todos',uuid()),{...data,isDone:false,createdAt:Date.now()});
   closeModal('modal-todo');
 };
-window.toggleTodo=async id=>{const t=todos.find(x=>x.id===id);if(t)await updateDoc(docRef('todos',id),{isDone:!t.isDone})};
+window.deleteTodo=async()=>{if(!editingTodoId||!confirm('To-do verwijderen?'))return;await deleteDoc(dref('todos',editingTodoId));closeModal('modal-todo')};
+window.toggleTodo=async id=>{const t=todos.find(x=>x.id===id);if(t)await updateDoc(dref('todos',id),{isDone:!t.isDone})};
 window.setTodoMode=m=>{todoMode=m;renderTodos()};
 
+window.openStoreModal=id=>{
+  editingStoreId=id||null;
+  const s=id?stores.find(x=>x.id===id):null;
+  document.getElementById('store-modal-title').textContent=id?'Winkel bewerken':'Winkel toevoegen';
+  document.getElementById('store-delete-btn').style.display=id?'block':'none';
+  document.getElementById('s-name').value=s?.name||'';
+  selectedEmoji=s?.emoji||'🛒';
+  const grid=document.getElementById('emoji-grid');
+  grid.innerHTML=STORE_EMOJIS.map(e=>`<button class="emoji-btn${e===selectedEmoji?' selected':''}" onclick="selectEmoji('${e}')">${e}</button>`).join('');
+  openModal('modal-store');
+};
+window.selectEmoji=e=>{selectedEmoji=e;document.querySelectorAll('.emoji-btn').forEach(b=>{b.classList.toggle('selected',b.textContent===e)})};
+window.saveStore=async()=>{
+  const n=document.getElementById('s-name').value.trim();if(!n)return;
+  const data={name:n,emoji:selectedEmoji,order:editingStoreId?stores.find(s=>s.id===editingStoreId)?.order??stores.length:stores.length};
+  if(editingStoreId)await updateDoc(dref('stores',editingStoreId),data);
+  else await setDoc(dref('stores',uuid()),data);
+  closeModal('modal-store');
+};
+window.deleteStoreFromModal=async()=>{
+  if(!editingStoreId||!confirm('Winkel verwijderen?'))return;
+  for(const i of shopItems.filter(i=>i.storeId===editingStoreId))await deleteDoc(dref('shopItems',i.id));
+  await deleteDoc(dref('stores',editingStoreId));
+  if(expandedStoreId===editingStoreId)expandedStoreId=null;
+  closeModal('modal-store');
+};
 window.toggleStore=id=>{expandedStoreId=expandedStoreId===id?null:id;renderWinkellijst()};
-window.saveStore=async()=>{const n=document.getElementById('s-name').value.trim();if(!n)return;await setDoc(docRef('stores',uuid()),{name:n,order:stores.length});closeModal('modal-store')};
-window.deleteStore=async id=>{if(!confirm('Winkel verwijderen?'))return;for(const i of shopItems.filter(i=>i.storeId===id))await deleteDoc(docRef('shopItems',i.id));await deleteDoc(docRef('stores',id));if(expandedStoreId===id)expandedStoreId=null};
 window.openShopItemModal=id=>{addingShopItemForStore=id;document.getElementById('si-name').value='';document.getElementById('si-qty').value='';document.getElementById('si-cat').value='overig';openModal('modal-shopitem')};
-window.saveShopItem=async()=>{const n=document.getElementById('si-name').value.trim();if(!n||!addingShopItemForStore)return;await setDoc(docRef('shopItems',uuid()),{name:n,quantity:document.getElementById('si-qty').value.trim(),category:document.getElementById('si-cat').value,storeId:addingShopItemForStore,isGot:false,createdAt:Date.now()});closeModal('modal-shopitem')};
-window.toggleShop=async id=>{const i=shopItems.find(x=>x.id===id);if(i)await updateDoc(docRef('shopItems',id),{isGot:!i.isGot})};
-window.deleteShop=async id=>await deleteDoc(docRef('shopItems',id));
-window.clearGot=async sid=>{for(const i of shopItems.filter(i=>i.storeId===sid&&i.isGot))await deleteDoc(docRef('shopItems',i.id))};
+window.saveShopItem=async()=>{const n=document.getElementById('si-name').value.trim();if(!n||!addingShopItemForStore)return;await setDoc(dref('shopItems',uuid()),{name:n,quantity:document.getElementById('si-qty').value.trim(),category:document.getElementById('si-cat').value,storeId:addingShopItemForStore,isGot:false,createdAt:Date.now()});closeModal('modal-shopitem')};
+window.toggleShop=async id=>{const i=shopItems.find(x=>x.id===id);if(i)await updateDoc(dref('shopItems',id),{isGot:!i.isGot})};
+window.deleteShop=async id=>await deleteDoc(dref('shopItems',id));
+window.clearGot=async sid=>{for(const i of shopItems.filter(i=>i.storeId===sid&&i.isGot))await deleteDoc(dref('shopItems',i.id))};
 
-window.openCatModal=type=>{addingCatFor=type;document.getElementById('cat-modal-title').textContent=type==='routine'?'Routine categorie':'To-do categorie';document.getElementById('cat-name').value='';document.getElementById('cat-color').value='#5a8a5a';openModal('modal-cat')};
-window.saveCat=async()=>{const n=document.getElementById('cat-name').value.trim();if(!n)return;await setDoc(docRef(addingCatFor==='routine'?'routineCats':'todoCats',uuid()),{name:n,colorHex:document.getElementById('cat-color').value});closeModal('modal-cat')};
-window.deleteCat=async(col,id)=>{if(!confirm('Categorie verwijderen?'))return;await deleteDoc(docRef(col,id))};
+window.openCatModal=(type,id)=>{
+  addingCatFor=type;editingCatId=id||null;
+  const cats=type==='routine'?routineCats:todoCats;
+  const cat=id?cats.find(c=>c.id===id):null;
+  document.getElementById('cat-modal-title').textContent=id?'Categorie bewerken':'Categorie toevoegen';
+  document.getElementById('cat-name').value=cat?.name||'';
+  document.getElementById('cat-color').value=cat?.colorHex||'#5a8a5a';
+  openModal('modal-cat');
+};
+window.saveCat=async()=>{
+  const n=document.getElementById('cat-name').value.trim();if(!n)return;
+  const colName=addingCatFor==='routine'?'routineCats':'todoCats';
+  const data={name:n,colorHex:document.getElementById('cat-color').value};
+  if(editingCatId)await updateDoc(dref(colName,editingCatId),data);
+  else await setDoc(dref(colName,uuid()),data);
+  closeModal('modal-cat');
+};
+window.deleteCat=async(colName,id)=>{if(!confirm('Categorie verwijderen?'))return;await deleteDoc(dref(colName,id))};
 
 window.toggleDark=()=>{const d=document.documentElement.getAttribute('data-theme')==='dark';localStorage.setItem('planr_dark',d?'0':'1');document.documentElement.setAttribute('data-theme',d?'':'dark');renderInstellingen()};
 (()=>{if(localStorage.getItem('planr_dark')==='1')document.documentElement.setAttribute('data-theme','dark')})();
+
+window.exportBackup=async()=>{
+  const data={routines,routineCats,todos,todoCats,stores,shopItems,exportedAt:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`planr-backup-${new Date().toISOString().split('T')[0]}.json`;a.click();
+  URL.revokeObjectURL(url);
+};
+window.importBackup=async input=>{
+  const file=input.files[0];if(!file)return;
+  const status=document.getElementById('import-status');
+  try{
+    const data=JSON.parse(await file.text());
+    status.textContent='Bezig met importeren...';
+    for(const c of['routines','routineCats','todos','todoCats','stores','shopItems']){
+      if(!data[c])continue;
+      const snap=await getDocs(col(c));
+      const b1=writeBatch(db);snap.docs.forEach(d=>b1.delete(d.ref));await b1.commit();
+      const b2=writeBatch(db);data[c].forEach(item=>{const{id,...rest}=item;b2.set(dref(c,id||uuid()),rest)});await b2.commit();
+    }
+    status.textContent='✅ Import geslaagd!';
+    setTimeout(()=>closeModal('modal-backup'),1500);
+  }catch(e){status.textContent='❌ Fout: '+e.message}
+};
 
 function uuid(){return'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&0x3|0x8);return v.toString(16)})}
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
