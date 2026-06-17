@@ -31,13 +31,13 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 .card-list{margin:0 12px;border-radius:14px;overflow:hidden;background:var(--card);box-shadow:0 1px 4px var(--shadow)}
 .row{display:flex;align-items:flex-start;padding:12px 14px;gap:10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;position:relative}
 .row:last-child{border-bottom:none}.row:active{background:var(--bg2)}
-.row-accent{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0}
+.row-accent{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0;min-height:36px}
 .row-content{flex:1;min-width:0}
 .row-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
 .row-sub{font-size:12px;color:var(--text3);margin-bottom:4px}
 .chip{display:inline-block;font-size:11px;padding:2px 7px;border-radius:10px;margin-right:4px;margin-top:2px;font-weight:500}
 .chip-green{background:var(--bg3);color:var(--text2)}.chip-red{background:rgba(155,74,74,.12);color:var(--red)}.chip-orange{background:rgba(139,105,20,.12);color:var(--orange)}
-.check-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0}
+.check-btn{background:none;border:none;cursor:pointer;padding:2px;flex-shrink:0;margin-top:2px}
 .check-btn svg{width:26px;height:26px;stroke:var(--accent);fill:none;stroke-width:1.7}
 .empty{padding:40px 20px;text-align:center}
 .empty-icon{font-size:40px;margin-bottom:10px;opacity:.5}
@@ -103,15 +103,15 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:-apple-
 input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(--border);cursor:pointer;background:none;padding:0}
 .logo-upload-area{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:border-color .15s;margin:0 16px 12px}
 .logo-preview{width:72px;height:72px;border-radius:12px;object-fit:cover;margin:0 auto 8px;display:block}
-/* emoji picker */
 .emoji-picker{border:1.5px solid var(--border);border-radius:10px;background:var(--card);overflow:hidden}
 .emoji-search{width:100%;padding:9px 12px;border:none;border-bottom:1px solid var(--border);background:var(--card);color:var(--text);font-size:14px;outline:none;font-family:inherit}
-.emoji-results{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:6px;max-height:140px;overflow-y:auto}
+.emoji-results{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;padding:6px;max-height:160px;overflow-y:auto}
 .ep-btn{font-size:22px;padding:4px;border:none;background:none;cursor:pointer;border-radius:6px;text-align:center;line-height:1}
-.ep-btn:hover{background:var(--bg2)}
-.ep-btn.selected{background:var(--bg3);outline:2px solid var(--accent)}
+.ep-btn:hover{background:var(--bg2)}.ep-btn.selected{background:var(--bg3);outline:2px solid var(--accent)}
 .emoji-selected-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--border)}
 .emoji-clear{font-size:12px;color:var(--red);cursor:pointer;background:none;border:none;padding:0}
+.date-row{display:flex;gap:8px}
+.date-row .form-input{flex:1}
 </style>
 </head>
 <body>
@@ -170,12 +170,17 @@ input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(
         <option value="maandelijks">Maandelijks</option>
         <option value="kwartaal">Per kwartaal</option>
         <option value="jaarlijks">Jaarlijks</option>
-        <option value="aangepast">Aangepaste datum</option>
       </select>
     </div>
-    <div class="form-group hidden" id="r-custom-date-group"><label class="form-label">Volgende keer</label><input class="form-input" id="r-next-date" type="date"></div>
     <div class="form-group"><label class="form-label">Categorie</label><select class="form-select" id="r-cat"></select></div>
-    <div class="form-group"><label class="form-label">Laatste keer gedaan</label><input class="form-input" id="r-last-done" type="date"></div>
+    <div class="form-group">
+      <label class="form-label">Laatste keer gedaan</label>
+      <input class="form-input" id="r-last-done" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Volgende keer <span style="font-weight:400;text-transform:none;font-size:11px;color:var(--text3)">(optioneel — overschrijft berekening)</span></label>
+      <input class="form-input" id="r-next-manual" type="date">
+    </div>
     <div class="sheet-actions">
       <button class="btn btn-secondary" onclick="closeModal('modal-routine')">Annuleer</button>
       <button class="btn btn-primary" onclick="saveRoutine()">Opslaan</button>
@@ -237,7 +242,7 @@ input[type=color]{width:32px;height:32px;border-radius:50%;border:2px solid var(
     </div>
     <div class="form-group"><label class="form-label">Naam</label><input class="form-input" id="s-name" placeholder="Bijv. Delhaize, Lidl..." type="text"></div>
     <div class="form-group"><label class="form-label">Logo</label>
-      <label class="logo-upload-area" id="logo-upload-area">
+      <label class="logo-upload-area">
         <input type="file" accept="image/*" id="s-logo-input" style="display:none" onchange="handleLogoUpload(this)">
         <div id="logo-preview-wrap">
           <div style="font-size:32px;margin-bottom:6px">🖼️</div>
@@ -326,55 +331,57 @@ const db=getFirestore(app);
 let uid=null,currentPage='routines',todoMode='lijst',currentPrio='normaal';
 let editingRoutineId=null,editingTodoId=null,editingStoreId=null,addingShopItemForStore=null,addingCatFor=null,editingCatId=null,expandedStoreId=null;
 let routines=[],routineCats=[],todos=[],todoCats=[],stores=[],shopItems=[],unsubs=[];
-let currentLogoBase64=null,currentTodoEmoji=null;
+let currentLogoBase64=null,currentTodoEmoji=null,currentEmojiSearch='';
 
-// ── Emoji database met zoektermen ──
+// ── Uitgebreide emoji database ──
 const EMOJI_DB=[
-  ['😀','blij lachen gezicht'],['😂','lachen tranen grappig'],['😍','verliefd hart ogen'],['😎','cool zonnebril'],['🤔','denken nadenken'],
-  ['😴','slapen moe'],['🥳','feest vieren'],['😡','boos kwaad'],['😢','huilen verdriet'],['🤒','ziek'],
-  ['🏠','huis thuis woning'],['🏡','huis tuin'],['🏢','kantoor gebouw werk'],['🏪','winkel'],['🏥','ziekenhuis'],
-  ['🚗','auto rijden'],['🚕','taxi'],['🚲','fiets'],['🏃','rennen sport'],['✈️','vliegtuig reizen'],
-  ['🍕','pizza eten'],['🍔','hamburger'],['🍎','appel fruit'],['🥗','salade gezond'],['☕','koffie'],
-  ['💊','medicijn gezondheid'],['💉','vaccin spuit'],['🩺','dokter'],['🏋️','sporten gewichten'],['⚽','voetbal'],
-  ['🎯','doel target'],['📚','boek lezen studie'],['✏️','potlood schrijven'],['📝','notitie schrijven'],['💻','laptop computer werk'],
-  ['📱','telefoon gsm'],['🖨️','printer'],['📧','email bericht'],['📞','bellen telefoon'],['🔑','sleutel'],
-  ['💡','idee lamp'],['🔧','gereedschap repareren'],['🛒','winkelwagen boodschappen'],['🧹','stofzuigen schoonmaken'],['🧺','was wasgoed'],
-  ['🌿','plant natuur groen'],['🌸','bloem'],['🌳','boom natuur'],['🌻','zonnebloem'],['🍀','klavertje geluk'],
-  ['⭐','ster'],['🏆','trofee winnen'],['🎁','cadeau'],['🎂','verjaardag taart'],['🎵','muziek'],
-  ['💰','geld'],['💳','bankkaart betalen'],['📦','pakket doos'],['🗓️','kalender datum'],['⏰','alarm wekker tijd'],
-  ['🔒','slot beveiligen'],['🧴','verzorging hygiene'],['🪥','tandenborstel'],['🛁','bad douchen'],['🧽','spons schoonmaken'],
-  ['🐶','hond huisdier'],['🐱','kat poes'],['🌙','maan nacht'],['☀️','zon warm zomer'],['❄️','sneeuw winter koud'],
-  ['💪','spier kracht sport'],['🧘','yoga mediteren'],['🏊','zwemmen water'],['🚴','fietsen sport'],['🎾','tennis'],
-  ['👨‍👩‍👧','gezin familie'],['👶','baby kind'],['👴','opa ouder'],['❤️','hart liefde'],['🤝','samenwerking afspraak'],
+  ['😀','blij lachen gezicht vrolijk'],['😂','lachen tranen grappig humor'],['😍','verliefd hart ogen mooi'],['😎','cool zonnebril stijl'],['🤔','denken nadenken idee'],
+  ['😴','slapen moe rust'],['🥳','feest vieren party'],['😡','boos kwaad frustratie'],['😢','huilen verdriet triest'],['🤒','ziek ziek zijn'],
+  ['🤧','niezen verkouden ziek'],['🥰','liefde knuffelen schattig'],['😇','engel goed lief'],['🤓','nerd bril slim studie'],['😤','trots gefrustreerd'],
+  ['🙏','bidden danken alstublieft'],['👍','goed akkoord prima'],['👎','slecht nee afkeuren'],['👏','applaus bravo goed gedaan'],['🤝','afspraak samenwerking deal'],
+  ['💪','spier kracht sterk sport'],['🖐️','stop hand hallo'],['✌️','vrede twee'],['🤞','geluk vingers hopen'],['👌','ok prima perfect'],
+  ['🏠','huis thuis woning'],['🏡','huis tuin buiten'],['🏢','kantoor gebouw werk bedrijf'],['🏪','winkel shop'],['🏥','ziekenhuis dokter'],
+  ['🏫','school onderwijs leren'],['🏋️','sportschool gewichten fitness'],['🏊','zwemmen water sport'],['🏃','rennen joggen sport'],['🚴','fietsen sport buiten'],
+  ['⚽','voetbal sport'],['🏀','basketball sport'],['🎾','tennis sport'],['🏐','volleybal sport'],['🏊','zwemmen sport water'],
+  ['🚗','auto rijden transport'],['🚕','taxi transport'],['🚲','fiets fietsen eco'],['✈️','vliegtuig reizen vliegen'],['🚂','trein transport'],
+  ['🚌','bus transport'],['🛵','scooter rijden'],['🚁','helikopter vliegen'],['⛵','boot zeilen water'],['🚀','raket ruimte snel'],
+  ['🍕','pizza eten avond'],['🍔','hamburger fastfood'],['🍎','appel fruit gezond'],['🥗','salade groenten gezond'],['☕','koffie ochtend warm'],
+  ['🍵','thee drinken warm'],['🧃','sap drinken fruit'],['🍺','bier drinken weekend'],['🍷','wijn drinken avond'],['🥂','champagne feest vieren'],
+  ['🍰','taart dessert zoet'],['🍫','chocolade zoet snoep'],['🥐','croissant ontbijt bakery'],['🍳','eieren ontbijt koken'],['🥘','koken eten pot'],
+  ['💊','medicijn gezondheid pillen'],['💉','vaccin spuit medisch'],['🩺','dokter medisch gezondheid'],['🩹','pleister wond verzorging'],['🧬','dna wetenschap'],
+  ['📚','boek lezen studie kennis'],['✏️','potlood schrijven tekenen'],['📝','notitie schrijven lijst'],['💻','laptop computer werk'],['📱','telefoon gsm bellen'],
+  ['🖨️','printer afdrukken document'],['📧','email bericht sturen'],['📞','bellen telefoon oproep'],['🔑','sleutel toegang open'],['🔒','slot beveiligen veilig'],
+  ['💡','idee lamp inspiratie'],['🔧','gereedschap repareren fix'],['🔨','hamer bouwen repareren'],['🪛','schroevendraaier repareren'],['🧰','gereedschapskist repareren'],
+  ['🛒','winkelwagen boodschappen kopen'],['🧹','schoonmaken vegen stofzuigen'],['🧺','was wasgoed wassen'],['🧽','schoonmaken spons poetsen'],['🪣','emmer schoonmaken water'],
+  ['🧴','verzorging hygiene lotion'],['🪥','tandenborstel poetsen tanden'],['🛁','bad douchen wassen'],['🚿','douche wassen schoonmaken'],['🪒','scheren verzorging'],
+  ['🌿','plant natuur groen'],['🌸','bloem lente roze'],['🌳','boom natuur buiten'],['🌻','zonnebloem geel bloem'],['🍀','klavertje geluk groen'],
+  ['🌱','zaailing groeien natuur'],['🌺','hibiscus bloem tropisch'],['🍃','bladeren natuur groen'],['🌾','graan oogst natuur'],['🪴','kamerplant verzorgen'],
+  ['⭐','ster favoriet top'],['🏆','trofee winnen kampioen'],['🎁','cadeau geschenk verjaardag'],['🎂','taart verjaardag feest'],['🎵','muziek noot geluid'],
+  ['🎸','gitaar muziek spelen'],['🎹','piano muziek spelen'],['🎤','microfoon zingen optreden'],['🎧','hoofdtelefoon muziek luisteren'],['📸','foto camera fotograferen'],
+  ['💰','geld rijkdom euro'],['💳','bankkaart betalen pin'],['📦','pakket doos verzenden'],['🗓️','kalender datum planning'],['⏰','alarm wekker tijd'],
+  ['⌚','horloge tijd kijken'],['📅','datum kalender afspraak'],['🗂️','map bestanden organiseren'],['📋','lijst taken clipboard'],['📊','grafiek data rapport'],
+  ['🐶','hond huisdier trouw'],['🐱','kat poes huisdier'],['🐰','konijn huisdier schattig'],['🐟','vis aquarium huisdier'],['🐦','vogel vliegen natuur'],
+  ['🌙','maan nacht slapen'],['☀️','zon warm zomer licht'],['❄️','sneeuw winter koud ijs'],['🌧️','regen weer buiten'],['⛅','bewolkt weer'],
+  ['🏖️','strand vakantie zee zon'],['🏔️','berg wandelen natuur'],['🌍','wereld aarde reizen'],['🗺️','kaart navigatie reizen'],['🧳','koffer reizen vakantie'],
+  ['❤️','hart liefde rood'],['💙','blauw hart liefde'],['💚','groen hart natuur'],['💛','geel hart vrolijk'],['🖤','zwart hart stijl'],
+  ['🎯','doel target raak'],['🎮','gamen spelen hobby'],['🧩','puzzel denken oplossen'],['♟️','schaken strategie denken'],['🎲','dobbelstenen spellen kans'],
+  ['👨‍👩‍👧','gezin familie kinderen'],['👶','baby kind klein'],['👴','opa grootvader ouder'],['👩‍🍳','koken chef eten'],['👨‍💻','programmeren developer werk'],
+  ['🧘','yoga mediteren rust'],['🛌','slapen bed rust nacht'],['🏡','thuis wonen buiten'],['🎓','afstuderen diploma studie'],['🧑‍💼','werk professional business'],
+  ['🏐','volleybal sport team'],['🎒','rugzak school reizen'],['📋','lijst taken overzicht'],['🗑️','prullenbak verwijderen weggooien'],['♻️','recyclen duurzaam groen'],
 ];
 
-let currentEmojiSearch='';
-
-window.searchEmoji=q=>{
-  currentEmojiSearch=q.toLowerCase();
-  renderEmojiResults();
-};
-
+window.searchEmoji=q=>{currentEmojiSearch=q.toLowerCase();renderEmojiResults()};
 function renderEmojiResults(){
   const q=currentEmojiSearch;
-  const filtered=q?EMOJI_DB.filter(([e,k])=>k.includes(q)||e.includes(q)):EMOJI_DB;
-  const el=document.getElementById('t-emoji-results');
-  el.innerHTML=filtered.slice(0,64).map(([e])=>`<button class="ep-btn${currentTodoEmoji===e?' selected':''}" onclick="selectTodoEmoji('${e}')">${e}</button>`).join('');
+  const filtered=q?EMOJI_DB.filter(([e,k])=>k.includes(q)):EMOJI_DB;
+  document.getElementById('t-emoji-results').innerHTML=filtered.slice(0,80).map(([e])=>`<button class="ep-btn${currentTodoEmoji===e?' selected':''}" onclick="selectTodoEmoji('${e}')">${e}</button>`).join('');
 }
-
 window.selectTodoEmoji=e=>{
-  currentTodoEmoji=e;
-  renderEmojiResults();
-  const row=document.getElementById('t-emoji-selected-row');
+  currentTodoEmoji=e;renderEmojiResults();
   document.getElementById('t-emoji-selected-display').textContent=e;
-  row.style.display='flex';
+  document.getElementById('t-emoji-selected-row').style.display='flex';
 };
-
-window.clearEmoji=()=>{
-  currentTodoEmoji=null;
-  renderEmojiResults();
-  document.getElementById('t-emoji-selected-row').style.display='none';
-};
+window.clearEmoji=()=>{currentTodoEmoji=null;renderEmojiResults();document.getElementById('t-emoji-selected-row').style.display='none'};
 
 const defaultRoutineCats=[{id:'huishouden',name:'Huishouden',colorHex:'#5a8a5a'},{id:'persoonlijk',name:'Persoonlijk',colorHex:'#4a7a9b'},{id:'tuin',name:'Tuin',colorHex:'#6b8c3a'},{id:'overig',name:'Overig',colorHex:'#7a8a6a'}];
 const defaultTodoCats=[{id:'persoonlijk',name:'Persoonlijk',colorHex:'#5a8a5a'},{id:'werk',name:'Werk',colorHex:'#4a7a9b'},{id:'thuis',name:'Thuis',colorHex:'#6b8c3a'}];
@@ -397,7 +404,7 @@ function startListeners(){
   unsubs.forEach(u=>u());unsubs=[];
   unsubs.push(onSnapshot(col('routineCats'),s=>{routineCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!routineCats.length)defaultRoutineCats.forEach(c=>setDoc(dref('routineCats',c.id),c));else renderCurrent()}));
   unsubs.push(onSnapshot(col('todoCats'),s=>{todoCats=s.docs.map(d=>({id:d.id,...d.data()}));if(!todoCats.length)defaultTodoCats.forEach(c=>setDoc(dref('todoCats',c.id),c));else renderCurrent()}));
-  unsubs.push(onSnapshot(query(col('routines'),orderBy('createdAt','asc')),s=>{routines=s.docs.map(d=>({id:d.id,...d.data()}));if(!routines.length)defaultRoutines.forEach(r=>setDoc(dref('routines',uuid()),{...r,note:'',lastDone:null,nextDate:null,createdAt:Date.now()}));else renderCurrent()}));
+  unsubs.push(onSnapshot(query(col('routines'),orderBy('createdAt','asc')),s=>{routines=s.docs.map(d=>({id:d.id,...d.data()}));if(!routines.length)defaultRoutines.forEach(r=>setDoc(dref('routines',uuid()),{...r,note:'',lastDone:null,nextDate:null,nextManual:null,createdAt:Date.now()}));else renderCurrent()}));
   unsubs.push(onSnapshot(query(col('todos'),orderBy('createdAt','asc')),s=>{todos=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
   unsubs.push(onSnapshot(query(col('stores'),orderBy('order','asc')),s=>{stores=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
   unsubs.push(onSnapshot(col('shopItems'),s=>{shopItems=s.docs.map(d=>({id:d.id,...d.data()}));renderCurrent()}));
@@ -419,11 +426,30 @@ function renderCurrent(){
 }
 
 const FREQ_DAYS={dagelijks:1,wekelijks:7,'2wekelijks':14,'3wekelijks':21,maandelijks:30,kwartaal:90,jaarlijks:365};
-function computeNext(r){if(r.frequency==='aangepast')return r.nextDate?new Date(r.nextDate):null;if(!r.lastDone)return null;const d=new Date(r.lastDone);d.setDate(d.getDate()+(FREQ_DAYS[r.frequency]||7));return d}
-function daysUntil(r){const n=computeNext(r);if(!n)return null;const t=new Date();t.setHours(0,0,0,0);const nd=new Date(n);nd.setHours(0,0,0,0);return Math.round((nd-t)/86400000)}
+
+// Berekende volgende datum op basis van frequentie + lastDone
+function computeNextAuto(r){
+  if(!r.lastDone)return null;
+  const d=new Date(r.lastDone);
+  d.setDate(d.getDate()+(FREQ_DAYS[r.frequency]||7));
+  return d;
+}
+
+// Effectieve volgende datum: manueel heeft voorrang, anders berekend
+function effectiveNext(r){
+  if(r.nextManual)return new Date(r.nextManual);
+  return computeNextAuto(r);
+}
+
+function daysUntil(r){
+  const n=effectiveNext(r);if(!n)return null;
+  const t=new Date();t.setHours(0,0,0,0);
+  const nd=new Date(n);nd.setHours(0,0,0,0);
+  return Math.round((nd-t)/86400000);
+}
 function urgColor(r){const d=daysUntil(r);if(d===null||d<0)return'#9b4a4a';if(d<=3)return'#8b6914';return'#5a8a5a'}
-function urgStatus(r){const d=daysUntil(r);if(d===null)return'Nog nooit';if(d<0)return`${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} te laat`;if(d===0)return'Vandaag!';return`Over ${d} dag${d===1?'':'en'}`}
-function fLabel(f){return{dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal',jaarlijks:'Jaarlijks',aangepast:'Aangepast'}[f]||f}
+function urgStatus(r){const d=daysUntil(r);if(d===null)return'Nog nooit gedaan';if(d<0)return`${Math.abs(d)} dag${Math.abs(d)===1?'':'en'} te laat`;if(d===0)return'Vandaag!';return`Over ${d} dag${d===1?'':'en'}`}
+function fLabel(f){return{dagelijks:'Dagelijks',wekelijks:'Wekelijks','2wekelijks':'Elke 2 wkn','3wekelijks':'Elke 3 wkn',maandelijks:'Maandelijks',kwartaal:'Per kwartaal',jaarlijks:'Jaarlijks'}[f]||f}
 
 function renderRoutines(){
   const el=document.getElementById('page-routines');
@@ -436,12 +462,39 @@ function renderRoutines(){
       h+=`<div class="section"><div class="section-header"><div class="dot" style="background:${cat.colorHex}"></div>${esc(cat.name)}</div><div class="card-list">`;
       cr.forEach(r=>{
         const color=urgColor(r),st=urgStatus(r);
-        h+=`<div class="row" onclick="openRoutineModal('${r.id}')"><div class="row-accent" style="background:${cat.colorHex}"></div><div class="row-content"><div class="row-title">${esc(r.name)}</div>${r.note?`<div class="row-sub">${esc(r.note)}</div>`:''}<div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color};background:${color}18">${st}</span></div>${r.lastDone?`<div class="row-sub" style="margin-top:3px">Laatste: ${fmtDate(r.lastDone)}</div>`:''}</div><button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button></div>`;
+        const autoNext=computeNextAuto(r);
+        const manualNext=r.nextManual?new Date(r.nextManual):null;
+        let nextInfo='';
+        if(manualNext){
+          nextInfo=`<div class="row-sub" style="margin-top:2px">📌 Volgende: ${fmtDate(manualNext.getTime())}${autoNext?` · berekend: ${fmtDate(autoNext.getTime())}`:''}</div>`;
+        } else if(autoNext){
+          nextInfo=`<div class="row-sub" style="margin-top:2px">📅 Volgende: ${fmtDate(autoNext.getTime())}</div>`;
+        }
+        h+=`<div class="row" onclick="openRoutineModal('${r.id}')">
+          <div class="row-accent" style="background:${cat.colorHex}"></div>
+          <div class="row-content">
+            <div class="row-title">${esc(r.name)}</div>
+            ${r.note?`<div class="row-sub">${esc(r.note)}</div>`:''}
+            <div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color};background:${color}18">${st}</span></div>
+            ${r.lastDone?`<div class="row-sub" style="margin-top:2px">✓ Laatste: ${fmtDate(r.lastDone)}</div>`:''}
+            ${nextInfo}
+          </div>
+          <button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </button>
+        </div>`;
       });
       h+=`</div></div>`;
     });
     const noCat=sorted.filter(r=>!routineCats.find(c=>c.id===r.categoryId));
-    if(noCat.length){h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;noCat.forEach(r=>{const color=urgColor(r),st=urgStatus(r);h+=`<div class="row" onclick="openRoutineModal('${r.id}')"><div class="row-accent" style="background:#7a8a6a"></div><div class="row-content"><div class="row-title">${esc(r.name)}</div><div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color}">${st}</span></div></div><button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button></div>`});h+=`</div></div>`}
+    if(noCat.length){
+      h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;
+      noCat.forEach(r=>{
+        const color=urgColor(r),st=urgStatus(r);
+        h+=`<div class="row" onclick="openRoutineModal('${r.id}')"><div class="row-accent" style="background:#7a8a6a"></div><div class="row-content"><div class="row-title">${esc(r.name)}</div><div><span class="chip chip-green">${fLabel(r.frequency)}</span><span class="chip" style="color:${color}">${st}</span></div></div><button class="check-btn" onclick="event.stopPropagation();markDone('${r.id}')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></button></div>`;
+      });
+      h+=`</div></div>`;
+    }
   }
   el.innerHTML=h;
 }
@@ -469,17 +522,18 @@ function renderTodos(){
     if(noCat.length){h+=`<div class="section"><div class="section-header">Overig</div><div class="card-list">`;noCat.forEach(t=>{h+=todoRow(t,'#7a8a6a')});h+=`</div></div>`}
     if(done.length){
       h+=`<div class="section"><div class="section-header">Afgerond (${done.length})</div><div class="card-list">`;
-      done.forEach(t=>{h+=`<div class="row"><div style="font-size:18px;color:var(--accent);flex-shrink:0">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3);cursor:pointer" onclick="openTodoModal('${t.id}')">${t.emoji?`<span style="font-size:14px">${t.emoji}</span> `:''}${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
+      done.forEach(t=>{h+=`<div class="row" style="opacity:.6"><div class="row-accent" style="background:var(--border)"></div><div style="font-size:18px;color:var(--accent);flex-shrink:0;margin-top:2px">✓</div><div class="row-content" style="text-decoration:line-through;color:var(--text3);cursor:pointer" onclick="openTodoModal('${t.id}')">${t.emoji?`<span style="font-size:14px">${t.emoji}</span> `:''}${esc(t.text)}</div><button class="check-btn" onclick="toggleTodo('${t.id}')"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--text3)"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button></div>`});
       h+=`</div></div>`;
     }
   }
   el.innerHTML=h;
 }
 
-function todoRow(t,c){
+function todoRow(t,colorHex){
   const chips=(t.priority==='hoog'?'<span class="chip chip-red">Hoog</span>':'')+(t.urgent?'<span class="chip chip-orange">Urgent</span>':'')+(t.tags||[]).map(g=>`<span class="chip chip-green">${esc(g)}</span>`).join('');
   const emojiHtml=t.emoji?`<span style="font-size:14px;margin-right:3px">${t.emoji}</span>`:'';
   return `<div class="row" onclick="openTodoModal('${t.id}')">
+    <div class="row-accent" style="background:${colorHex}"></div>
     <button class="check-btn" onclick="event.stopPropagation();toggleTodo('${t.id}')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></button>
     <div class="row-content">
       <div class="row-title">${emojiHtml}${esc(t.text)}</div>
@@ -537,7 +591,7 @@ function renderInstellingen(){
     <div class="settings-section">${routineCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="btn btn-secondary" style="flex:none;padding:6px 12px;font-size:12px" onclick="openCatModal('routine','${c.id}')">Bewerk</button><button class="settings-del" onclick="deleteCat('routineCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('routine',null)">＋ Categorie toevoegen</div></div>
     <div class="settings-group-label">To-do categorieën</div>
     <div class="settings-section">${todoCats.map(c=>`<div class="settings-row"><div class="cat-color-dot" style="background:${c.colorHex}"></div><span class="settings-label">${esc(c.name)}</span><button class="btn btn-secondary" style="flex:none;padding:6px 12px;font-size:12px" onclick="openCatModal('todo','${c.id}')">Bewerk</button><button class="settings-del" onclick="deleteCat('todoCats','${c.id}')">✕</button></div>`).join('')}<div class="add-cat-row" onclick="openCatModal('todo',null)">＋ Categorie toevoegen</div></div>
-    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.3 · 🌿</div>`;
+    <div style="margin:16px 12px;font-size:12px;color:var(--text3);text-align:center">Planr v1.5 · 🌿</div>`;
 }
 
 window.openModal=id=>{const el=document.getElementById(id);el.classList.add('open');el.onclick=e=>{if(e.target===el)closeModal(id)}};
@@ -552,24 +606,33 @@ window.openRoutineModal=id=>{
   document.getElementById('r-note').value=r?.note||'';
   document.getElementById('r-freq').value=r?.frequency||'wekelijks';
   document.getElementById('r-last-done').value=r?.lastDone?toDateInput(r.lastDone):'';
-  document.getElementById('r-next-date').value=r?.nextDate?toDateInput(r.nextDate):'';
+  document.getElementById('r-next-manual').value=r?.nextManual?toDateInput(r.nextManual):'';
   const sel=document.getElementById('r-cat');
   sel.innerHTML=routineCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   sel.value=r?.categoryId||routineCats[0]?.id||'';
-  toggleCD();
-  document.getElementById('r-freq').onchange=toggleCD;
   openModal('modal-routine');
 };
-function toggleCD(){document.getElementById('r-custom-date-group').classList.toggle('hidden',document.getElementById('r-freq').value!=='aangepast')}
+
 window.saveRoutine=async()=>{
   const name=document.getElementById('r-name').value.trim();if(!name)return;
-  const data={name,note:document.getElementById('r-note').value.trim(),frequency:document.getElementById('r-freq').value,categoryId:document.getElementById('r-cat').value,lastDone:document.getElementById('r-last-done').value?new Date(document.getElementById('r-last-done').value).getTime():null,nextDate:document.getElementById('r-next-date').value?new Date(document.getElementById('r-next-date').value).getTime():null};
+  const lastDoneVal=document.getElementById('r-last-done').value;
+  const nextManualVal=document.getElementById('r-next-manual').value;
+  const data={
+    name,
+    note:document.getElementById('r-note').value.trim(),
+    frequency:document.getElementById('r-freq').value,
+    categoryId:document.getElementById('r-cat').value,
+    lastDone:lastDoneVal?new Date(lastDoneVal).getTime():null,
+    nextManual:nextManualVal?new Date(nextManualVal).getTime():null,
+  };
   if(editingRoutineId)await updateDoc(dref('routines',editingRoutineId),data);
   else await setDoc(dref('routines',uuid()),{...data,createdAt:Date.now()});
   closeModal('modal-routine');
 };
 window.deleteRoutine=async()=>{if(!editingRoutineId||!confirm('Routine verwijderen?'))return;await deleteDoc(dref('routines',editingRoutineId));closeModal('modal-routine')};
-window.markDone=async id=>await updateDoc(dref('routines',id),{lastDone:Date.now()});
+window.markDone=async id=>{
+  await updateDoc(dref('routines',id),{lastDone:Date.now(),nextManual:null});
+};
 
 window.openTodoModal=id=>{
   editingTodoId=id||null;
@@ -585,14 +648,13 @@ window.openTodoModal=id=>{
   const sel=document.getElementById('t-cat');
   sel.innerHTML=todoCats.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
   sel.value=t?.categoryId||todoCats[0]?.id||'';
-  // emoji
   currentTodoEmoji=t?.emoji||null;
   document.getElementById('t-emoji-search').value='';
   currentEmojiSearch='';
   renderEmojiResults();
   const row=document.getElementById('t-emoji-selected-row');
   if(currentTodoEmoji){document.getElementById('t-emoji-selected-display').textContent=currentTodoEmoji;row.style.display='flex'}
-  else{row.style.display='none'}
+  else row.style.display='none';
   openModal('modal-todo');
 };
 window.setPrio=p=>{currentPrio=p;['laag','normaal','hoog'].forEach(x=>document.getElementById(`prio-${x}`).classList.toggle('active',x===p))};
